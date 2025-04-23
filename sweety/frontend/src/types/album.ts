@@ -2,21 +2,47 @@
 
 import { Timestamp } from "firebase/firestore";
 
+export enum DraftAlbumStatus { 
+  draft = 0,
+  requestApprove = 1,
+  approved = 2,
+  reject = 3,
+}
+export enum AlbumTier { 
+  standard = 0,
+  premium = 1,
+  exclusive = 2,
+  principle = 3,
+}
+
 export interface DraftAlbum {
   albumId: string;
   owner: string;
   name: string;
-  tier: 'standard' | 'premium' | 'exclusive' | 'principle';
+  tier: AlbumTier;
   price: number;
   description: string;
   tags: string[];
-  status: 'draft' | 'pending_approval' | 'approved' | 'reject';
-  contentInfo: string[]
-  contents: string[]; // array of URLs (image/video)
+  status: DraftAlbumStatus
+  contentInfos: string[]
+  contents: string[];
   created_at: Timestamp;
+}
+
+export interface PublishedAlbum { 
+  albumId: string;
+  owner: string;
+  name: string;
+  tier: AlbumTier;
+  price: number;
+  description: string;
+  tags: string[];
+  contentInfo: string[]
   interaction: {
     likes: number;
     shares: number;
     saves: number;
   };
+  created_at: Timestamp;
 }
+

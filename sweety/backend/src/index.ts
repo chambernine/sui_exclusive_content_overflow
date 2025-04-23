@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { firestoreDb } from './firebaseAdmin.js'
-import type { IFormData } from './type.js'
+import type { DraftAlbum, IFormData } from './type.js'
 
 const app = new Hono()
 
@@ -17,22 +17,6 @@ app.get('/', (c) => {
   return c.text('Hello Hono!')
   // console.log(fireStoreDb)
 })
-
-// const uploadFileToStorage = async (file: File, path: string) => {
-//   const buffer = await file.arrayBuffer()
-//   const fileName = `${path}/${file.name}`
-//   // const fileRef = bucket.file(fileName)
-
-//   await fileRef.save(Buffer.from(buffer), {
-//     metadata: {
-//       contentType: file.type,
-//       firebaseStorageDownloadTokens: uuidv4()
-//     },
-//     public: true
-//   })
-
-//   return `https://storage.googleapis.com/${bucket.name}/${fileName}`
-// }
 
 app.post("/edit-profile", async (c) => {
   const body = await c.req.formData()
@@ -62,6 +46,41 @@ app.post("/edit-profile", async (c) => {
     bannerImagesBase64: form.banner_image_files,
     socialLinks: form.socialLinks,
     createdAt: Date.now()
+  })
+
+  return c.json({
+    status: 200
+  })
+})
+
+app.post("/draft-album/request-approval", async (c)=>{
+  const body: DraftAlbum = await c.req.json()
+  
+  // const draftAlbum: DraftAlbum= {
+  //   albumId: body.albumId,
+  //   owner: body.owner,
+  //   name: body.name,
+  //   tier: body.tier,
+  //   price: body.price,
+  //   description: body.description,
+  //   tags: body.tags,
+  //   status: body.status,
+  //   contentInfos: body.contentInfos,
+  //   contents: body.contents,
+  //   created_at: body.created_at,
+  // }
+  await firestoreDb.collection('draft-album').doc(body.albumId).set({
+    albumId: body.albumId,
+    owner: body.owner,
+    name: body.name,
+    tier: body.tier,
+    price: body.price,
+    description: body.description,
+    tags: body.tags,
+    status: body.status,
+    contentInfos: body.contentInfos,
+    contents: body.contents,
+    created_at: body.created_at,
   })
 
   return c.json({

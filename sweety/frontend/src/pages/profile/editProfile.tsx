@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import type { SocialBanner } from "@/types/profile";
 
 import axios from "axios";
+import { fileToBase64 } from "@/utils/fileFormat";
 
 interface IFormData {
   walletAddress?: string;
@@ -66,15 +67,6 @@ export default function Profile() {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
-
-  function fileToBase64(file: File) {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = (error) => reject(error)
-      reader.readAsDataURL(file)
-    })
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

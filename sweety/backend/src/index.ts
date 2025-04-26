@@ -10,7 +10,7 @@ const app = new Hono()
 app.use('*', cors({
   origin: 'http://localhost:5173',
   allowHeaders: ['Content-Type', 'Authorization'],
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
 }))
 
 app.get('/', (c) => {
@@ -86,6 +86,96 @@ app.post("/draft-album/request-approval", async (c)=>{
   return c.json({
     status: 200
   })
+})
+
+app.get("/my-album/:owner", async (c) => {
+  try {
+    const { owner } = c.req.param()
+    const snapshot = await firestoreDb
+      .collection('draft-album')
+      .where('owner', '==', owner)
+      .get()
+
+    const albums = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+
+    return c.json({
+      status: 200,
+      data: albums
+    })
+  } catch (err) {
+    console.error('🔥 Error fetching approvals:', err)
+    return c.json({ status: 500, error: 'Internal Server Error' })
+  }
+})
+
+
+app.get("/album-approval/:approver", async (c) => {
+  try {
+    const { approver } = c.req.param()
+    const snapshot = await firestoreDb
+      .collection('draft-album')
+      .where('status', 'in', [0, 1])
+      .where('owner', '!=', approver)
+      .get()
+
+    const albums = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+
+    return c.json({
+      status: 200,
+      data: albums
+    })
+  } catch (err) {
+    console.error('🔥 Error fetching approvals:', err)
+    return c.json({ status: 500, error: 'Internal Server Error' })
+  }
+})
+
+app.patch("/album-approval/:albumId/:approver", async (c) => {
+  try {
+    const { albumId, approver } = c.req.param();
+
+    await firestoreDb.collection('draft-album').doc(albumId).update({
+      status: 2,
+    })
+
+    // Update Approver's ranking score (Increment by 1)
+    const approverDocRef = firestoreDb.collection('approve-ranking').doc(approver);
+
+    await firestoreDb.runTransaction(async (transaction) => {
+      const doc = await transaction.get(approverDocRef);
+
+      if (doc.exists) {
+        const currentScore = doc.data()?.score || 0;
+        transaction.update(approverDocRef, {
+          score: currentScore + 1
+        });
+      } else {
+        transaction.set(approverDocRef, {
+          userAddress: approver,
+          score: 1
+        });
+      }
+    })
+
+
+    return c.json({
+      status: 200,
+      message: `✅ Album ${albumId} approved by ${approver}`
+    })
+
+  } catch (error) {
+    console.error('🔥 Error approving album:', error);
+    return c.json({
+      status: 500,
+      error: 'Internal Server Error'
+    });
+  }
 })
 
 serve({

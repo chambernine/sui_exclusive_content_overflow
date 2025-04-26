@@ -2,7 +2,6 @@ import { initializeApp, getApps, cert, type ServiceAccount } from "firebase-admi
 
 import { getFirestore } from "firebase-admin/firestore";
 import { getDatabase } from "firebase-admin/database";
-import { readFileSync } from "fs";
 
 import dotenv from "dotenv";
 

@@ -35,7 +35,7 @@ export default function CreateDraftAlbum() {
     price: 0,
     description: "",
     tags: [],
-    status: DraftAlbumStatus.draft,
+    status: DraftAlbumStatus.requestApprove,
     contentInfos: [],
     contents: [],
     created_at: Timestamp.now(),

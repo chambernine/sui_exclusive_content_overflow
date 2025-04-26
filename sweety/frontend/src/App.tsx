@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navbar } from "./components/common/navbar";
 import Profile from "./pages/profile/editProfile";
-import RequestApprovals from "./pages/approveAlbum/arroveAlbum";
 import CreateDraftAlbum from "./pages/draftAlbum/createAlbumForm";
 import Home from "./pages/home/home";
+import AlbumRequestApproval from "./pages/approveRequestAlbum/albumRequestApproval";
+import MyAlbumRequest from "./pages/myAlbumRequest/myAlbumRequest";
+import "./App.css";
 
 function App() {
   return (
@@ -14,7 +16,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/create-draft" element={<CreateDraftAlbum />} />
-          <Route path="/requests" element={<RequestApprovals />} />
+          <Route path="/requests" element={<AlbumRequestApproval />} />
+          <Route path="/my-requests" element={<MyAlbumRequest />} />
         </Routes>
       </BrowserRouter>
     </div>

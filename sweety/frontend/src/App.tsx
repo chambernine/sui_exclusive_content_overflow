@@ -9,18 +9,18 @@ import "./App.css";
 
 function App() {
   return (
-    <div className="min-h-screen">
+    <main className="min-h-screen">
       <BrowserRouter>
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/create-draft" element={<CreateDraftAlbum />} />
-          <Route path="/requests" element={<AlbumRequestApproval />} />
+          <Route path="/approve" element={<AlbumRequestApproval />} />
           <Route path="/my-requests" element={<MyAlbumRequest />} />
         </Routes>
       </BrowserRouter>
-    </div>
+    </main>
   );
 }
 

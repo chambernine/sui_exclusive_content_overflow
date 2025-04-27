@@ -13,7 +13,7 @@ export function Navbar() {
           </Link>
           <Link to="/profile" className="hover:underline">Profile</Link>
           <Link to="/create-draft" className="hover:underline">Create Draft</Link>
-          <Link to="/requests" className="hover:underline">Requests</Link>
+          <Link to="/approve" className="hover:underline">approve</Link>
           <Link to="/my-requests" className="hover:underline">My Requests</Link>
         </div>
 

@@ -65,6 +65,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.4
         version: 4.1.4
+      transactions:
+        specifier: link:@mysten/sui/transactions
+        version: link:@mysten/sui/transactions
       uuid:
         specifier: ^11.1.0
         version: 11.1.0

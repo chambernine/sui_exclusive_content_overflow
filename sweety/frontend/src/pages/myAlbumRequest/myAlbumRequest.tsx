@@ -4,6 +4,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DraftAlbumStatus, AlbumTier } from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount"; // your custom wallet hook
+import { WaitForSignPublishResponse } from "@/types/interact";
+import useInteractContract from "@/hooks/useInteractContract";
 
 interface Album {
   id: string;
@@ -24,6 +26,7 @@ export default function MyAlbumRequest() {
   const { address } = useSuiAccount(); // 👈 Get current user address
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
+  const { publishBlobsToAlbum }  = useInteractContract()
 
   const fetchMyAlbums = async () => {
     try {
@@ -39,11 +42,22 @@ export default function MyAlbumRequest() {
     }
   };
 
-  const handlePublish = async (albumId: string) => {
+  const handlePublish = async (album: Album) => {
     try {
-      await axios.patch(`http://localhost:3000/my-album-publish/${albumId}`);
-
-      setAlbums((prev) => prev.filter((a) => a.albumId !== albumId));
+      const response = await axios.patch(`http://localhost:3000/my-album/request-publish`,
+        JSON.stringify(album),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (response.status === 200) {
+        const waitforSign: WaitForSignPublishResponse = response.data.data
+        console.log(response.data)
+        waitforSign.walrusObjectIds.map(async (walrusObjectId)=>{
+          await publishBlobsToAlbum(waitforSign.albumId, waitforSign.capId, walrusObjectId)
+        })    
+      }
+      setAlbums((prev) => prev.filter((a) => a.albumId !== album.albumId));
       alert("✅ Published Successfully!");
     } catch (err) {
       console.error("❌ Failed to publish album:", err);
@@ -112,7 +126,10 @@ export default function MyAlbumRequest() {
                 {/* 🛫 Publish Button */}
                 <Button
                   disabled={album.status !== 2}
-                  onClick={() => handlePublish(album.albumId)}
+
+                  onClick={() => {
+                    handlePublish(album)
+                  }}
                   className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
                 >
                   🚀 {album.status === 2 ? "Publish Album" : "wait for approve"}

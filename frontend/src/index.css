@@ -1,42 +1,92 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --radius: 0.75rem;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Main SUI brand colors */
+  --sui-blue: #6fbcf0;
+  --sui-blue-dark: #3a95d6;
+  --sui-blue-light: #a6d8f7;
+  --sui-navy: #0F1C35;
+  --sui-navy-light: #2D4264;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Light theme colors */
+  --background: hsl(210, 25%, 98%);
+  --foreground: hsl(210, 30%, 10%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(210, 30%, 10%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(210, 30%, 10%);
+  --primary: hsl(201, 83%, 68%);
+  /* Sui's blue #6fbcf0 */
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(201, 70%, 96%);
+  /* Lighter variant of Sui's blue */
+  --secondary-foreground: hsl(201, 75%, 40%);
+  /* Darker variant of Sui's blue */
+  --muted: hsl(201, 20%, 96%);
+  --muted-foreground: hsl(201, 10%, 50%);
+  --accent: hsl(201, 100%, 96%);
+  /* Very light Sui blue */
+  --accent-foreground: hsl(201, 60%, 40%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(201, 10%, 90%);
+  --input: hsl(201, 10%, 90%);
+  --ring: hsl(201, 60%, 65%);
+  /* Sui blue as ring */
+  --chart-1: hsl(270, 70%, 60%);
+  --chart-2: hsl(201, 83%, 68%);
+  /* Sui blue as chart color */
+  --chart-3: hsl(230, 70%, 50%);
+  --chart-4: hsl(190, 70%, 50%);
+  --chart-5: hsl(150, 70%, 50%);
+  --success: hsl(155, 65%, 45%);
+  --success-foreground: hsl(0 0% 98%);
+  --warning: hsl(38, 95%, 60%);
+  --warning-foreground: hsl(0 0% 98%);
+  --info: hsl(220, 80%, 65%);
+  --info-foreground: hsl(0 0% 98%);
+}
+
+/* Grid pattern background */
+.bg-grid-white\/5 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M96,95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1,0v-9h-9v9h9zm-10,0v-9h-9v9h9zm-10,0v-9h-9v9h9zm-10,0v-9h-9v9h9zm-10,0v-9h-9v9h9zm-10,0v-9h-9v9h9zm-10,0v-9h-9v9h9zm-10,0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10,0h9v-9h-9v9zm10,0h9v-9h-9v9zm10,0h9v-9h-9v9zm10,0h9v-9h-9v9zm10,0h9v-9h-9v9zm10,0h9v-9h-9v9zm10,0h9v-9h-9v9z' fill='%23ffffff' fill-opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* Add Inter font */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  color: var(--primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+a:hover {
+  color: var(--accent-foreground);
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
 button {
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
@@ -44,25 +94,256 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.25s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+button:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(111, 188, 240, 0.15);
+  /* Sui blue shadow */
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.dark {
+  /* Dark theme colors based on SUI brand */
+  --background: hsl(217, 54%, 11%);
+  /* SUI Navy-based background */
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(217, 54%, 15%);
+  /* Slightly lighter navy for cards */
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(217, 54%, 15%);
+  --popover-foreground: hsl(0 0% 98%);
+  --primary: hsl(201, 83%, 68%);
+  /* Keep Sui blue as primary - #6fbcf0 */
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(217, 54%, 25%);
+  /* Darker navy variant */
+  --secondary-foreground: hsl(0 0% 96%);
+  --muted: hsl(217, 40%, 20%);
+  --muted-foreground: hsl(217, 10%, 65%);
+  --accent: hsl(201, 30%, 30%);
+  --accent-foreground: hsl(0 0% 98%);
+  --destructive: hsl(0 62.8% 45.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(217, 30%, 26%);
+  --input: hsl(217, 30%, 22%);
+  --ring: hsla(201, 83%, 68%, 0.3);
+  /* Sui blue ring with transparency */
+  --chart-1: hsl(300, 80%, 65%);
+  --chart-2: hsl(201, 83%, 68%);
+  /* Sui blue as chart-2 */
+  --chart-3: hsl(230, 70%, 65%);
+  --chart-4: hsl(190, 70%, 65%);
+  --chart-5: hsl(150, 70%, 65%);
+  --success: hsl(155, 65%, 40%);
+  --success-foreground: hsl(0 0% 98%);
+  --warning: hsl(38, 95%, 55%);
+  --warning-foreground: hsl(0 0% 98%);
+  --info: hsl(220, 80%, 60%);
+  --info-foreground: hsl(0 0% 98%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-  a:hover {
-    color: #747bff;
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+/* Custom animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
   }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Glass effect - enhanced */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.dark .glass {
+  background: rgba(20, 20, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Gradient text */
+.gradient-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(135deg, var(--chart-1), var(--primary));
+}
+
+/* Premium glow */
+.premium-glow {
+  position: relative;
+}
+
+.premium-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, var(--chart-1), var(--primary), var(--chart-3));
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.7;
+  filter: blur(8px);
+  transition: opacity 0.3s ease;
+}
+
+.premium-glow:hover::after {
+  opacity: 1;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary);
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: var(--radius);
+  opacity: 0.7;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+  opacity: 1;
+}
+
+/* New image styles */
+.image-hover-zoom {
+  overflow: hidden;
+}
+
+.image-hover-zoom img {
+  transition: transform 0.5s ease;
+}
+
+.image-hover-zoom:hover img {
+  transform: scale(1.05);
+}
+
+/* New card style */
+.card-premium {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(var(--primary), 0.2);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.dark .card-premium {
+  border: 1px solid rgba(var(--primary), 0.3);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.25),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-premium:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 15px 40px rgba(var(--primary), 0.15),
+    0 1px 5px rgba(var(--primary), 0.05);
+}
+
+.dark .card-premium:hover {
+  box-shadow:
+    0 15px 40px rgba(var(--primary), 0.2),
+    0 1px 5px rgba(var(--primary), 0.1);
+}
+
+/* New background styles */
+.bg-mesh {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(at 25% 25%, rgba(var(--chart-1), 0.15) 0px, transparent 50%),
+    radial-gradient(at 75% 75%, rgba(var(--primary), 0.15) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.dark .bg-mesh {
+  background-image:
+    radial-gradient(at 25% 25%, rgba(var(--chart-1), 0.2) 0px, transparent 60%),
+    radial-gradient(at 75% 75%, rgba(var(--primary), 0.2) 0px, transparent 60%);
 }

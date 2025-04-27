@@ -5,23 +5,34 @@
   text-align: center;
 }
 
+/* SUI-themed styles */
+.sui-container {
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em var(--sui-blue));
 }
+
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em var(--sui-blue));
 }
 
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -33,10 +44,107 @@
   }
 }
 
+/* Enhanced card styles with SUI theme */
 .card {
   padding: 2em;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(111, 188, 240, 0.15);
+  border-color: rgba(111, 188, 240, 0.3);
+}
+
+.dark .card:hover {
+  box-shadow: 0 10px 20px rgba(111, 188, 240, 0.1);
+}
+
+.card-title {
+  color: var(--foreground);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.card-description {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+/* Content section styles */
+.content-section {
+  margin: 2rem 0;
+  padding: 2rem;
+  border-radius: var(--radius);
+  background: var(--card);
+  transition: all 0.3s ease;
+}
+
+/* SUI-themed text */
+.sui-text-primary {
+  color: var(--sui-blue);
+}
+
+.sui-text-dark {
+  color: var(--sui-navy);
+}
+
+.dark .sui-text-dark {
+  color: var(--sui-blue-light);
+}
+
+/* SUI gradient text */
+.sui-gradient-text {
+  background: linear-gradient(135deg, var(--sui-blue-light), var(--sui-blue), var(--sui-blue-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--sui-blue);
+  outline-offset: 2px;
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--muted-foreground);
+  transition: color 0.3s ease;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

@@ -2,13 +2,13 @@
 
 import { Timestamp } from "firebase/firestore";
 
-export enum DraftAlbumStatus { 
+export enum DraftAlbumStatus {
   draft = 0,
   requestApprove = 1,
   approved = 2,
   reject = 3,
 }
-export enum AlbumTier { 
+export enum AlbumTier {
   standard = 0,
   premium = 1,
   exclusive = 2,
@@ -23,13 +23,13 @@ export interface DraftAlbum {
   price: number;
   description: string;
   tags: string[];
-  status: DraftAlbumStatus
-  contentInfos: string[]
+  status: DraftAlbumStatus;
+  contentInfos: string[];
   contents: string[];
   created_at: Timestamp;
 }
 
-export interface PublishedAlbum { 
+export interface PublishedAlbum {
   albumId: string;
   owner: string;
   name: string;
@@ -37,7 +37,7 @@ export interface PublishedAlbum {
   price: number;
   description: string;
   tags: string[];
-  contentInfo: string[]
+  contentInfo: string[];
   interaction: {
     likes: number;
     shares: number;
@@ -46,3 +46,16 @@ export interface PublishedAlbum {
   created_at: Timestamp;
 }
 
+export const tierColors = {
+  [AlbumTier.standard]: "bg-amber-700",
+  [AlbumTier.premium]: "bg-neutral-400",
+  [AlbumTier.exclusive]: "bg-amber-400",
+  [AlbumTier.principle]: "bg-blue-400",
+};
+
+export const tierNames = {
+  [AlbumTier.standard]: "Standard",
+  [AlbumTier.premium]: "Premium",
+  [AlbumTier.exclusive]: "Exclusive",
+  [AlbumTier.principle]: "Principle",
+};

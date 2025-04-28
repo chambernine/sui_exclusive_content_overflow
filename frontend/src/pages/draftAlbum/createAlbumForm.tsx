@@ -5,10 +5,32 @@ import { AlbumTier, DraftAlbum, DraftAlbumStatus } from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import axios from "axios";
 import { fileToBase64 } from "@/utils/fileFormat";
+import { motion } from "framer-motion";
+import {
+  Image,
+  Upload,
+  X,
+  Tag as TagIcon,
+  Sparkles,
+  FileText,
+  Check,
+} from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Protected } from "@/components/auth/Protected";
 
 export interface IFormDraftAlbum {
   albumId: string;
@@ -24,7 +46,7 @@ export interface IFormDraftAlbum {
   created_at: Timestamp;
 }
 
-export default function CreateDraftAlbum() {
+export default function CreateAlbumPage() {
   const { address } = useSuiAccount();
 
   const [draft, setDraft] = useState<IFormDraftAlbum>({
@@ -43,9 +65,12 @@ export default function CreateDraftAlbum() {
 
   const [previewContentInfos, setPreviewContentInfos] = useState<string[]>([]);
   const [previewContents, setPreviewContents] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
 
@@ -77,7 +102,7 @@ export default function CreateDraftAlbum() {
     const current = draft.contentInfos?.length || 0;
 
     if (current + fileList.length > maxAllowed) {
-      alert(`🚫 Maximum of ${maxAllowed} preview files allowed.`);
+      toast.error(`Maximum of ${maxAllowed} preview files allowed.`);
       return;
     }
 
@@ -101,7 +126,7 @@ export default function CreateDraftAlbum() {
     const current = draft.contents?.length || 0;
 
     if (current + fileList.length > maxAllowed) {
-      alert(`🚫 Maximum of ${maxAllowed} content files allowed.`);
+      toast.error(`Maximum of ${maxAllowed} content files allowed.`);
       return;
     }
 
@@ -116,31 +141,92 @@ export default function CreateDraftAlbum() {
     ]);
   };
 
+  const removeContentInfoFile = (index: number) => {
+    const newContentInfos = [...(draft.contentInfos || [])];
+    newContentInfos.splice(index, 1);
+
+    const newPreviews = [...previewContentInfos];
+    newPreviews.splice(index, 1);
+
+    setDraft((prev) => ({
+      ...prev,
+      contentInfos: newContentInfos.length ? newContentInfos : [],
+    }));
+    setPreviewContentInfos(newPreviews);
+  };
+
+  const removeContentFile = (index: number) => {
+    const newContents = [...(draft.contents || [])];
+    newContents.splice(index, 1);
+
+    const newPreviews = [...previewContents];
+    newPreviews.splice(index, 1);
+
+    setDraft((prev) => ({
+      ...prev,
+      contents: newContents.length ? newContents : [],
+    }));
+    setPreviewContents(newPreviews);
+  };
+
+  const handleSelectTier = (value: string) => {
+    setDraft((prev) => ({
+      ...prev,
+      tier: parseInt(value) as AlbumTier,
+    }));
+  };
+
   const handleSave = async () => {
     if (!address) {
-      alert("⚠️ Wallet connect required.");
+      toast.error("Wallet connect required.");
       return;
     }
 
-    const base64Contents = draft.contents
-      ? await Promise.all(draft.contents.map(fileToBase64))
-      : [];
+    if (!draft.name) {
+      toast.error("Please enter an album name.");
+      return;
+    }
 
-    const base64Previews = draft.contentInfos
-      ? await Promise.all(draft.contentInfos.map(fileToBase64))
-      : [];
+    if (!draft.description) {
+      toast.error("Please enter a description.");
+      return;
+    }
 
-    const draftAlbum: DraftAlbum = {
-      ...draft,
-      albumId: uuidv4(),
-      owner: address,
-      contents: base64Contents,
-      contentInfos: base64Previews,
-    };
+    if (draft.price <= 0) {
+      toast.error("Please enter a valid price.");
+      return;
+    }
 
-      console.log(draftAlbum)
+    if (!draft.contentInfos || draft.contentInfos.length === 0) {
+      toast.error("Please upload at least one preview image.");
+      return;
+    }
+
+    if (!draft.contents || draft.contents.length === 0) {
+      toast.error("Please upload at least one content file.");
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      const response = await axios.post(
+      const base64Contents = draft.contents
+        ? await Promise.all(draft.contents.map(fileToBase64))
+        : [];
+
+      const base64Previews = draft.contentInfos
+        ? await Promise.all(draft.contentInfos.map(fileToBase64))
+        : [];
+
+      const draftAlbum: DraftAlbum = {
+        ...draft,
+        albumId: uuidv4(),
+        owner: address,
+        contents: base64Contents,
+        contentInfos: base64Previews,
+      };
+
+      await axios.post(
         "http://localhost:3000/draft-album/request-approval",
         draftAlbum,
         {
@@ -148,123 +234,337 @@ export default function CreateDraftAlbum() {
         }
       );
 
-      console.log("✅ Submitted:", response.data);
-      alert("✅ Draft album submitted for approval!");
+      toast.success("Draft album submitted for approval!");
+
+      // Reset form
+      setDraft({
+        albumId: "",
+        owner: "",
+        name: "",
+        tier: AlbumTier.standard,
+        price: 0,
+        description: "",
+        tags: [],
+        status: DraftAlbumStatus.requestApprove,
+        contentInfos: [],
+        contents: [],
+        created_at: Timestamp.now(),
+      });
+      setPreviewContentInfos([]);
+      setPreviewContents([]);
     } catch (error) {
-      console.error("❌ Submission failed:", error);
-      alert("Submission failed. Check console.");
+      console.error("Submission failed:", error);
+      toast.error("Submission failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  return (
-    <div className="max-w-xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold mb-4">🎶 Create Draft Album</h2>
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="name">Album Name</Label>
-          <Input name="name" value={draft.name} onChange={handleChange} />
-        </div>
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
+  };
 
-        <div>
-          <Label htmlFor="tier">Tier</Label>
-          <select
-            name="tier"
-            value={draft.tier}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
-          >
-            <option value={AlbumTier.standard}>Standard</option>
-            <option value={AlbumTier.premium}>Premium</option>
-            <option value={AlbumTier.exclusive}>Exclusive</option>
-            <option value={AlbumTier.principle}>Principle</option>
-          </select>
-        </div>
+  const tierLabels = {
+    [AlbumTier.standard]: "Standard",
+    [AlbumTier.premium]: "Premium",
+    [AlbumTier.exclusive]: "Exclusive",
+    [AlbumTier.principle]: "Principle",
+  };
 
-        <div>
-          <Label htmlFor="price">Price</Label>
-          <Input
-            type="number"
-            name="price"
-            value={draft.price}
-            onChange={handleChange}
-          />
-        </div>
+  const tierColors = {
+    [AlbumTier.standard]: "bg-amber-700",
+    [AlbumTier.premium]: "bg-neutral-400",
+    [AlbumTier.exclusive]: "bg-amber-400",
+    [AlbumTier.principle]: "bg-blue-400",
+  };
 
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            name="description"
-            value={draft.description}
-            onChange={handleChange}
-          />
-        </div>
+  const renderAlbumForm = () => (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-6"
+    >
+      <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
+        <CardHeader>
+          <CardTitle>Album Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <motion.div variants={item} className="space-y-4">
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="name">Album Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={draft.name}
+                onChange={handleChange}
+                placeholder="Enter album name"
+                className="mt-1"
+              />
+            </div>
 
-        <div>
-          <Label htmlFor="tags">Tags (comma separated)</Label>
-          <Input
-            name="tags"
-            value={draft.tags.join(", ")}
-            onChange={handleChange}
-          />
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="tier">Tier</Label>
+                <Select
+                  value={draft.tier.toString()}
+                  onValueChange={handleSelectTier}
+                >
+                  <SelectTrigger className="w-full mt-1">
+                    <SelectValue placeholder="Select tier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(tierLabels).map(([key, value]) => (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-3 h-3 rounded-full ${
+                              tierColors[key as unknown as AlbumTier]
+                            }`}
+                          />
+                          {value}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-        {/* Preview Section */}
-        <div>
-          <Label htmlFor="preview">Upload Preview Images</Label>
-          <Input
-            id="preview"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handlePreviewFiles}
-          />
-          {previewContentInfos.length > 0 && (
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              {previewContentInfos.map((src, index) => (
-                <img
-                  key={index}
-                  src={src}
-                  alt={`preview-${index}`}
-                  className="h-24 w-full object-cover rounded border border-gray-700"
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="price">
+                  <div className="flex items-center gap-1">Price (SUI)</div>
+                </Label>
+                <Input
+                  id="price"
+                  type="number"
+                  name="price"
+                  value={draft.price}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  className="mt-1"
                 />
-              ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="description">
+                <div className="flex items-center gap-1">
+                  <FileText className="h-4 w-4" />
+                  Description
+                </div>
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={draft.description}
+                onChange={handleChange}
+                placeholder="Describe your album"
+                className="mt-1 min-h-24"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="tags">
+                <div className="flex items-center gap-1">
+                  <TagIcon className="h-4 w-4" />
+                  Tags (comma separated)
+                </div>
+              </Label>
+              <Input
+                id="tags"
+                name="tags"
+                value={draft.tags.join(", ")}
+                onChange={handleChange}
+                placeholder="art, photography, exclusive, etc."
+                className="mt-1"
+              />
+
+              {draft.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {draft.tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </CardContent>
+      </Card>
+
+      <motion.div variants={item}>
+        <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle>Preview Images</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-primary/50">
+              <label htmlFor="preview-images" className="cursor-pointer block">
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Image className="h-8 w-8 text-muted-foreground" />
+                  <span className="font-medium">Upload Preview Images</span>
+                  <span className="text-xs text-muted-foreground">
+                    These images will be shown as previews to potential buyers
+                  </span>
+                </div>
+              </label>
+              <input
+                id="preview-images"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handlePreviewFiles}
+                className="hidden"
+              />
+            </div>
+
+            {previewContentInfos.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium mb-2">
+                  {previewContentInfos.length} Preview Image
+                  {previewContentInfos.length !== 1 && "s"}
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {previewContentInfos.map((src, index) => (
+                    <div
+                      key={index}
+                      className="group relative aspect-square rounded-md overflow-hidden border border-border"
+                    >
+                      <img
+                        src={src}
+                        alt={`Preview ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeContentInfoFile(index)}
+                        className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      <motion.div variants={item}>
+        <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle>Album Exclusive Content</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-primary/50">
+              <label htmlFor="content-files" className="cursor-pointer block">
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <span className="font-medium">
+                    Upload Album Exclusive Content
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    These files will be accessible to users after purchase
+                  </span>
+                </div>
+              </label>
+              <input
+                id="content-files"
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                onChange={handleContentFiles}
+                className="hidden"
+              />
+            </div>
+
+            {previewContents.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium mb-2">
+                  {previewContents.length} Content File
+                  {previewContents.length !== 1 && "s"}
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {previewContents.map((src, index) => (
+                    <div
+                      key={index}
+                      className="group relative aspect-square rounded-md overflow-hidden border border-border"
+                    >
+                      <img
+                        src={src}
+                        className="h-full w-full object-cover"
+                        alt={`Content ${index + 1}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeContentFile(index)}
+                        className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      <motion.div variants={item} className="flex justify-end pt-4">
+        <Button onClick={handleSave} disabled={isLoading} className="px-8">
+          {isLoading ? (
+            <div className="flex items-center">
+              <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>
+              <span>Submitting...</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Check className="h-4 w-4" />
+              Submit for Approval
             </div>
           )}
-        </div>
-
-        {/* Content Section */}
-        <div>
-          <Label htmlFor="content">Upload Album Content</Label>
-          <Input
-            id="content"
-            type="file"
-            accept="image/*,video/*"
-            multiple
-            onChange={handleContentFiles}
-          />
-          {previewContents.length > 0 && (
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              {previewContents.map((src, index) => (
-                <img
-                  key={index}                  
-                  src={src}
-                  className="h-24 w-full object-cover rounded border border-gray-700"
-                />
-              ))}
-            </div>
-          )}
-          <p className="text-sm text-gray-400">Max 10 files per section</p>
-        </div>
-
-        {/* Save */}
-        <Button
-          onClick={handleSave}
-          className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
-        >
-          📤 Publish for Approval
         </Button>
-      </div>
+      </motion.div>
+    </motion.div>
+  );
+
+  return (
+    <div className="container max-w-4xl mx-auto py-12 px-4">
+      <Protected
+        title="Connect Wallet to Create Album"
+        description="You need to connect your wallet to create and publish your exclusive content albums."
+      >
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-primary" />
+            Create New Album
+          </h1>
+          <p className="text-muted-foreground">
+            Share your exclusive content with your fans and supporters
+          </p>
+        </motion.div>
+
+        {renderAlbumForm()}
+      </Protected>
     </div>
   );
 }

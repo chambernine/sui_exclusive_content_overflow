@@ -232,46 +232,51 @@ async function sealEncryptions(albumId: string, contents: string[]){
 async function publishWalrus(encryptedBlobs: Uint8Array<ArrayBufferLike>[], creator: string) {
   console.log("storingencrypted album to walrus");
   const epoch = 3;
-  const responses: WalrusObjectResponse[] = [];
+  let responses: WalrusObjectResponse[] = [];
   let index = 1
+  console.log("start storing ",index, encryptedBlobs);
+  
   for (const encryptedBlob of encryptedBlobs) {
-    try {
-      const { storageCost, writeCost } = await walrusServer.storageCost(encryptedBlob.length, epoch);
-      console.log("start storing ",index);
+    // let attempts = 0;
+    // let success = false;
+    // while (attempts < 3 && !success) {
+      try {
+        const { storageCost, writeCost } = await walrusServer.storageCost(encryptedBlob.length, epoch);
+        console.log(encryptedBlob)
+        const { blobObject, blobId } = await walrusServer.writeBlob({
+          blob: encryptedBlob,
+          deletable: true,
+          epochs: epoch,
+          signer: keypair,
+          owner: keypair.toSuiAddress(),
+        });
 
-      const { blobObject } = await walrusServer.writeBlob({
-        blob: encryptedBlob,
-        deletable: true,
-        epochs: epoch,
-        signer: keypair,
-        owner: keypair.toSuiAddress(),
-      });
-
-      const response: WalrusObjectResponse = {
-        ...blobObject,
-        id: blobObject.id.id,
-        storage: {
-          ...blobObject.storage,
-          id: blobObject.storage.id.id,
-        },
-        resourceOperation: {
-          registerFromScratch: {
-            encodedLength: blobObject.storage.storage_size,
-            epochsAhead: epoch,
+        const response: WalrusObjectResponse = {
+          ...blobObject,
+          id: blobObject.id.id,
+          storage: {
+            ...blobObject.storage,
+            id: blobObject.storage.id.id,
           },
-        },
-        cost: Number(storageCost + writeCost),
-      };
-      index++
-      console.log(response);
-      responses.push(response);
-      
-    } catch (error) {
-      console.error("❌ Failed to publish one blob:", error);
-      // ไม่ throw error เดี๋ยว process จะ continue ไปอันถัดไป
-      continue;
+          blob_id: blobId,
+          resourceOperation: {
+            registerFromScratch: {
+              encodedLength: blobObject.storage.storage_size,
+              epochsAhead: epoch,
+            },
+          },
+          cost: Number(storageCost + writeCost),
+        };
+        console.log(blobObject)
+        responses.push(response);
+        // success = true;
+      } catch (error) {
+        // console.error("❌ Retry attempt", attempts + 1, ":", error);
+        // attempts++;
+        // await new Promise(res => setTimeout(res, 1000)); // wait 1 sec between retries
+      }
     }
-  }
+  console.log(responses);  
   return responses;
 }
 
@@ -311,7 +316,7 @@ app.patch("/my-album/request-publish", async (c) => {
     }
     const { albumId: albumAccessId, capId } = await createAlbum(album.name, album.price, album.owner)
     const encryptedBlobs = await sealEncryptions(albumAccessId, album.contents)    
-    // console.log("encryptedBlobs done", encryptedBlobs)
+    console.log("encryptedBlobs done", encryptedBlobs)
     const walrusObjectIds: WalrusObjectResponse[] = await publishWalrus(encryptedBlobs, album.owner) 
     // console.log("walrus object published done wait for push to album list")
     // walrusObjectIds.forEach(async (walrusObjectId) => {

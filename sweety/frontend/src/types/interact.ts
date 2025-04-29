@@ -1,5 +1,29 @@
 export interface WaitForSignPublishResponse {
   albumId: string
   capId: string
-  walrusObjectIds: string[];
+  walrusObjectIds: WalrusObjectResponse[];
 }
+
+
+export interface WalrusObjectResponse {
+    id: string;
+    registered_epoch: number;
+    blob_id: string;
+    size: string;
+    encoding_type: number;
+    certified_epoch: number | null;
+    storage: {
+      id: string;
+      start_epoch: number;
+      end_epoch: number;
+      storage_size: string;
+    };
+    deletable: boolean;
+    cost: number;
+    resourceOperation: {
+      registerFromScratch: {
+        encodedLength: string;
+        epochsAhead: number;
+      };
+    };
+  }

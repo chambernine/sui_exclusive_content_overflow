@@ -108,7 +108,7 @@ entry fun support_album(album: &mut Album, payment: Coin<SUI> , fee: u64, vault:
     let sender = ctx.sender();
     assert!(!album.insider.contains(&sender), EDuplicate);   
     assert!( payment.value() == album.price, ENotEqual);
-    assert!(fee > 20 || fee <= 0, 0);
+    assert!(fee == 0 || fee > 20, 0);
 
     update_balance(album, payment, fee, vault);
     album.insider.push_back(sender);
@@ -156,7 +156,6 @@ fun approve_internal(caller: address, id: vector<u8>, album: &Album): bool {
         return false
     };
 
-    // Check if user is in the allowlist
     album.insider.contains(&caller)
 }
 

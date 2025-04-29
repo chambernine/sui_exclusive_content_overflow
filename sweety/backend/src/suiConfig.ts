@@ -21,13 +21,15 @@ const keypair = Secp256k1Keypair.fromSecretKey(secretKey);
 const sealServer = new SealClient({
   suiClient: suiServer,
   serverObjectIds: getAllowlistedKeyServers('testnet'),
-  verifyKeyServers: false,
+  verifyKeyServers: true,
 })
 
 const walrusServer = new WalrusClient({
   network: 'testnet',
   suiClient: suiServer,
-
+  storageNodeClientOptions: {
+    timeout: 60_000,
+  },
 })
 
 export {keypair, suiServer, sealServer, walrusServer };

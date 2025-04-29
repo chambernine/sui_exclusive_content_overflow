@@ -6,6 +6,7 @@ import Home from "./pages/home/home";
 import AlbumRequestApproval from "./pages/approveRequestAlbum/albumRequestApproval";
 import MyAlbumRequest from "./pages/myAlbumRequest/myAlbumRequest";
 import "./App.css";
+import SeeAlbum from "./pages/getAlbums/seeAlbum";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/create-draft" element={<CreateDraftAlbum />} />
           <Route path="/approve" element={<AlbumRequestApproval />} />
           <Route path="/my-requests" element={<MyAlbumRequest />} />
+          <Route path="/see-album" element={<SeeAlbum />} />
         </Routes>
       </BrowserRouter>
     </main>

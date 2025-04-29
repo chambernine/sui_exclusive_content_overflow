@@ -51,13 +51,13 @@ export default function MyAlbumRequest() {
         }
       );
       if (response.status === 200) {
-        const waitforSign: WaitForSignPublishResponse = response.data.data
-        console.log(response.data)
-        waitforSign.walrusObjectIds.map(async (walrusObjectId)=>{
-          await publishBlobsToAlbum(waitforSign.albumId, waitforSign.capId, walrusObjectId)
-        })    
+        const waitforSign: WaitForSignPublishResponse = await response.data.data
+        console.log(response.data.data)
+        Promise.all(waitforSign.walrusObjectIds.map(async (walrusObjectId)=>{
+          await publishBlobsToAlbum(waitforSign.albumId, waitforSign.capId, walrusObjectId.blob_id)
+        }))
       }
-      setAlbums((prev) => prev.filter((a) => a.albumId !== album.albumId));
+      // setAlbums((prev) => prev.filter((a) => a.albumId !== album.albumId));
       alert("✅ Published Successfully!");
     } catch (err) {
       console.error("❌ Failed to publish album:", err);

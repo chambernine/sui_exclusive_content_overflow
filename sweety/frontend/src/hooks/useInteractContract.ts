@@ -21,6 +21,7 @@ export default function useInteractContract() {
     capId: string,
     blobId: string
   ) {
+    console.log(albumId, capId, blobId);
     const tx = new Transaction();
     tx.moveCall({
       target: `${TESTNET_PACKAGE_ID}::albums::publish`,
@@ -34,7 +35,7 @@ export default function useInteractContract() {
       },
       {
         onSuccess: async (result) => {
-          console.log("Transaction successful:", result);
+          console.log("Transaction successful:", await result);
         },
       }
     );

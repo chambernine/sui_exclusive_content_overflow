@@ -5,7 +5,6 @@ import Profile from "./pages/profile/editProfile";
 
 import Home from "./pages/home/home";
 import AlbumRequestApproval from "./pages/approveRequestAlbum/albumRequestApproval";
-import MyAlbumRequest from "./pages/myAlbumRequest/myAlbumRequest";
 
 import { ContentList } from "./pages/contentList/contentList";
 
@@ -32,12 +31,8 @@ function App() {
           element: <CreateAlbumPage />,
         },
         {
-          path: "requests",
+          path: "album-requests",
           element: <AlbumRequestApproval />,
-        },
-        {
-          path: "my-requests",
-          element: <MyAlbumRequest />,
         },
         {
           path: "content",

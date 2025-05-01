@@ -145,14 +145,19 @@ export function ContentList() {
 
   return (
     <div className="py-12 px-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-2xl md:text-3xl font-bold mb-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8 text-center"
+      >
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">
           Discover Exclusive Content
         </h1>
         <p className="text-muted-foreground">
           Explore our exclusive collection of premium albums
         </p>
-      </div>
+      </motion.div>
 
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">

@@ -49,7 +49,7 @@ export interface PublishedAlbum {
 export const tierColors = {
   [AlbumTier.standard]: "bg-amber-700",
   [AlbumTier.premium]: "bg-neutral-400",
-  [AlbumTier.exclusive]: "bg-amber-400",
+  [AlbumTier.exclusive]: "bg-amber-500",
   [AlbumTier.principle]: "bg-blue-400",
 };
 

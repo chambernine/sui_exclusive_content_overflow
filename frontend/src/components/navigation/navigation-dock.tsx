@@ -16,7 +16,7 @@ const DockItem = ({ to, icon, label, isActive }: DockItemProps) => {
     <Link to={to} className="relative">
       <motion.div
         className={cn(
-          "relative flex flex-col items-center justify-center p-3 rounded-xl transition-colors",
+          "relative flex flex-col items-center justify-center p-2 rounded-xl transition-colors",
           isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
         )}
         whileHover={{ scale: 1.1 }}
@@ -54,7 +54,7 @@ export function NavigationDock() {
       label: "Create",
     },
     {
-      path: "/my-requests",
+      path: "/album-requests",
       icon: <ClipboardList className="h-5 w-5" />,
       label: "Requests",
     },
@@ -73,7 +73,7 @@ export function NavigationDock() {
         delay: 0.2,
       }}
     >
-      <div className="flex items-center gap-1 md:gap-3 bg-card border border-border rounded-full p-1 shadow-lg backdrop-blur-lg">
+      <div className="flex items-center gap-1 md:gap-3 bg-card border border-border rounded-full px-6 py-1 shadow-lg backdrop-blur-lg">
         {routes.map((route) => (
           <DockItem
             key={route.path}

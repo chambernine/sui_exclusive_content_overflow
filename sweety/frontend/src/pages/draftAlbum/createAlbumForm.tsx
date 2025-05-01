@@ -56,7 +56,11 @@ export default function CreateDraftAlbum() {
       }));
     }
     if (name === "price") {
-      return setDraft((prev) => ({ ...prev, price: parseInt(value) }));
+      const floatValue = parseFloat(value);
+      return setDraft((prev) => ({
+        ...prev,
+        price: isNaN(floatValue) ? 0 : parseFloat(floatValue.toFixed(5)), // ✅ limit to 5 decimals
+      }));
     }
     if (name === "tags") {
       return setDraft((prev) => ({
@@ -187,6 +191,7 @@ export default function CreateDraftAlbum() {
             type="number"
             name="price"
             value={draft.price}
+            step="0.00001"
             onChange={handleChange}
           />
         </div>

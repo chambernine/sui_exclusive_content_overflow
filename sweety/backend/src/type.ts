@@ -64,7 +64,7 @@ export interface WalrusObjectResponse {
   };
 }
 
-export interface IAlbum {
+export interface PublishedAlbum { 
   albumId: string;
   owner: string;
   name: string;
@@ -74,6 +74,10 @@ export interface IAlbum {
   tags: string[];
   contentInfos: string[]
   contentsObjectId: WalrusObjectResponse[];
-  created_at: number;
+  interaction: {
+    likes: number;
+    shares: number;
+    saves: number;
+  };
+  created_at: Timestamp;
 }
-

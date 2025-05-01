@@ -44,7 +44,7 @@ export default function MyAlbumRequest() {
 
   const handlePublish = async (album: Album) => {
     try {
-      const response = await axios.patch(`http://localhost:3000/my-album/request-publish`,
+      const response = await axios.patch(`http://localhost:3000/my-album/publish`,
         JSON.stringify(album),
         {
           headers: { "Content-Type": "application/json" },
@@ -53,9 +53,12 @@ export default function MyAlbumRequest() {
       if (response.status === 200) {
         const waitforSign: WaitForSignPublishResponse = await response.data.data
         console.log(response.data.data)
-        Promise.all(waitforSign.walrusObjectIds.map(async (walrusObjectId)=>{
-          await publishBlobsToAlbum(waitforSign.albumId, waitforSign.capId, walrusObjectId.blob_id)
-        }))
+        await Promise.all(
+          waitforSign.walrusObjectIds.map(async (walrusObjectId) => {
+            console.log(walrusObjectId.blob_id);
+            await publishBlobsToAlbum(waitforSign.albumId, waitforSign.capId, walrusObjectId.blob_id);
+          })
+        );
       }
       // setAlbums((prev) => prev.filter((a) => a.albumId !== album.albumId));
       alert("✅ Published Successfully!");

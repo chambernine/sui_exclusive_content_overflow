@@ -13,3 +13,7 @@ export interface User {
     profileinfo: ProfileMetaData | null
     created_at: Timestamp
 }
+
+export interface UsersResponse { 
+    data: User | undefined
+}

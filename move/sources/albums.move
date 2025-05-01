@@ -1,7 +1,7 @@
 // Copyright (c), Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-module sweety::albums;
+module walrus::albums;
 
 use sui::coin::{Self, Coin};
 use sui::sui::{SUI};
@@ -11,7 +11,8 @@ use sui::dynamic_field ;
 use sui::table;
 use std::string::{String};
 
-use sweety::utils::is_prefix;
+use walrus::utils::is_prefix;
+use sui::object::borrow_id;
 
 const EInvalidCap: u64 = 0;
 const ENoAccess: u64 = 1;
@@ -43,9 +44,8 @@ public struct Vault has key, store {
 public struct ALBUMS has drop {}
 
 fun init(witness: ALBUMS, ctx: &mut TxContext) {
-    transfer::public_transfer(
+    transfer::share_object(
     create_admin_vault(witness, ctx),
-    ctx.sender()  
     )
 }
 
@@ -107,7 +107,7 @@ fun update_balance(album: &Album, payment: Coin<SUI> , fee: u64, vault: &mut Vau
 entry fun support_album(album: &mut Album, payment: Coin<SUI> , fee: u64, vault: &mut Vault, ctx: &TxContext){
     let sender = ctx.sender();
     assert!(!album.insider.contains(&sender), EDuplicate);   
-    assert!( payment.value() == album.price, ENotEqual);
+    assert!(payment.value() == album.price, ENotEqual);
     assert!(fee == 0 || fee > 20, 0);
 
     update_balance(album, payment, fee, vault);
@@ -116,10 +116,10 @@ entry fun support_album(album: &mut Album, payment: Coin<SUI> , fee: u64, vault:
 
 entry fun withdraw_request(vault: &mut Vault, request_amount: u64,ctx: &mut TxContext) {
     let creator = ctx.sender();
-    let user_balance = table::borrow(&vault.balances, creator);
-    assert!(*user_balance >= request_amount, ENoAccess);
-    assert!(*user_balance != 0, ENoAccess);
-    table::add(&mut vault.balances, creator, *user_balance - request_amount);
+    let creator_balance = table::borrow(&vault.balances, creator);
+    assert!(*creator_balance >= request_amount, ENoAccess);
+    assert!(*creator_balance != 0, ENoAccess);
+    table::add(&mut vault.balances, creator, *creator_balance - request_amount);
 
     // split from platform_balance
     let reward_coin = balance::split<SUI>(&mut vault.platform_balance, request_amount).into_coin(ctx);

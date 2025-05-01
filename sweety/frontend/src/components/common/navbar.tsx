@@ -15,6 +15,7 @@ export function Navbar() {
           <Link to="/create-draft" className="hover:underline">Create Draft</Link>
           <Link to="/approve" className="hover:underline">approve</Link>
           <Link to="/my-requests" className="hover:underline">My Requests</Link>
+          <Link to="/explore-albums" className="hover:underline">Exploring albums</Link>
         </div>
 
         <div className="flex items-center gap-4">

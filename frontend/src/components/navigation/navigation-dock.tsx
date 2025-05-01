@@ -44,7 +44,7 @@ export function NavigationDock() {
   const routes = [
     { path: "/", icon: <Home className="h-5 w-5" />, label: "Home" },
     {
-      path: "/content",
+      path: "/explore-albums",
       icon: <Search className="h-5 w-5" />,
       label: "Discover",
     },

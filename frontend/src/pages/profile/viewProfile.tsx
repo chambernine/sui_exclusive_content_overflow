@@ -506,15 +506,10 @@ export function ProfilePage() {
   );
 
   return (
-    <div className="container py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <Protected
-          title="Connect Wallet to View Profile"
-          description="You need to connect your wallet to access your profile, collections, and settings."
-        >
-          {renderProfileContent()}
-        </Protected>
+    <Protected description="Connect wallet to view profile">
+      <div className="container py-12 px-4">
+        <div className="max-w-4xl mx-auto">{renderProfileContent()}</div>
       </div>
-    </div>
+    </Protected>
   );
 }

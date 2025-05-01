@@ -1,5 +1,4 @@
 import { ReactNode, useState } from "react";
-import { ConnectButton } from "@mysten/dapp-kit";
 import { motion } from "framer-motion";
 import { LogIn } from "lucide-react";
 
@@ -12,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Login } from "./Login";
 
 interface AuthCheckProps {
   children: ReactNode;
@@ -59,20 +59,7 @@ export function AuthCheck({ children, fallback }: AuthCheckProps) {
           </DialogHeader>
 
           <div className="flex flex-col items-center justify-center p-4 space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <LogIn className="h-16 w-16 text-primary opacity-80" />
-            </motion.div>
-
-            <p className="text-center text-sm text-muted-foreground mb-4">
-              Connect your wallet to access exclusive content, manage your
-              profile, and create albums.
-            </p>
-
-            <ConnectButton />
+            <Login description="Connect your wallet to access exclusive content" />
           </div>
         </DialogContent>
       </Dialog>

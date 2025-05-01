@@ -1,16 +1,15 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { ThemeProvider } from "./providers/ThemeProvider";
-import Profile from "./pages/profile/editProfile";
 
 import Home from "./pages/home/home";
 import AlbumRequestApproval from "./pages/approveRequestAlbum/albumRequestApproval";
 
-import { ContentList } from "./pages/contentList/contentList";
-
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProfilePage } from "./pages/profile/viewProfile";
 import CreateAlbumPage from "./pages/draftAlbum/createAlbumForm";
+import ExploreAlbums from "./pages/exploreAlbums/exploreAlbums";
+import BuyAlbum from "./pages/exploreAlbums/buyAlbum";
 
 function App() {
   const router = createBrowserRouter([
@@ -35,8 +34,12 @@ function App() {
           element: <AlbumRequestApproval />,
         },
         {
-          path: "content",
-          element: <ContentList />,
+          path: "explore-albums",
+          element: <ExploreAlbums />,
+        },
+        {
+          path: "explore-albums/:albumId",
+          element: <BuyAlbum />,
         },
       ],
     },

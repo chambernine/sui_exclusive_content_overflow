@@ -1,14 +1,19 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DraftAlbumStatus, AlbumTier, tierColors } from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
-import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Protected } from "@/components/auth/Protected";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, ClipboardCheck, Album, Clock } from "lucide-react";
+import { CheckCircle, ClipboardCheck, Album } from "lucide-react";
+import {
+  usePendingApprovalAlbums,
+  useMyAlbums,
+  useApproveAlbum,
+  usePublishAlbum,
+} from "@/hooks/api/useAlbums";
 
 interface Album {
   id: string;
@@ -26,14 +31,22 @@ interface Album {
 }
 
 export default function AlbumRequestApproval() {
-  const [pendingApproval, setPendingApproval] = useState<Album[]>([]);
-  const [myAlbums, setMyAlbums] = useState<Album[]>([]);
-  const [loading, setLoading] = useState({
-    approvalAlbums: true,
-    myAlbums: true,
-  });
   const { address } = useSuiAccount();
   const [currentTab, setCurrentTab] = useState<string>("pending-approval");
+
+  // Fetching data with React Query
+  const { data: pendingApprovalData, isLoading: isLoadingPendingApproval } =
+    usePendingApprovalAlbums(address);
+
+  const { data: myAlbumsData, isLoading: isLoadingMyAlbums } =
+    useMyAlbums(address);
+
+  // Mutations
+  const approveMutation = useApproveAlbum(address);
+  const publishMutation = usePublishAlbum(address);
+
+  const pendingApproval = pendingApprovalData?.data || [];
+  const myAlbums = myAlbumsData?.data || [];
 
   const container = {
     hidden: { opacity: 0 },
@@ -50,75 +63,24 @@ export default function AlbumRequestApproval() {
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
   };
 
-  // Fetch albums pending approval (for admins/approvers)
-  const fetchPendingApprovalAlbums = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:3000/album-approval/${address}`
-      );
-      setPendingApproval(res.data.data);
-    } catch (error) {
-      console.error("Error fetching pending approval albums:", error);
-    } finally {
-      setLoading((prev) => ({ ...prev, approvalAlbums: false }));
-    }
-  };
-
-  // Fetch my albums (as a creator)
-  const fetchMyAlbums = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/my-album/${address}`
-      );
-      const allAlbums = response.data.data;
-      setMyAlbums(allAlbums);
-    } catch (error) {
-      console.error("Error fetching my albums:", error);
-    } finally {
-      setLoading((prev) => ({ ...prev, myAlbums: false }));
-    }
-  };
-
   const handleApprove = async (albumId: string) => {
-    try {
-      const response = await axios.patch(
-        `http://localhost:3000/album-approval/${albumId}/${address}`
-      );
-      alert(response.data);
-      setPendingApproval((prev) => prev.filter((a) => a.albumId !== albumId));
-    } catch (err) {
-      console.error("❌ Failed to approve album:", err);
-    }
+    approveMutation.mutate({ albumId });
   };
 
   const handlePublish = async (albumId: string) => {
-    try {
-      await axios.patch(`http://localhost:3000/my-album-publish/${albumId}`);
-      setMyAlbums((prev) => prev.filter((a) => a.albumId !== albumId));
-      alert("✅ Published Successfully!");
-    } catch (err) {
-      console.error("❌ Failed to publish album:", err);
-      alert("Failed to publish album. See console.");
-    }
+    publishMutation.mutate(albumId);
   };
 
   const formatTimestamp = (ts: Album["created_at"]) => {
     return new Date(ts.seconds * 1000).toLocaleString();
   };
 
-  useEffect(() => {
-    if (address) {
-      fetchPendingApprovalAlbums();
-      fetchMyAlbums();
-    }
-  }, [address]);
-
   const renderPendingApprovalContent = () => {
-    if (loading.approvalAlbums && !address) {
+    if (isLoadingPendingApproval && !address) {
       return <p>Connect to wallet first</p>;
     }
 
-    if (loading.approvalAlbums) {
+    if (isLoadingPendingApproval) {
       return <p>Loading albums...</p>;
     }
 
@@ -133,7 +95,7 @@ export default function AlbumRequestApproval() {
         animate="show"
         className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
-        {pendingApproval.map((album) => (
+        {pendingApproval.map((album: Album) => (
           <motion.div key={album.albumId} variants={item}>
             <Card className="bg-gray-900 border border-gray-700">
               <CardHeader>
@@ -196,11 +158,11 @@ export default function AlbumRequestApproval() {
   };
 
   const renderMyAlbumsContent = () => {
-    if (loading.myAlbums && !address) {
+    if (isLoadingMyAlbums && !address) {
       return <p>Connect to wallet first</p>;
     }
 
-    if (loading.myAlbums) {
+    if (isLoadingMyAlbums) {
       return <p>Loading your albums...</p>;
     }
 
@@ -215,7 +177,7 @@ export default function AlbumRequestApproval() {
         animate="show"
         className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
-        {myAlbums.map((album) => (
+        {myAlbums.map((album: Album) => (
           <motion.div key={album.albumId} variants={item}>
             <Card className="bg-gray-900 border border-gray-700 text-white">
               <CardHeader>
@@ -283,10 +245,7 @@ export default function AlbumRequestApproval() {
   };
 
   return (
-    <Protected
-      title="Connect Wallet to Manage Album Requests"
-      description="You need to connect your wallet to view albums waiting for approval and manage your own album requests."
-    >
+    <Protected description="Connect wallet to manage album requests">
       <div className="container max-w-6xl mx-auto py-12 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

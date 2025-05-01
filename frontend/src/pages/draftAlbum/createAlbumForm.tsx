@@ -3,9 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 import { Timestamp } from "firebase/firestore";
 import { AlbumTier, DraftAlbum, DraftAlbumStatus } from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
-import axios from "axios";
 import { fileToBase64 } from "@/utils/fileFormat";
 import { motion } from "framer-motion";
+import { useSubmitDraftAlbum } from "@/hooks/api/useAlbums";
 import {
   Image,
   Upload,
@@ -48,6 +48,8 @@ export interface IFormDraftAlbum {
 
 export default function CreateAlbumPage() {
   const { address } = useSuiAccount();
+  const { mutate: submitDraftAlbum, isPending: isSubmitting } =
+    useSubmitDraftAlbum();
 
   const [draft, setDraft] = useState<IFormDraftAlbum>({
     albumId: "",
@@ -65,7 +67,6 @@ export default function CreateAlbumPage() {
 
   const [previewContentInfos, setPreviewContentInfos] = useState<string[]>([]);
   const [previewContents, setPreviewContents] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -207,8 +208,6 @@ export default function CreateAlbumPage() {
       return;
     }
 
-    setIsLoading(true);
-
     try {
       const base64Contents = draft.contents
         ? await Promise.all(draft.contents.map(fileToBase64))
@@ -226,37 +225,29 @@ export default function CreateAlbumPage() {
         contentInfos: base64Previews,
       };
 
-      await axios.post(
-        "http://localhost:3000/draft-album/request-approval",
-        draftAlbum,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      toast.success("Draft album submitted for approval!");
-
-      // Reset form
-      setDraft({
-        albumId: "",
-        owner: "",
-        name: "",
-        tier: AlbumTier.standard,
-        price: 0,
-        description: "",
-        tags: [],
-        status: DraftAlbumStatus.requestApprove,
-        contentInfos: [],
-        contents: [],
-        created_at: Timestamp.now(),
+      submitDraftAlbum(draftAlbum, {
+        onSuccess: () => {
+          // Reset form
+          setDraft({
+            albumId: "",
+            owner: "",
+            name: "",
+            tier: AlbumTier.standard,
+            price: 0,
+            description: "",
+            tags: [],
+            status: DraftAlbumStatus.requestApprove,
+            contentInfos: [],
+            contents: [],
+            created_at: Timestamp.now(),
+          });
+          setPreviewContentInfos([]);
+          setPreviewContents([]);
+        },
       });
-      setPreviewContentInfos([]);
-      setPreviewContents([]);
     } catch (error) {
-      console.error("Submission failed:", error);
-      toast.error("Submission failed. Please try again.");
-    } finally {
-      setIsLoading(false);
+      console.error("Preparation failed:", error);
+      toast.error("Failed to prepare submission. Please try again.");
     }
   };
 
@@ -525,8 +516,8 @@ export default function CreateAlbumPage() {
       </motion.div>
 
       <motion.div variants={item} className="flex justify-end pt-4">
-        <Button onClick={handleSave} disabled={isLoading} className="px-8">
-          {isLoading ? (
+        <Button onClick={handleSave} disabled={isSubmitting} className="px-8">
+          {isSubmitting ? (
             <div className="flex items-center">
               <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>
               <span>Submitting...</span>
@@ -543,11 +534,8 @@ export default function CreateAlbumPage() {
   );
 
   return (
-    <div className="container max-w-4xl mx-auto py-12 px-4">
-      <Protected
-        title="Connect Wallet to Create Album"
-        description="You need to connect your wallet to create and publish your exclusive content albums."
-      >
+    <Protected description="Connect wallet to create album.">
+      <div className="container max-w-4xl mx-auto py-12 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -564,7 +552,7 @@ export default function CreateAlbumPage() {
         </motion.div>
 
         {renderAlbumForm()}
-      </Protected>
-    </div>
+      </div>
+    </Protected>
   );
 }

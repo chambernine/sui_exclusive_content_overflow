@@ -83,7 +83,7 @@ async function sealEncryptions(albumId: string, contents: string[]) {
 async function publishWalrus(
   encryptedBlobs: Uint8Array<ArrayBufferLike>[],
 ) {
-  const epoch = 4;
+  const epoch = 5;
   let responses: WalrusObjectResponse[] = [];
   for (const encryptedBlob of encryptedBlobs) {
     try {

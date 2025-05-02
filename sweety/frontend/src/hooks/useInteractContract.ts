@@ -1,6 +1,7 @@
 import { TESTNET_PACKAGE_ID } from "@/constant/constant";
 import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
+import { ADMIN_VAULT } from "@/constant/constant"
 
 export default function useInteractContract() {
   const suiClient = useSuiClient();
@@ -60,14 +61,14 @@ export default function useInteractContract() {
         coin, // Coin<SUI>
         tx.pure.u64(fee), // u64
         tx.object(
-          "0x6ab6896e7d80a0f8e0bf679583bfa95c11785586ad195ed65cd3b8dc107f0c18"
+          ADMIN_VAULT
         ), // &mut Vault (shared)
       ],
     });
 
     // 3. Optional: set budget
     tx.setGasBudget(10_000_000);
-
+    console.log("execute tx ")
     signAndExecute(
       {
         transaction: tx,
@@ -76,6 +77,9 @@ export default function useInteractContract() {
         onSuccess: async (result) => {
           console.log("Transaction successful:", await result);
         },
+        onError: (error) => {
+          console.error("Transaction failed:", error);
+        }
       }
     );
 

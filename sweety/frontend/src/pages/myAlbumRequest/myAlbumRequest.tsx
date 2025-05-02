@@ -26,8 +26,8 @@ export default function MyAlbumRequest() {
   const { address } = useSuiAccount(); // 👈 Get current user address
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
-  const { publishBlobsToAlbum }  = useInteractContract()
-
+  const { publishBlobsToAlbum } = useInteractContract();
+  const [waitforSign, setWaitForSign] = useState<WaitForSignPublishResponse>();
   const fetchMyAlbums = async () => {
     try {
       const response = await axios.get(
@@ -44,24 +44,34 @@ export default function MyAlbumRequest() {
 
   const handlePublish = async (album: Album) => {
     try {
-      const response = await axios.patch(`http://localhost:3000/my-album/publish`,
+      const response = await axios.patch(
+        "http://localhost:3000/my-album/publish",
         JSON.stringify(album),
         {
           headers: { "Content-Type": "application/json" },
         }
       );
+
       if (response.status === 200) {
-        const waitforSign: WaitForSignPublishResponse = await response.data.data
-        console.log(response.data.data)
-        await Promise.all(
-          waitforSign.walrusObjectIds.map(async (walrusObjectId) => {
-            console.log(walrusObjectId.blob_id);
-            await publishBlobsToAlbum(waitforSign.albumId, waitforSign.capId, walrusObjectId.blob_id);
-          })
-        );
+        const waitforSign: WaitForSignPublishResponse = response.data.data;
+        console.log(waitforSign)
+        setWaitForSign(waitforSign);
+
+        // for (const walrusObjectId of waitforSign.walrusObjectIds) {
+        //   const blobResponse = await publishBlobsToAlbum(
+        //     waitforSign.albumId,
+        //     waitforSign.capId,
+        //     walrusObjectId.blob_id
+        //   );
+
+        //   console.log(blobResponse);
+
+        //   // Optional: check blobResponse status before continuing
+        //   // if (blobResponse.status !== 200) break;
+        // }
+
+        alert("✅ Published Successfully!");
       }
-      // setAlbums((prev) => prev.filter((a) => a.albumId !== album.albumId));
-      alert("✅ Published Successfully!");
     } catch (err) {
       console.error("❌ Failed to publish album:", err);
       alert("Failed to publish album. See console.");
@@ -89,9 +99,7 @@ export default function MyAlbumRequest() {
       ) : albums.length === 0 && loading ? (
         <p>loading...</p>
       ) : albums.length === 0 && !loading ? (
-        <>
-            user no album in db
-        </>
+        <>user no album in db</>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {albums.map((album) => (
@@ -129,9 +137,8 @@ export default function MyAlbumRequest() {
                 {/* 🛫 Publish Button */}
                 <Button
                   disabled={album.status !== 2}
-
                   onClick={() => {
-                    handlePublish(album)
+                    handlePublish(album);
                   }}
                   className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
                 >
@@ -142,6 +149,24 @@ export default function MyAlbumRequest() {
           ))}
         </div>
       )}
+      {waitforSign?.walrusObjectIds.map((walrusObjectId) => {
+        console.log(waitforSign)
+        return (
+          <div className="flex flex-col gap-2 text-black">
+            <Button
+              onClick={async () => {
+                await publishBlobsToAlbum(
+                  waitforSign.albumId,
+                  waitforSign.capId,
+                  walrusObjectId.blob_id
+                );
+              }}
+            >
+              Click to publish {walrusObjectId.blob_id}
+            </Button>
+          </div>
+        );
+      })}
     </div>
   );
 }

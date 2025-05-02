@@ -1,5 +1,5 @@
 // src/pages/Home.tsx
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // ✅ React Router
 import { useSuiAccount } from '@/hooks/useSuiAccount';
 import { useUserInfo } from '@/hooks/useUserInfo';

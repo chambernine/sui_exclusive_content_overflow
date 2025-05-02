@@ -1,5 +1,5 @@
-const PACKAGE_ID = "0x87110b15b06ced840487a9078a9951d8be789a6a94d9f977514f721596115006"
-const ADMIN_VAULT = "0xd1a589e4aab738177677174560277ced712797902c7a5b6ad07c0669279a7d93"
-const PUBLISH_TX = "https://testnet.suivision.xyz/txblock/Dn9QYXmzZvgMjw1uxQmnxMKftCy8i6GYDfRD1Lusyc95?tab=Changes"
+const PACKAGE_ID = "0xd614c58fe7946aca29bdbf3ff704d7cbf7cc3e6363626c1e5241f1b839be805c"
+const ADMIN_VAULT = "0x498172edc2abf8fe0c875825dc78ef826bf1faf42698b6f420b25e32668d3144"
+const PUBLISH_TX = "https://testnet.suivision.xyz/txblock/3PYQqNKSNp2NVB57p9NerVCZ5GzC3xQKcozsPLQ1tZsd"
 
 export { PACKAGE_ID, ADMIN_VAULT, PUBLISH_TX };

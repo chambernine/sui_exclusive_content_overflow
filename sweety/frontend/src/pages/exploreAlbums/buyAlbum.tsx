@@ -1,4 +1,5 @@
 import useInteractContract from "@/hooks/useInteractContract";
+import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -18,15 +19,23 @@ interface Album {
   };
 }
 
+const onPurchaseAlbum = async (albumId: string, address: string) => {
+  await fetch(`http://localhost:3000/explore-album/purchase/${albumId}/${address}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 export default function BuyAlbum() {
   const { albumId } = useParams();
+  const { address } = useSuiAccount(); 
   const [album, setAlbum] = useState<Album | null>(null);
     const { CreateSupportAlbumTx } = useInteractContract()
   useEffect(() => {
     const fetchAlbum = async () => {
       const res = await fetch(`http://localhost:3000/explore-album/${albumId}`);
       const json = await res.json();
-      setAlbum(json.data); // ✅ this fixes the issue
+      setAlbum(json.data);
     };
     fetchAlbum();
   }, [albumId]);
@@ -63,9 +72,14 @@ export default function BuyAlbum() {
 
         <button
           className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          onClick={() =>{
+          onClick={async () =>{
+            if (!address) {
+              alert("Please connect your wallet first.");
+              return;
+            }
             console.log("albumId", album.albumId)
-            CreateSupportAlbumTx(album.albumId, album.price * 1_000_000_000, 20)
+            await CreateSupportAlbumTx(album.albumId, album.price * 1_000_000_000, 20)
+            await onPurchaseAlbum(album.albumId, address);
           }}
         >
           🛒 Buy Album

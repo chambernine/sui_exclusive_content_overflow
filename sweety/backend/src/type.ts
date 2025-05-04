@@ -1,6 +1,6 @@
 import type { Timestamp } from "firebase-admin/firestore";
 
-export interface IFormData {
+export interface IUserData {
   walletAddress: string;
   username: string;
   description: string;
@@ -12,6 +12,7 @@ export interface IFormData {
     ig: string;
     youtube: string;
   };
+  purchase: string[];
 }
 
 export enum DraftAlbumStatus {
@@ -39,6 +40,10 @@ export interface DraftAlbum {
   contentInfos: string[];
   contents: string[];
   created_at: Timestamp;
+  publishedBlobs?: {
+    blobId: string
+    ispublished: boolean
+  }[]
 }
 
 export interface WalrusObjectResponse {
@@ -73,7 +78,7 @@ export interface PublishedAlbum {
   description: string;
   tags: string[];
   contentInfos: string[]
-  contentsObjectId: WalrusObjectResponse[];
+  contentsObjectId?: string[];
   interaction: {
     likes: number;
     shares: number;

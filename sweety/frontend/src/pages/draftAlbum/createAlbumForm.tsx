@@ -48,7 +48,6 @@ export default function CreateDraftAlbum() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-
     if (name === "tier") {
       return setDraft((prev) => ({
         ...prev,
@@ -142,7 +141,7 @@ export default function CreateDraftAlbum() {
       contentInfos: base64Previews,
     };
 
-      console.log(draftAlbum)
+    console.log(draftAlbum)
     try {
       const response = await axios.post(
         "http://localhost:3000/draft-album/request-approval",

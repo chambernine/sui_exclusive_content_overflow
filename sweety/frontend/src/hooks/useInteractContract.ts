@@ -22,10 +22,11 @@ export default function useInteractContract() {
     capId: string,
     blobId: string
   ) {
+    console.log(TESTNET_PACKAGE_ID)
     console.log(albumId, capId, blobId);
     const tx = new Transaction();
     tx.moveCall({
-      target: `${TESTNET_PACKAGE_ID}::albums::publish`,
+      target: `${TESTNET_PACKAGE_ID}::execlusive::publish`,
       arguments: [tx.object(albumId), tx.object(capId), tx.pure.string(blobId)],
     });
 
@@ -55,7 +56,7 @@ export default function useInteractContract() {
 
     // 2. Call the entry function
     tx.moveCall({
-      target: `${TESTNET_PACKAGE_ID}::albums::support_album`,
+      target: `${TESTNET_PACKAGE_ID}::execlusive::support_album`,
       arguments: [
         tx.object(albumId), // &mut Album (shared)
         coin, // Coin<SUI>
@@ -85,5 +86,34 @@ export default function useInteractContract() {
 
   }
 
-  return { publishBlobsToAlbum, CreateSupportAlbumTx };
+  async function findCapIdForAlbum(walletAddress: string, albumId: string) {
+    const { data: ownedObjects } = await suiClient.getOwnedObjects({
+      owner: walletAddress,
+      options: {
+        showType: true,
+        showContent: true,
+      },
+    });
+  
+    for (const item of ownedObjects) {
+      const type = item.data?.type;
+      const content = item.data?.content;
+      console.log(item.data)
+      if (
+        type?.includes("::execlusive::CreatorCap") &&
+        content?.dataType === "moveObject"
+      ) {
+        const fields = content.fields
+        ;
+  
+        if (fields.album_id === albumId) {
+          return item.data?.objectId;
+        }
+      }
+    }
+  
+    throw new Error(`❌ capId not found for albumId ${albumId}`);
+  }
+
+  return { publishBlobsToAlbum, CreateSupportAlbumTx, findCapIdForAlbum };
 }

@@ -27,6 +27,10 @@ export interface DraftAlbum {
   contentInfos: string[]
   contents: string[];
   created_at: Timestamp;
+  publishedBlobs?: {
+    blobId: string
+    ispublished: boolean
+  }[]
 }
 
 export interface PublishedAlbum { 

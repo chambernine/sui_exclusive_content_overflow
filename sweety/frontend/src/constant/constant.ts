@@ -1,7 +1,6 @@
 export const DEVNET_PACKAGE_ID = '0xTODO';
-export const TESTNET_PACKAGE_ID =
-  '0xd614c58fe7946aca29bdbf3ff704d7cbf7cc3e6363626c1e5241f1b839be805c';
+export const TESTNET_PACKAGE_ID = '0x566de8df2e21ef871ddf8833fff623b3e352b168257a07318a20da4c78588b4e'
 export const MAINNET_PACKAGE_ID = '0xTODO';
 
 
-export const ADMIN_VAULT = "0x498172edc2abf8fe0c875825dc78ef826bf1faf42698b6f420b25e32668d3144"
+export const ADMIN_VAULT = "0x08eb4ebefca27ada4bf8ba27a25efbf4475e7a7ce7075804fd1adcf8ad82c6e9"

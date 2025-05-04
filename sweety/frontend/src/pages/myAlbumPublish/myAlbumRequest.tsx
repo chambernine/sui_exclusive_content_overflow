@@ -3,9 +3,8 @@ import axios from "axios";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DraftAlbumStatus, AlbumTier } from "@/types/album";
-import { useSuiAccount } from "@/hooks/useSuiAccount"; // your custom wallet hook
-import { WaitForSignPublishResponse } from "@/types/interact";
-import useInteractContract from "@/hooks/useInteractContract";
+import { useSuiAccount } from "@/hooks/useSuiAccount";
+import { useNavigate } from "react-router-dom";
 
 interface Album {
   id: string;
@@ -23,11 +22,11 @@ interface Album {
 }
 
 export default function MyAlbumRequest() {
-  const { address } = useSuiAccount(); // 👈 Get current user address
+  const { address } = useSuiAccount();
+  const navigate = useNavigate();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
-  const { publishBlobsToAlbum } = useInteractContract();
-  const [waitforSign, setWaitForSign] = useState<WaitForSignPublishResponse>();
+
   const fetchMyAlbums = async () => {
     try {
       const response = await axios.get(
@@ -39,42 +38,6 @@ export default function MyAlbumRequest() {
       console.error("Error fetching albums:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePublish = async (album: Album) => {
-    try {
-      const response = await axios.patch(
-        "http://localhost:3000/my-album/publish",
-        JSON.stringify(album),
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      if (response.status === 200) {
-        const waitforSign: WaitForSignPublishResponse = response.data.data;
-        console.log(waitforSign)
-        setWaitForSign(waitforSign);
-
-        // for (const walrusObjectId of waitforSign.walrusObjectIds) {
-        //   const blobResponse = await publishBlobsToAlbum(
-        //     waitforSign.albumId,
-        //     waitforSign.capId,
-        //     walrusObjectId.blob_id
-        //   );
-
-        //   console.log(blobResponse);
-
-        //   // Optional: check blobResponse status before continuing
-        //   // if (blobResponse.status !== 200) break;
-        // }
-
-        alert("✅ Published Successfully!");
-      }
-    } catch (err) {
-      console.error("❌ Failed to publish album:", err);
-      alert("Failed to publish album. See console.");
     }
   };
 
@@ -120,53 +83,21 @@ export default function MyAlbumRequest() {
 
               <CardContent className="space-y-3">
                 <p className="text-sm">{album.description}</p>
-
-                {album.contentInfos.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {album.contentInfos.map((img, i) => (
-                      <img
-                        key={i}
-                        src={img}
-                        alt={`preview-${i}`}
-                        className="h-28 w-full object-cover rounded border border-gray-700"
-                      />
-                    ))}
-                  </div>
-                )}
-
                 {/* 🛫 Publish Button */}
                 <Button
                   disabled={album.status !== 2}
                   onClick={() => {
-                    handlePublish(album);
+                    navigate(`/my-request/${album.albumId}`);
                   }}
                   className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
                 >
-                  🚀 {album.status === 2 ? "Publish Album" : "wait for approve"}
+                  🚀 Sign to publish
                 </Button>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
-      {waitforSign?.walrusObjectIds.map((walrusObjectId) => {
-        console.log(waitforSign)
-        return (
-          <div className="flex flex-col gap-2 text-black">
-            <Button
-              onClick={async () => {
-                await publishBlobsToAlbum(
-                  waitforSign.albumId,
-                  waitforSign.capId,
-                  walrusObjectId.blob_id
-                );
-              }}
-            >
-              Click to publish {walrusObjectId.blob_id}
-            </Button>
-          </div>
-        );
-      })}
     </div>
   );
 }

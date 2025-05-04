@@ -1,11 +1,13 @@
-module sweety::albums;
+module sweety::execlusive;
 
-use sui::coin::{Self, Coin};
-use sui::sui::SUI;
-use sui::balance::{Self, Balance};
-use sui::dynamic_field;
-use sui::table;
 use std::string::String;
+
+use sui::balance::{Self, Balance};
+use sui::coin::{Coin};
+use sui::dynamic_field;
+use sui::event;
+use sui::sui::SUI;
+use sui::table;
 
 use sweety::utils::is_prefix;
 
@@ -46,10 +48,20 @@ public struct Vault has key, store {
     platform_balance: Balance<SUI>,
     balances: table::Table<address, table::Table<ID, u64>>,
 }
-// vault initilizer 
-public struct ALBUMS has drop {}
 
-fun init(witness: ALBUMS, ctx: &mut TxContext) {
+public struct SupportEvent has copy, drop {
+    supporter: address,
+    album_id: ID,
+    creator: address,
+    total_payment: u64,
+    creator_fee: u64,
+    platform_fee: u64,
+}
+
+// vault initilizer 
+public struct EXECLUSIVE has drop {}
+
+fun init(witness: EXECLUSIVE, ctx: &mut TxContext) {
     let (vault, admin_cap) = create_admin_vault(witness, ctx);
     transfer::share_object(vault);
     transfer::transfer(admin_cap, ctx.sender());
@@ -61,7 +73,7 @@ fun create_admin_cap(ctx: &mut TxContext): AdminCap {
     }
 }
 
-fun create_admin_vault(_witness: ALBUMS,ctx: &mut TxContext): (Vault, AdminCap) {
+fun create_admin_vault(_witness: EXECLUSIVE, ctx: &mut TxContext): (Vault, AdminCap) {
     let admin_address = ctx.sender();
     let admin_cap = create_admin_cap(ctx);
     let admin_cap_id = object::id(&admin_cap);
@@ -82,6 +94,7 @@ fun create_admin_vault(_witness: ALBUMS,ctx: &mut TxContext): (Vault, AdminCap) 
     (vault, admin_cap)
 }
 
+// === Album Creation ===
 // create album and transfer admin cap to creator
 public fun create_album(
     name: String,
@@ -167,6 +180,7 @@ entry fun create_album_entry(
 //     vault.platform_balance.join(coin::into_balance(payment));
 // }
 
+// === Album Support ===
 entry fun support_album(
     album: &mut Album,
     mut payment: Coin<SUI>,
@@ -190,9 +204,17 @@ entry fun support_album(
 
     transfer::public_transfer(platoform_coin, _vault.admin);
     transfer::public_transfer(creator_coin, album.owner);
-    payment.destroy_zero();
 
     album.insider.push_back(sender);
+    event::emit(SupportEvent {
+        supporter: sender,
+        album_id: object::id(album),
+        creator: album.owner,
+        total_payment: payment.value(),
+        creator_fee,
+        platform_fee,
+    });
+    payment.destroy_zero();
 }
 
 entry fun withdraw_platform_balances(
@@ -261,8 +283,8 @@ entry fun seal_approve(id: vector<u8>, album: &Album, ctx: &TxContext) {
     assert!(approve_internal(ctx.sender(), id, album), E_NO_ACCESS);
 }
 
-
-entry fun publish(album: &mut Album, album_cap: &AlbumCap, blobs: vector<String>) {
+entry fun publish(album: &mut Album, album_cap: &AlbumCap, blobId: String) {
     assert!(album_cap.album_id == object::id(album), E_INVALID_CAP);
-    dynamic_field::add(&mut album.id, blobs, MARKER);
+    assert!(!dynamic_field::exists_(&album.id, blobId), E_DUPLICATE);
+    dynamic_field::add(&mut album.id, blobId, MARKER);
 }

@@ -11,7 +11,7 @@ async function createAlbum(
 ): Promise<{ albumId: string; capId: string }> {
   const tx = new Transaction();
   tx.moveCall({
-    target: `${PACKAGE_ID}::albums::create_album_entry`,
+    target: `${PACKAGE_ID}::execlusive::create_album_entry`,
     arguments: [
       tx.pure.string(name),
       tx.pure.u64(price * 1_000_000_000),

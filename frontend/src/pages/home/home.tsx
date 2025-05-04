@@ -2,7 +2,6 @@
 import { ConnectButton } from "@mysten/dapp-kit";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { motion } from "framer-motion";
-import { Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Login } from "@/components/auth/Login";
 

@@ -1,13 +1,36 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DraftAlbumStatus, AlbumTier, tierColors } from "@/types/album";
+import {
+  DraftAlbumStatus,
+  AlbumTier,
+  tierColors,
+  tierNames,
+} from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Protected } from "@/components/auth/Protected";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, ClipboardCheck, Album } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import {
+  CheckCircle,
+  ClipboardCheck,
+  Album,
+  Search,
+  Clock,
+  CheckSquare,
+  Image as ImageIcon,
+} from "lucide-react";
 import {
   usePendingApprovalAlbums,
   useMyAlbums,
@@ -33,6 +56,8 @@ interface Album {
 export default function AlbumRequestApproval() {
   const { address } = useSuiAccount();
   const [currentTab, setCurrentTab] = useState<string>("pending-approval");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Fetching data with React Query
   const { data: pendingApprovalData, isLoading: isLoadingPendingApproval } =
@@ -48,6 +73,24 @@ export default function AlbumRequestApproval() {
   const pendingApproval = pendingApprovalData?.data || [];
   const myAlbums = myAlbumsData?.data || [];
 
+  const filteredPendingApproval = pendingApproval.filter(
+    (album: Album) =>
+      album.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      album.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      album.tags?.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+  );
+
+  const filteredMyAlbums = myAlbums.filter(
+    (album: Album) =>
+      album.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      album.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      album.tags?.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+  );
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -60,7 +103,14 @@ export default function AlbumRequestApproval() {
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 70,
+      },
+    },
   };
 
   const handleApprove = async (albumId: string) => {
@@ -75,17 +125,99 @@ export default function AlbumRequestApproval() {
     return new Date(ts.seconds * 1000).toLocaleString();
   };
 
+  const toggleExpandCard = (albumId: string) => {
+    setExpandedCard(expandedCard === albumId ? null : albumId);
+  };
+
+  const renderStatusBadge = (status: DraftAlbumStatus) => {
+    switch (status) {
+      case DraftAlbumStatus.approved:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-green-500/10 text-green-500 border-green-500/20"
+          >
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Approved
+          </Badge>
+        );
+      case DraftAlbumStatus.requestApprove:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+          >
+            <Clock className="h-3 w-3 mr-1" />
+            Pending
+          </Badge>
+        );
+      default:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-gray-500/10 text-gray-500 border-gray-500/20"
+          >
+            Draft
+          </Badge>
+        );
+    }
+  };
+
+  const renderSkeletonCards = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {[1, 2, 3, 4].map((i) => (
+        <Card
+          key={i}
+          className="bg-card border-border hover:shadow-md transition-shadow overflow-hidden"
+        >
+          <CardHeader className="pb-2">
+            <div className="flex justify-between">
+              <Skeleton className="h-6 w-36" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+          </CardHeader>
+          <CardContent className="pb-3">
+            <Skeleton className="h-4 w-full mb-4" />
+            <Skeleton className="h-4 w-3/4 mb-2" />
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <Skeleton className="h-24 w-full rounded" />
+              <Skeleton className="h-24 w-full rounded" />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Skeleton className="h-9 w-full rounded" />
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+
   const renderPendingApprovalContent = () => {
     if (isLoadingPendingApproval && !address) {
-      return <p>Connect to wallet first</p>;
+      return (
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <ClipboardCheck className="h-12 w-12 mb-4 opacity-30" />
+          <p>Connect to wallet first to view pending approvals</p>
+        </div>
+      );
     }
 
     if (isLoadingPendingApproval) {
-      return <p>Loading albums...</p>;
+      return renderSkeletonCards();
     }
 
-    if (pendingApproval.length === 0) {
-      return <p>No pending albums found to approve.</p>;
+    if (filteredPendingApproval.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <ClipboardCheck className="h-12 w-12 mb-4 opacity-30" />
+          <p className="text-center mb-1">
+            No pending albums found to approve.
+          </p>
+          <p className="text-sm">
+            Albums awaiting your approval will appear here.
+          </p>
+        </div>
+      );
     }
 
     return (
@@ -93,63 +225,131 @@ export default function AlbumRequestApproval() {
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4"
       >
-        {pendingApproval.map((album: Album) => (
+        {filteredPendingApproval.map((album: Album) => (
           <motion.div key={album.albumId} variants={item}>
-            <Card className="bg-gray-900 border border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-lg">{album.name}</CardTitle>
-                <p className="text-sm text-gray-400">Owner: {album.owner}</p>
-                <p className="text-sm text-gray-400">
-                  Tier: {AlbumTier[album.tier]}
-                </p>
-                <p className="text-sm text-gray-400">Price: {album.price} 💰</p>
-                <p className="text-sm text-gray-400">
-                  Created: {formatTimestamp(album.created_at)}
-                </p>
-                <div className="text-xs text-gray-500 mt-1">
-                  Tags: {album.tags?.join(", ") || "None"}
+            <Card className="bg-card border-border hover:shadow-md transition-shadow overflow-hidden">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg font-medium">
+                    {album.name}
+                  </CardTitle>
+                  <Badge className={`${tierColors[album.tier]} text-white`}>
+                    {tierNames[album.tier]}
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {album.tags?.slice(0, 3).map((tag, i) => (
+                    <Badge key={i} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                  {album.tags?.length > 3 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{album.tags.length - 3} more
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-3">
-                <p className="text-sm">{album.description}</p>
-                <div className="font-medium">Content Information:</div>
-                {album.contentInfos?.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {album.contentInfos.map((img, i) => (
-                      <img
-                        key={i}
-                        src={img}
-                        alt={`content-${i}`}
-                        className="h-28 w-full object-cover rounded border border-gray-700"
-                      />
-                    ))}
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Price:
+                    </span>
+                    <span className="font-medium">{album.price} SUI</span>
                   </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Owner:
+                    </span>
+                    <span className="font-mono text-sm">
+                      {album.owner.slice(0, 10)}...{album.owner.slice(-6)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Created:
+                    </span>
+                    <span className="text-sm">
+                      {formatTimestamp(album.created_at)}
+                    </span>
+                  </div>
+                </div>
+
+                <motion.div
+                  initial={{ height: "60px", overflow: "hidden" }}
+                  animate={{
+                    height: expandedCard === album.albumId ? "auto" : "60px",
+                    overflow:
+                      expandedCard === album.albumId ? "visible" : "hidden",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p className="text-sm leading-relaxed">{album.description}</p>
+                </motion.div>
+
+                {album.description && album.description.length > 150 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs p-0 h-auto"
+                    onClick={() => toggleExpandCard(album.albumId)}
+                  >
+                    {expandedCard === album.albumId ? "Show less" : "Read more"}
+                  </Button>
                 )}
 
-                <div className="font-medium">Content Preview:</div>
-                {album.contents && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {album.contents.map((img, i) => (
-                      <img
-                        key={i}
-                        src={img}
-                        alt={`content-${i}`}
-                        className="h-28 w-full object-cover rounded border border-gray-700"
-                      />
-                    ))}
-                  </div>
-                )}
+                <Separator className="my-2" />
 
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-sm font-medium flex items-center gap-1">
+                      <ImageIcon className="h-3.5 w-3.5" /> Content Preview
+                    </h4>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {album.contentInfos?.slice(0, 2).map((img, i) => (
+                      <motion.div
+                        key={i}
+                        whileHover={{ scale: 1.03 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <AspectRatio ratio={16 / 9}>
+                          <img
+                            src={img}
+                            alt={`preview-${i}`}
+                            className="h-full w-full object-cover rounded"
+                          />
+                        </AspectRatio>
+                      </motion.div>
+                    ))}
+                    {album.contentInfos?.length > 2 && (
+                      <div className="absolute bottom-2 right-2">
+                        <Badge
+                          variant="secondary"
+                          className="bg-background/90 backdrop-blur-sm"
+                        >
+                          +{album.contentInfos.length - 2} more
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+
+              <CardFooter>
                 <Button
-                  className="mt-2 w-full bg-green-600 hover:bg-green-700"
+                  className="w-full glass bg-primary hover:bg-primary/90 text-white"
                   onClick={() => handleApprove(album.albumId)}
                 >
+                  <CheckCircle className="h-4 w-4 mr-2" />
                   Approve Album
                 </Button>
-              </CardContent>
+              </CardFooter>
             </Card>
           </motion.div>
         ))}
@@ -159,15 +359,28 @@ export default function AlbumRequestApproval() {
 
   const renderMyAlbumsContent = () => {
     if (isLoadingMyAlbums && !address) {
-      return <p>Connect to wallet first</p>;
+      return (
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <Album className="h-12 w-12 mb-4 opacity-30" />
+          <p>Connect to wallet first to view your albums</p>
+        </div>
+      );
     }
 
     if (isLoadingMyAlbums) {
-      return <p>Loading your albums...</p>;
+      return renderSkeletonCards();
     }
 
-    if (myAlbums.length === 0) {
-      return <p>You don't have any albums in the approval process.</p>;
+    if (filteredMyAlbums.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <Album className="h-12 w-12 mb-4 opacity-30" />
+          <p className="text-center mb-1">
+            You don't have any albums in the approval process.
+          </p>
+          <p className="text-sm">Create a new album to see it here.</p>
+        </div>
+      );
     }
 
     return (
@@ -175,68 +388,135 @@ export default function AlbumRequestApproval() {
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4"
       >
-        {myAlbums.map((album: Album) => (
+        {filteredMyAlbums.map((album: Album) => (
           <motion.div key={album.albumId} variants={item}>
-            <Card className="bg-gray-900 border border-gray-700 text-white">
-              <CardHeader>
-                <CardTitle className="text-lg">{album.name}</CardTitle>
-                <Badge
-                  variant="outline"
-                  className={`${tierColors[album.tier]} text-white mt-2 w-fit`}
-                >
-                  {AlbumTier[album.tier]}
-                </Badge>
-                <p className="text-sm text-gray-400 mt-1">
-                  Price: {album.price} 💰
-                </p>
-                <p className="text-sm text-gray-400">
-                  Created: {formatTimestamp(album.created_at)}
-                </p>
-                <Badge
-                  className={`mt-2 ${
-                    album.status === DraftAlbumStatus.approved
-                      ? "bg-green-700"
-                      : album.status === DraftAlbumStatus.requestApprove
-                      ? "bg-yellow-600"
-                      : "bg-gray-600"
-                  }`}
-                >
-                  {DraftAlbumStatus[album.status]}
-                </Badge>
+            <Card className="bg-card border-border hover:shadow-md transition-shadow overflow-hidden">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg font-medium">
+                    {album.name}
+                  </CardTitle>
+                  <div>{renderStatusBadge(album.status)}</div>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <Badge className={`${tierColors[album.tier]} text-white`}>
+                    {tierNames[album.tier]}
+                  </Badge>
+                  <span className="text-sm font-medium">{album.price} SUI</span>
+                </div>
               </CardHeader>
 
               <CardContent className="space-y-3">
-                <p className="text-sm">{album.description}</p>
+                <motion.div
+                  initial={{ height: "60px", overflow: "hidden" }}
+                  animate={{
+                    height: expandedCard === album.albumId ? "auto" : "60px",
+                    overflow:
+                      expandedCard === album.albumId ? "visible" : "hidden",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p className="text-sm leading-relaxed">{album.description}</p>
+                </motion.div>
 
-                {album.contentInfos && album.contentInfos.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {album.contentInfos.map((img, i) => (
-                      <img
-                        key={i}
-                        src={img}
-                        alt={`preview-${i}`}
-                        className="h-28 w-full object-cover rounded border border-gray-700"
-                      />
-                    ))}
-                  </div>
+                {album.description && album.description.length > 150 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs p-0 h-auto"
+                    onClick={() => toggleExpandCard(album.albumId)}
+                  >
+                    {expandedCard === album.albumId ? "Show less" : "Read more"}
+                  </Button>
                 )}
 
-                <Button
-                  disabled={album.status !== DraftAlbumStatus.approved}
-                  onClick={() => handlePublish(album.albumId)}
-                  className={`w-full mt-4 ${
-                    album.status === DraftAlbumStatus.approved
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "bg-gray-600"
-                  }`}
-                >
-                  {album.status === DraftAlbumStatus.approved
-                    ? "Publish Album"
-                    : "Waiting for Approval"}
-                </Button>
+                <Separator className="my-2" />
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium flex items-center gap-1">
+                      <ImageIcon className="h-3.5 w-3.5" /> Content Preview
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Created: {formatTimestamp(album.created_at).split(",")[0]}
+                    </span>
+                  </div>
+
+                  <div className="relative">
+                    <div className="grid grid-cols-2 gap-2">
+                      {album.contentInfos?.slice(0, 4).map((img, i) => (
+                        <motion.div
+                          key={i}
+                          whileHover={{ scale: 1.03 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <AspectRatio ratio={1}>
+                            <img
+                              src={img}
+                              alt={`preview-${i}`}
+                              className="h-full w-full object-cover rounded"
+                            />
+                          </AspectRatio>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {album.contentInfos?.length > 4 && (
+                      <div className="absolute bottom-2 right-2">
+                        <Badge
+                          variant="secondary"
+                          className="bg-background/90 backdrop-blur-sm"
+                        >
+                          +{album.contentInfos.length - 4} more
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </CardContent>
+
+              <CardFooter>
+                <AnimatePresence mode="wait">
+                  {album.status === DraftAlbumStatus.approved ? (
+                    <motion.div
+                      key="publish-button"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="w-full"
+                    >
+                      <Button
+                        onClick={() => handlePublish(album.albumId)}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <CheckSquare className="h-4 w-4 mr-2" />
+                        Publish Album
+                      </Button>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="waiting-button"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="w-full"
+                    >
+                      <Button
+                        disabled
+                        variant="outline"
+                        className="w-full cursor-not-allowed"
+                      >
+                        <Clock className="h-4 w-4 mr-2" />
+                        {album.status === DraftAlbumStatus.requestApprove
+                          ? "Awaiting Approval"
+                          : "Draft Status"}
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </CardFooter>
             </Card>
           </motion.div>
         ))}
@@ -246,15 +526,15 @@ export default function AlbumRequestApproval() {
 
   return (
     <Protected description="Connect wallet to manage album requests">
-      <div className="container max-w-6xl mx-auto py-12 px-4">
+      <div className="container max-w-6xl mx-auto py-6 md:py-12 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
-            <ClipboardCheck className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 gradient-text">
+            <ClipboardCheck className="h-6 w-6" />
             Album Request Management
           </h1>
           <p className="text-muted-foreground">
@@ -267,39 +547,81 @@ export default function AlbumRequestApproval() {
           onValueChange={setCurrentTab}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="pending-approval">
-              Albums to Approve
-            </TabsTrigger>
-            <TabsTrigger value="my-albums">My Album Requests</TabsTrigger>
-          </TabsList>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <TabsList className="w-full md:w-auto">
+              <TabsTrigger value="pending-approval" className="flex gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>Albums to Approve</span>
+              </TabsTrigger>
+              <TabsTrigger value="my-albums" className="flex gap-2">
+                <Album className="h-4 w-4" />
+                <span>My Albums Request</span>
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="pending-approval" className="mt-2">
-            <div className="mb-6">
-              <h3 className="text-xl font-medium mb-2 flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-primary" />
-                Albums Awaiting Your Approval
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Review and approve albums submitted by creators.
-              </p>
+            <div className="relative w-full md:w-auto md:min-w-[300px]">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by title, description, or tags..."
+                className="pl-9 bg-background"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-            {renderPendingApprovalContent()}
-          </TabsContent>
+          </div>
 
-          <TabsContent value="my-albums" className="mt-2">
-            <div className="mb-6">
-              <h3 className="text-xl font-medium mb-2 flex items-center gap-2">
-                <Album className="h-5 w-5 text-primary" />
-                My Albums Ready to Publish
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Track the status of your submitted albums and publish approved
-                ones.
-              </p>
-            </div>
-            {renderMyAlbumsContent()}
-          </TabsContent>
+          <div className="bg-card rounded-lg p-4">
+            <TabsContent value="pending-approval" className="mt-0">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-1 flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-primary" />
+                      Albums Awaiting Your Approval
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Review and approve albums submitted by creators
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="bg-primary/10">
+                    {filteredPendingApproval.length} album
+                    {filteredPendingApproval.length !== 1 ? "s" : ""}
+                  </Badge>
+                </div>
+                {renderPendingApprovalContent()}
+              </motion.div>
+            </TabsContent>
+
+            <TabsContent value="my-albums" className="mt-0">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-1 flex items-center gap-2">
+                      <Album className="h-5 w-5 text-primary" />
+                      My Albums Ready to Publish
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Track the status of your submitted albums and publish
+                      approved ones
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="bg-primary/10">
+                    {filteredMyAlbums.length} album
+                    {filteredMyAlbums.length !== 1 ? "s" : ""}
+                  </Badge>
+                </div>
+                {renderMyAlbumsContent()}
+              </motion.div>
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </Protected>

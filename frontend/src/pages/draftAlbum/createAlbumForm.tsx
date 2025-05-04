@@ -304,7 +304,6 @@ export default function CreateAlbumPage() {
                 className="mt-1"
               />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1">
                 <Label htmlFor="tier">Tier</Label>
@@ -347,7 +346,6 @@ export default function CreateAlbumPage() {
                 />
               </div>
             </div>
-
             <div className="flex flex-col gap-1">
               <Label htmlFor="description">
                 <div className="flex items-center gap-1">
@@ -364,7 +362,6 @@ export default function CreateAlbumPage() {
                 className="mt-1 min-h-24"
               />
             </div>
-
             <div className="flex flex-col gap-1">
               <Label htmlFor="tags">
                 <div className="flex items-center gap-1">
@@ -380,16 +377,6 @@ export default function CreateAlbumPage() {
                 placeholder="art, photography, exclusive, etc."
                 className="mt-1"
               />
-
-              {draft.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {draft.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              )}
             </div>
           </motion.div>
         </CardContent>

@@ -67,24 +67,24 @@
 
 .dark {
   /* Dark Mode */
-  --background: #000F1D;
-  --foreground: #FFFFFF;
-  --card: #051628;
-  --card-foreground: #FFFFFF;
-  --popover: #051628;
-  --popover-foreground: #FFFFFF;
-  --primary: #4DA2FF;
-  --primary-foreground: #FFFFFF;
-  --secondary: #051F35;
-  --secondary-foreground: #FFFFFF;
-  --muted: #051F35;
-  --muted-foreground: #A1A1A1;
-  --accent: #051F35;
-  --accent-foreground: #FFFFFF;
-  --destructive: #FF4D4D;
-  --border: rgba(77, 162, 255, 0.2);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #4DA2FF;
+  --background: hsl(220 13% 10%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(222 13% 14%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(222 13% 12%);
+  --popover-foreground: hsl(210 40% 98%);
+  --primary: hsl(217.2 91.2% 59.8%);
+  --primary-foreground: hsl(222.2 47.4% 11.2%);
+  --secondary: hsl(217.2 32.6% 17.5%);
+  --secondary-foreground: hsl(210 40% 98%);
+  --muted: hsl(217.2 32.6% 17.5%);
+  --muted-foreground: hsl(215 20.2% 65.1%);
+  --accent: hsl(217.2 32.6% 17.5%);
+  --accent-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --border: hsl(217.2 32.6% 17.5%);
+  --input: hsl(217.2 32.6% 17.5%);
+  --ring: hsl(224.3 76.3% 48%);
 }
 
 @layer base {
@@ -205,4 +205,27 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: var(--background);
+
+  /* Center slide text vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.swiper-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

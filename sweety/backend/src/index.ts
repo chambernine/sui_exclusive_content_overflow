@@ -217,8 +217,8 @@ app.patch("/my-album/publish", async (c) => {
         saves: 0,
       },
     };
-    // await firestoreDb.collection("albums").doc(albumAccessId).set(newAlbumData);
-    // draftDocRef.delete()
+    await firestoreDb.collection("albums").doc(albumAccessId).set(newAlbumData);
+    draftDocRef.delete()
 
     //return to sign message to publish walrus object to albumId
     //cannot done it on server side due to invalid sign owner address of cap and server keypair

@@ -24,6 +24,7 @@ import { LoadingWrapper } from "@/components/ui/loading-wrapper";
 import { CardWithLens } from "@/components/custom/card-with-lens";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const tierNames: { [key: number]: string } = {
   0: "Standard",
@@ -117,9 +118,10 @@ export default function Home() {
 
   // Profile Card Component
   const ProfileCard = () => (
-    <Card className="overflow-hidden border-border hover:shadow-md transition-shadow">
-      <CardHeader>
+    <Card className="overflow-hidden border-border hover:shadow-md transition-shadow gap-4">
+      <CardHeader className="flex items-center justify-between">
         <CardTitle>Your Profile</CardTitle>
+        <ThemeToggle />
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col items-center">
@@ -230,7 +232,7 @@ export default function Home() {
       initial={{ opacity: 0, y: 100 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 100 }}
-      className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs"
       onClick={() => setShowMobileProfile(false)}
     >
       <motion.div
@@ -238,7 +240,7 @@ export default function Home() {
         onClick={(e) => e.stopPropagation()}
       >
         <ProfileCard />
-        <div className="mt-4">
+        <div className="mt-4 mb-20">
           <QuickActions />
         </div>
       </motion.div>
@@ -263,16 +265,17 @@ export default function Home() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary dark:text-primary">
+          <div className="hidden lg:flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary dark:text-primary">
             <span className="mr-2">●</span>
             <span className="font-mono">
               {address?.slice(0, 6)}...{address?.slice(-4)}
             </span>
           </div>
+
           <ConnectButton />
           {/* Mobile Profile Avatar */}
           <Avatar
-            className="h-8 w-8 md:hidden cursor-pointer border border-border"
+            className="h-8 w-8 lg:hidden cursor-pointer border border-border"
             onClick={() => setShowMobileProfile(true)}
           >
             <AvatarFallback className="bg-primary/20 text-primary">

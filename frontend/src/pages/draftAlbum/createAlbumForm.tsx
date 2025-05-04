@@ -14,6 +14,7 @@ import {
   Sparkles,
   FileText,
   Check,
+  PlusCircle,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Select,
@@ -388,32 +388,37 @@ export default function CreateAlbumPage() {
             <CardTitle>Preview Images</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-primary/50">
-              <label htmlFor="preview-images" className="cursor-pointer block">
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <Image className="h-8 w-8 text-muted-foreground" />
-                  <span className="font-medium">Upload Preview Images</span>
-                  <span className="text-xs text-muted-foreground">
-                    These images will be shown as previews to potential buyers
-                  </span>
-                </div>
-              </label>
-              <input
-                id="preview-images"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handlePreviewFiles}
-                className="hidden"
-              />
-            </div>
-
-            {previewContentInfos.length > 0 && (
+            {previewContentInfos.length === 0 ? (
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-primary/50">
+                <label
+                  htmlFor="preview-images"
+                  className="cursor-pointer block"
+                >
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Image className="h-8 w-8 text-muted-foreground" />
+                    <span className="font-medium">Upload Preview Images</span>
+                    <span className="text-xs text-muted-foreground">
+                      These images will be shown as previews to potential buyers
+                    </span>
+                  </div>
+                </label>
+                <input
+                  id="preview-images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePreviewFiles}
+                  className="hidden"
+                />
+              </div>
+            ) : (
               <div>
-                <h3 className="text-sm font-medium mb-2">
-                  {previewContentInfos.length} Preview Image
-                  {previewContentInfos.length !== 1 && "s"}
-                </h3>
+                <div className="mb-2">
+                  <h3 className="text-sm font-medium">
+                    {previewContentInfos.length} Preview Image
+                    {previewContentInfos.length !== 1 && "s"}
+                  </h3>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {previewContentInfos.map((src, index) => (
                     <div
@@ -428,12 +433,31 @@ export default function CreateAlbumPage() {
                       <button
                         type="button"
                         onClick={() => removeContentInfoFile(index)}
-                        className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 opacity-100 transition-opacity"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
+                  <label
+                    htmlFor="preview-images-additional"
+                    className="cursor-pointer flex items-center justify-center aspect-square border-2 border-dashed border-border rounded-md hover:border-primary/50 transition-colors"
+                  >
+                    <div className="flex flex-col items-center justify-center">
+                      <PlusCircle className="h-6 w-6 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground mt-1">
+                        Add more
+                      </span>
+                    </div>
+                    <input
+                      id="preview-images-additional"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handlePreviewFiles}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
               </div>
             )}
@@ -447,34 +471,36 @@ export default function CreateAlbumPage() {
             <CardTitle>Album Exclusive Content</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-primary/50">
-              <label htmlFor="content-files" className="cursor-pointer block">
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <span className="font-medium">
-                    Upload Album Exclusive Content
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    These files will be accessible to users after purchase
-                  </span>
-                </div>
-              </label>
-              <input
-                id="content-files"
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                onChange={handleContentFiles}
-                className="hidden"
-              />
-            </div>
-
-            {previewContents.length > 0 && (
+            {previewContents.length === 0 ? (
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-primary/50">
+                <label htmlFor="content-files" className="cursor-pointer block">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <span className="font-medium">
+                      Upload Album Exclusive Content
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      These files will be accessible to users after purchase
+                    </span>
+                  </div>
+                </label>
+                <input
+                  id="content-files"
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={handleContentFiles}
+                  className="hidden"
+                />
+              </div>
+            ) : (
               <div>
-                <h3 className="text-sm font-medium mb-2">
-                  {previewContents.length} Content File
-                  {previewContents.length !== 1 && "s"}
-                </h3>
+                <div className="mb-2">
+                  <h3 className="text-sm font-medium">
+                    {previewContents.length} Content File
+                    {previewContents.length !== 1 && "s"}
+                  </h3>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {previewContents.map((src, index) => (
                     <div
@@ -489,12 +515,31 @@ export default function CreateAlbumPage() {
                       <button
                         type="button"
                         onClick={() => removeContentFile(index)}
-                        className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 opacity-100 transition-opacity"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
+                  <label
+                    htmlFor="content-files-additional"
+                    className="cursor-pointer flex items-center justify-center aspect-square border-2 border-dashed border-border rounded-md hover:border-primary/50 transition-colors"
+                  >
+                    <div className="flex flex-col items-center justify-center">
+                      <PlusCircle className="h-6 w-6 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground mt-1">
+                        Add more
+                      </span>
+                    </div>
+                    <input
+                      id="content-files-additional"
+                      type="file"
+                      accept="image/*,video/*"
+                      multiple
+                      onChange={handleContentFiles}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
               </div>
             )}
@@ -502,8 +547,8 @@ export default function CreateAlbumPage() {
         </Card>
       </motion.div>
 
-      <motion.div variants={item} className="flex justify-end pt-4">
-        <Button onClick={handleSave} disabled={isSubmitting} className="px-8">
+      <motion.div variants={item} className="flex justify-end">
+        <Button onClick={handleSave} disabled={isSubmitting}>
           {isSubmitting ? (
             <div className="flex items-center">
               <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>

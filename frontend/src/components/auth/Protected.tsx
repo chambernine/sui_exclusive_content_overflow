@@ -24,7 +24,7 @@ export function Protected({
   return (
     <div className="relative w-full h-full min-h-[300px]">
       {/* Blurred content in background */}
-      <div className="absolute inset-0 filter blur-md opacity-30 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 filter blur-xl opacity-30 pointer-events-none overflow-hidden">
         {children}
       </div>
 

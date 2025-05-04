@@ -13,6 +13,7 @@ import {
   AlbumTier,
   tierColors,
   tierNames,
+  WaitForSignPublishResponse,
 } from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -58,6 +59,8 @@ export default function AlbumRequestApproval() {
   const [currentTab, setCurrentTab] = useState<string>("pending-approval");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [waitForSign, setWaitForSign] =
+    useState<WaitForSignPublishResponse | null>(null);
 
   // Fetching data with React Query
   const { data: pendingApprovalData, isLoading: isLoadingPendingApproval } =
@@ -117,8 +120,15 @@ export default function AlbumRequestApproval() {
     approveMutation.mutate({ albumId });
   };
 
-  const handlePublish = async (albumId: string) => {
-    publishMutation.mutate(albumId);
+  const handlePublish = async (album: Album) => {
+    setWaitForSign(null);
+    console.log("Publishing album:", album);
+
+    // publishMutation.mutate(album, {
+    //   onSuccess: (response) => {
+    //     setWaitForSign(response);
+    //   },
+    // });
   };
 
   const formatTimestamp = (ts: Album["created_at"]) => {
@@ -488,7 +498,7 @@ export default function AlbumRequestApproval() {
                       className="w-full"
                     >
                       <Button
-                        onClick={() => handlePublish(album.albumId)}
+                        onClick={() => handlePublish(album)}
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         <CheckSquare className="h-4 w-4 mr-2" />

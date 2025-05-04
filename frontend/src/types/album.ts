@@ -46,6 +46,12 @@ export interface PublishedAlbum {
   created_at: Timestamp;
 }
 
+export interface WaitForSignPublishResponse {
+  albumId: string;
+  capId: string;
+  blobId: string;
+}
+
 export const tierColors = {
   [AlbumTier.standard]: "bg-amber-700",
   [AlbumTier.premium]: "bg-neutral-400",

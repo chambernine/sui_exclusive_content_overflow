@@ -23,11 +23,12 @@ export const albumKeys = {
 };
 
 // Fetch all albums for exploration
-export const useExploreAlbums = () => {
+export const useExploreAlbums = (address?: string) => {
   return useQuery({
     queryKey: albumKeys.lists(),
     queryFn: fetchExploreAlbums,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!address, // Only run query if address exists
   });
 };
 
@@ -105,26 +106,30 @@ export const useApproveAlbum = (approverAddress: string | undefined) => {
 };
 
 // Publish an album
-export const usePublishAlbum = (ownerAddress: string | undefined) => {
-  const queryClient = useQueryClient();
+export const usePublishAlbum = (album) => {
+  // const queryClient = useQueryClient();
+  console.log("album", album);
 
-  return useMutation({
-    mutationFn: publishAlbum,
-    onSuccess: () => {
-      toast.success("Album published successfully!");
+  // return useMutation({
+  //   mutationFn: publishAlbum,
+  //   onSuccess: (response) => {
+  //     toast.success("Album prepared for publishing!");
 
-      if (ownerAddress) {
-        queryClient.invalidateQueries({
-          queryKey: albumKeys.myAlbums(ownerAddress),
-        });
-        queryClient.invalidateQueries({
-          queryKey: albumKeys.lists(),
-        });
-      }
-    },
-    onError: (error) => {
-      console.error("Failed to publish album:", error);
-      toast.error("Failed to publish album. Please try again.");
-    },
-  });
+  //     if (album) {
+  //       queryClient.invalidateQueries({
+  //         queryKey: albumKeys.myAlbums(album),
+  //       });
+  //       queryClient.invalidateQueries({
+  //         queryKey: albumKeys.lists(),
+  //       });
+  //     }
+
+  //     // Return response data directly to the component for state updates
+  //     return response.data;
+  //   },
+  //   onError: (error) => {
+  //     console.error("Failed to publish album:", error);
+  //     toast.error("Failed to publish album. Please try again.");
+  //   },
+  // });
 };

@@ -43,7 +43,9 @@ export const approveAlbum = async (
   return response.data;
 };
 
-export const publishAlbum = async (albumId: string) => {
-  const response = await api.patch(`/my-album-publish/${albumId}`);
+export const publishAlbum = async (album: string) => {
+  const response = await api.patch(JSON.stringify({ album }), {
+    headers: { "Content-Type": "application/json" },
+  });
   return response.data;
 };

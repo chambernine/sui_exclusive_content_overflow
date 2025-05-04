@@ -7,7 +7,7 @@ import {
 export const useSuiAccount = () => {
   const account = useCurrentAccount();
 
-  const address = account?.address
+  const address = account?.address;
   const balances = useSuiClientQueries({
     queries: account?.address
       ? [
@@ -36,13 +36,13 @@ export const useSuiAccount = () => {
     },
     {
       enabled: !!account,
-    },
+    }
   );
 
   return {
     account,
     address,
     getOwnedObject,
-    balances
+    balances,
   };
 };

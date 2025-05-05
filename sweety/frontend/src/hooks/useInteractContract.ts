@@ -2,6 +2,8 @@ import { TESTNET_PACKAGE_ID } from "@/constant/constant";
 import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { ADMIN_VAULT } from "@/constant/constant"
+import { PublishStatus } from "@/types/interact";
+
 
 export default function useInteractContract() {
   const suiClient = useSuiClient();
@@ -21,7 +23,8 @@ export default function useInteractContract() {
     albumId: string,
     capId: string,
     blobId: string
-  ) {
+  ): Promise<PublishStatus> {
+
     console.log(TESTNET_PACKAGE_ID)
     console.log(albumId, capId, blobId);
     const tx = new Transaction();
@@ -32,17 +35,26 @@ export default function useInteractContract() {
 
     tx.setGasBudget(10000000);
 
-    signAndExecute(
-      {
-        transaction: tx,
-      },
-      {
-        onSuccess: async (result) => {
-          console.log("Transaction successful:", await result);
-        },
-      }
-    );
-  }
+    
+    return new Promise((resolve) => {
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: (result) => {
+            // Check status
+            if (result.effects?.status?.status === 'success') {
+              resolve({ status: 'approved', result });
+            } else {
+              resolve({ status: 'failed', error: result.effects?.status?.error, result });
+            }
+          },
+          onError: () => {
+            resolve({ status: 'rejected' });
+          }
+        }
+      );
+    });
+}
 
   async function CreateSupportAlbumTx(
     albumId: string,
@@ -94,22 +106,25 @@ export default function useInteractContract() {
         showContent: true,
       },
     });
-  
+    
     for (const item of ownedObjects) {
       const type = item.data?.type;
       const content = item.data?.content;
-      console.log(item.data)
       if (
-        type?.includes("::execlusive::CreatorCap") &&
+        type?.includes(`${TESTNET_PACKAGE_ID}::execlusive::AlbumCap`) &&
         content?.dataType === "moveObject"
       ) {
+        console.log("found album cap")
+        console.log("items data: ",item.data)
         const fields = content.fields
-        ;
-  
-        if (fields.album_id === albumId) {
-          return item.data?.objectId;
-        }
+        console.log(albumId)
+        console.log("fields: ", fields)
+        console.log(type)
+        // if (fields. === albumId) {
+        //   return item.data?.objectId;
+        // }
       }
+    
     }
   
     throw new Error(`❌ capId not found for albumId ${albumId}`);

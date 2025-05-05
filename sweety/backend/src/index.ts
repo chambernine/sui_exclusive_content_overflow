@@ -78,7 +78,6 @@ app.get("/draft-album/:albumId", async (c) => {
     const { albumId } = c.req.param();
     const draftRef = firestoreDb.collection("draft-album").doc(albumId);
     const draftSnap = await draftRef.get();
-
     if (!draftSnap.exists) {
       return c.json({ status: 404, error: "Draft album not found" });
     }
@@ -94,8 +93,7 @@ app.get("/draft-album/:albumId", async (c) => {
 // --- draft album request for approaval ---
 app.post("/draft-album/request-approval", async (c) => {
   const body: DraftAlbum = await c.req.json();
-  await firestoreDb.collection("draft-album").doc(body.albumId).set({
-    albumId: body.albumId,
+  await firestoreDb.collection("draft-album").doc(body.id).set({
     owner: body.owner,
     name: body.name,
     tier: body.tier,
@@ -114,7 +112,7 @@ app.post("/draft-album/request-approval", async (c) => {
 });
 
 // --- draft albums approval ---
-app.get("/album-approval/:approver", async (c) => {
+app.get("/draft-album-approval/:approver", async (c) => {
   try {
     const { approver } = c.req.param();
     const snapshot = await firestoreDb
@@ -127,7 +125,6 @@ app.get("/album-approval/:approver", async (c) => {
       id: doc.id,
       ...doc.data(),
     }));
-
     return c.json({
       status: 200,
       data: albums,
@@ -138,9 +135,10 @@ app.get("/album-approval/:approver", async (c) => {
   }
 });
 
-app.patch("/album-approval/:albumId/:approver", async (c) => {
+app.patch("/draft-album-approval/:albumId/:approver", async (c) => {
   try {
     const { albumId, approver } = c.req.param();
+    console.log(albumId, approver);
     await firestoreDb.collection("draft-album").doc(albumId).update({
       status: 2,
     });
@@ -206,27 +204,36 @@ app.get("/my-album/:owner", async (c) => {
 app.patch("/my-album/publish", async (c) => {
   try {
     const body = await c.req.json();
-    const album: DraftAlbum = {
-      ...body,
-    };
+    const { id } = body;
     const draftDocRef = firestoreDb
       .collection("draft-album")
-      .doc(album.albumId);
+      .doc(id);
+
     if (!draftDocRef) {
       return c.json({ status: 404, error: "Draft album not found" });
     }
+    const draftDocSnap = await draftDocRef.get();
 
+    const draftAlbum = draftDocSnap.data() as DraftAlbum;
     const { albumId: albumAccessId, capId } = await createAlbum(
-      album.name,
-      album.price,
-      album.owner
+      draftAlbum.name,
+      draftAlbum.price,
+      draftAlbum.owner
     );
-    const encryptedBlobs = await sealEncryptions(albumAccessId, album.contents);
+    const encryptedBlobs = await sealEncryptions(albumAccessId, draftAlbum.contents);
     const walrusObjectIds: WalrusObjectResponse[] = await publishWalrus(
       encryptedBlobs
     );
+    // console.log("album & capId : ", albumAccessId, capId);
+    // console.log("publishWalrus: ", walrusObjectIds);
+
+    if (walrusObjectIds.length < 0) {
+      throw new Error("❌ Failed to publish album");
+    }
 
     draftDocRef.update({
+      albumId: albumAccessId,
+      capId: capId,
       publishedBlobs: walrusObjectIds.map((walrusObject) => {
         return {
           blobId: walrusObject.blob_id,
@@ -235,37 +242,11 @@ app.patch("/my-album/publish", async (c) => {
       }),
     });
 
-    console.log("album & capId : ", albumAccessId, capId);
-    console.log("publishWalrus: ", walrusObjectIds);
-    if (walrusObjectIds.length < 0) {
-      throw new Error("❌ Failed to publish album");
-    }
-
-    // const newAlbumData: PublishedAlbum = {
-    //   albumId: albumAccessId,
-    //   owner: album.owner,
-    //   name: album.name,
-    //   tier: album.tier,
-    //   price: album.price,
-    //   description: album.description,
-    //   tags: album.tags,
-    //   contentInfos: album.contentInfos,
-    //   contentsObjectId: walrusObjectIds,
-    //   created_at: album.created_at,
-    //   interaction: {
-    //     likes: 0,
-    //     shares: 0,
-    //     saves: 0,
-    //   },
-    // };
-    // await firestoreDb.collection("albums").doc(albumAccessId).set(newAlbumData);
-    // draftDocRef.delete()
-
     //return to sign message to publish walrus object to albumId
     //cannot done it on server side due to invalid sign owner address of cap and server keypair
     return c.json({
       status: 200,
-      message: `✅ Album ${album.albumId} published by ${album.owner}`,
+      message: `✅ Album ${draftAlbum.albumId} published by ${draftAlbum.owner}`,
     });
   } catch (error) {
     console.error("🔥 Error publishing album:", error);
@@ -288,7 +269,9 @@ app.patch("/my-album/publish/:albumId/:blobId", async (c) => {
     }
 
     const draftAlbum = draftDocSnap.data() as DraftAlbum;
-
+    if (!draftAlbum.albumId){
+      return c.json({ status: 404, error: "draft album ID not published yet" });
+    }
     // 1. Update ispublished to true for the specified blobId
     const updatedBlobs = (draftAlbum.publishedBlobs || []).map((b) =>
       b.blobId === blobId ? { ...b, ispublished: true } : b
@@ -398,7 +381,7 @@ app.get("/explore-albums", async (c) => {
     const albums: PublishedAlbum[] = snapshot.docs.map((doc) => {
       const data = doc.data();
       return {
-        albumId: doc.id,
+        albumId: data.albumId,
         owner: data.owner,
         name: data.name,
         tier: data.tier,

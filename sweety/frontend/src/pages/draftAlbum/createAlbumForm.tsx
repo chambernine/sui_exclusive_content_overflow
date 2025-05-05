@@ -135,7 +135,7 @@ export default function CreateDraftAlbum() {
 
     const draftAlbum: DraftAlbum = {
       ...draft,
-      albumId: uuidv4(),
+      id: uuidv4(),
       owner: address,
       contents: base64Contents,
       contentInfos: base64Previews,

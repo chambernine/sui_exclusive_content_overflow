@@ -30,7 +30,8 @@ export default function BuyAlbum() {
   const { albumId } = useParams();
   const { address } = useSuiAccount(); 
   const [album, setAlbum] = useState<Album | null>(null);
-    const { CreateSupportAlbumTx } = useInteractContract()
+  const { CreateSupportAlbumTx } = useInteractContract()
+  
   useEffect(() => {
     const fetchAlbum = async () => {
       const res = await fetch(`http://localhost:3000/explore-album/${albumId}`);

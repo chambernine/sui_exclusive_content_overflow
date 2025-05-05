@@ -5,19 +5,23 @@ import { Button } from "@/components/ui/button";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import useInteractContract from "@/hooks/useInteractContract";
 import type { DraftAlbum } from "@/types/album";
+import { PublishStatus } from "@/types/interact";
 
 export default function PublishDraftAlbum() {
-  const { albumId } = useParams();
+  const { albumId: dbId } = useParams();
   const { address } = useSuiAccount();
-  const { publishBlobsToAlbum, findCapIdForAlbum } = useInteractContract();
+  const { publishBlobsToAlbum } = useInteractContract();
+  const [isLoading, setLoading] = useState(false);
   const [album, setAlbum] = useState<DraftAlbum | null>(null);
-
+  console.log("getting album id: ", dbId);
   // Fetch draft album
   const fetchAlbum = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(
-        `http://localhost:3000/draft-album/${albumId}`
+        `http://localhost:3000/draft-album/${dbId}`
       );
+      console.log(res.data.data)
       setAlbum(res.data.data);
     } catch (err) {
       console.error("Error loading album:", err);
@@ -30,7 +34,7 @@ export default function PublishDraftAlbum() {
   const markBlobAsPublished = async (blobId: string) => {
     try {
       await axios.patch(
-        `http://localhost:3000/my-album/publish/${albumId}/${blobId}`
+        `http://localhost:3000/my-album/publish/${dbId}/${blobId}`
       );
       await fetchAlbum(); // Refresh data
     } catch (err) {
@@ -38,22 +42,36 @@ export default function PublishDraftAlbum() {
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      if (albumId && address) {
-        console.log("Address:", address);
-        console.log("getting cap")
-        await findCapIdForAlbum(address, albumId);
+  const onPublishAlbumOnChain = async () => {
+    if (!album) return;
+    await axios.patch(
+      `http://localhost:3000/my-album/publish`,
+      {id: dbId},
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-    })();
-  },[address,albumId]);
+    );
+  }
+
+  // useEffect(() => {
+  //   (async () => {
+  //     if (dbId && address && album && album.albumId) {
+  //       console.log("Address:", address);
+  //       console.log("getting cap");
+  //       await findCapIdForAlbum(address, album.albumId);
+  //     }
+  //   })();
+  // }, [address, dbId, findCapIdForAlbum]);
 
   useEffect(() => {
-    if (albumId && address) {
+    if (dbId && address) {
       fetchAlbum();
     }
-  }, [albumId, address]);
+  }, [dbId, address]);
 
+  if (isLoading) return <p className="p-6">Loading...</p>;
   if (!album) return <p className="p-6">❌ Album not found.</p>;
 
   return (
@@ -65,13 +83,35 @@ export default function PublishDraftAlbum() {
       <p>
         Created At: {new Date(album.created_at.seconds * 1000).toLocaleString()}
       </p>
-
       <h2 className="text-xl mt-6 font-semibold">🔐 Pending Blob Signatures</h2>
+      <div>
+        
+          <Button
+          className="bg-blue-400"
+            onClick={async () => {
+              console.log("Publishing album on chain...");
+              setLoading(true)
+              await onPublishAlbumOnChain()
+              await fetchAlbum()
+              setLoading(false)
+            }}
+            disabled={album.albumId !== undefined && album.publishedBlobs && album.publishedBlobs.length > 0}
+          >
+            Click to publih album & content
+          </Button>
+      </div>
+      <div>
+        {album.albumId && (
+          <p className="text-sm text-gray-500">
+            Album ID: {album.albumId}
+          </p>
+        )}
+      </div>
       <div className="space-y-3">
         {album.publishedBlobs?.map((blob) => (
           <div
             key={blob.blobId}
-            className="flex items-center justify-between p-4 border rounded bg-white"
+            className="flex items-center justify-between p-4 border rounded bg-blue-400"
           >
             <div>
               <p className="text-sm font-mono">{blob.blobId}</p>
@@ -79,16 +119,30 @@ export default function PublishDraftAlbum() {
                 Status: {blob.ispublished ? "✅ Published" : "⏳ Waiting"}
               </p>
             </div>
+
+
             {!blob.ispublished && (
               <Button
                 onClick={async () => {
                   try {
-                    await publishBlobsToAlbum(
+                    if (!album.albumId) return
+                    
+                    const txResult: PublishStatus = await publishBlobsToAlbum(
                       album.albumId,
                       album.capId!,
                       blob.blobId
                     );
-                    await markBlobAsPublished(blob.blobId); // sync with backend
+
+                    if (txResult.status === 'approved') {
+                      // Success logic
+                      await markBlobAsPublished(blob.blobId);
+                    } else if (txResult.status === 'failed') {
+                      // Failed logic
+                      alert("Transaction failed. Check console.");
+                    } else if (txResult.status === 'rejected') {
+                      // Rejected logic
+                      alert("Transaction rejected. Check console.");
+                    }
                   } catch (err) {
                     console.error("Error during sign + publish:", err);
                   }

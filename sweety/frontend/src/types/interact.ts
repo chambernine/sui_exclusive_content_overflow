@@ -1,3 +1,4 @@
+import { SuiTransactionBlockResponse } from 'node_modules/@mysten/sui/dist/esm/client/types';
 export interface WaitForSignPublishResponse {
   albumId: string
   capId: string
@@ -27,3 +28,8 @@ export interface WalrusObjectResponse {
       };
     };
   }
+
+  export type PublishStatus =
+  | { status: "approved"; result: SuiTransactionBlockResponse }
+  | { status: "failed"; error?: string; result: SuiTransactionBlockResponse }
+  | { status: "rejected" };

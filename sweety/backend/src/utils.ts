@@ -83,7 +83,7 @@ async function sealEncryptions(albumId: string, contents: string[]) {
 async function publishWalrus(
   encryptedBlobs: Uint8Array<ArrayBufferLike>[],
 ) {
-  const epoch = 5;
+  const epoch = 2;
   let responses: WalrusObjectResponse[] = [];
   for (const encryptedBlob of encryptedBlobs) {
     try {
@@ -91,6 +91,7 @@ async function publishWalrus(
         encryptedBlob.length,
         epoch
       );
+      console.log("published walrus")
       const { blobObject, blobId } = await walrusServer.writeBlob({
         blob: encryptedBlob,
         deletable: true,
@@ -98,7 +99,7 @@ async function publishWalrus(
         signer: keypair,
         owner: keypair.toSuiAddress(),
       });
-
+      
       const response: WalrusObjectResponse = {
         ...blobObject,
         id: blobObject.id.id,
@@ -116,7 +117,9 @@ async function publishWalrus(
         cost: Number(storageCost + writeCost),
       };
       responses.push(response);
-    } catch (error) {}
+    } catch (error) {
+      console.log("something wrong in here ")
+    }
   }
   return responses;
 }

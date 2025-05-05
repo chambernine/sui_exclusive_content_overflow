@@ -16,7 +16,9 @@ export enum AlbumTier {
 }
 
 export interface DraftAlbum {
-  albumId: string;
+  id: string;
+  albumId?: string;
+  capId?: string;
   owner: string;
   name: string;
   tier: AlbumTier;

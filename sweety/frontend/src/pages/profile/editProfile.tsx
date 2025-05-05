@@ -12,7 +12,7 @@ import type { SocialBanner } from "@/types/profile";
 import axios from "axios";
 import { fileToBase64 } from "@/utils/fileFormat";
 
-interface IUserData {
+interface  IUserData {
   walletAddress?: string;
   username: string;
   profile_image_file: File | null;

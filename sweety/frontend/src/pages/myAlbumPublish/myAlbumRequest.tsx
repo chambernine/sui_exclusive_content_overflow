@@ -2,29 +2,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DraftAlbumStatus, AlbumTier } from "@/types/album";
+import { AlbumTier, DraftAlbum } from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { useNavigate } from "react-router-dom";
-
-interface Album {
-  id: string;
-  albumId: string;
-  name: string;
-  tier: number;
-  owner: string;
-  price: number;
-  description: string;
-  tags: string[];
-  status: DraftAlbumStatus;
-  contentInfos: string[];
-  contents: string[];
-  created_at: { seconds: number; nanoseconds: number }; // Firestore Timestamp
-}
 
 export default function MyAlbumRequest() {
   const { address } = useSuiAccount();
   const navigate = useNavigate();
-  const [albums, setAlbums] = useState<Album[]>([]);
+  const [albums, setAlbums] = useState<DraftAlbum[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchMyAlbums = async () => {
@@ -33,6 +18,7 @@ export default function MyAlbumRequest() {
         `http://localhost:3000/my-album/${address}`
       );
       const allAlbums = response.data.data;
+      console.log(allAlbums)
       setAlbums(allAlbums);
     } catch (error) {
       console.error("Error fetching albums:", error);
@@ -41,7 +27,7 @@ export default function MyAlbumRequest() {
     }
   };
 
-  const formatTimestamp = (ts: Album["created_at"]) => {
+  const formatTimestamp = (ts: DraftAlbum["created_at"]) => {
     return new Date(ts.seconds * 1000).toLocaleString();
   };
 
@@ -67,7 +53,7 @@ export default function MyAlbumRequest() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {albums.map((album) => (
             <Card
-              key={album.albumId}
+              key={album.id}
               className="bg-gray-900 border border-gray-700 text-white"
             >
               <CardHeader>
@@ -87,7 +73,7 @@ export default function MyAlbumRequest() {
                 <Button
                   disabled={album.status !== 2}
                   onClick={() => {
-                    navigate(`/my-request/${album.albumId}`);
+                    navigate(`/my-request/${album.id}`);
                   }}
                   className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
                 >

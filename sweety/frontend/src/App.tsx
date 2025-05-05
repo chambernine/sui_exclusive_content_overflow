@@ -21,9 +21,9 @@ function App() {
           <Route path="/create-draft" element={<CreateDraftAlbum />} />
           <Route path="/approve" element={<AlbumRequestApproval />} />
           <Route path="/my-requests" element={<MyAlbumRequest />} />
-          <Route path="/my-request/:albumId" element={<BuyAlbum />} />
+          <Route path="/my-request/:albumId" element={<PublishDraftAlbum />} />
           <Route path="/explore-albums" element={<ExploreAlbums />} />
-          <Route path="/explore-albums/:albumId" element={<PublishDraftAlbum />} />
+          <Route path="/explore-albums/:albumId" element={<BuyAlbum />} />
 
         </Routes>
       </BrowserRouter>

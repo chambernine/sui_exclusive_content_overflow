@@ -25,20 +25,7 @@ import { CardWithLens } from "@/components/custom/card-with-lens";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-
-const tierNames: { [key: number]: string } = {
-  0: "Standard",
-  1: "Premium",
-  2: "Exclusive",
-  3: "Principle",
-};
-
-const tierColors: { [key: number]: string } = {
-  0: "bg-green-500",
-  1: "bg-blue-500",
-  2: "bg-purple-500",
-  3: "bg-amber-500",
-};
+import { tierColors, tierNames } from "@/types/album";
 
 interface Album {
   albumId: string;
@@ -130,10 +117,11 @@ export default function Home() {
               {address ? address.slice(0, 2) : ""}
             </span>
           </div>
-          <h3 className="font-medium">Wallet Connected</h3>
-          <p className="text-sm text-muted-foreground font-mono">
-            {address?.slice(0, 6)}...{address?.slice(-4)}
-          </p>
+          <div className="hidden lg:flex items-center px-2 py-1 rounded-full bg-primary/10 text-primary dark:text-primary">
+            <span className="font-mono text-sm">
+              {address?.slice(0, 6)}...{address?.slice(-4)}
+            </span>
+          </div>
         </div>
         <Separator />
         <div className="grid grid-cols-3 text-center">
@@ -165,14 +153,14 @@ export default function Home() {
 
   // Quick Actions Component
   const QuickActions = () => (
-    <Card className="overflow-hidden border-border hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden border-border hover:shadow-md transition-shadow gap-2">
       <CardHeader>
         <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-2 flex flex-col gap-1">
         <Button
           variant="default"
-          className="w-full mb-2"
+          className="w-full"
           onClick={() => navigate("/explore-albums")}
         >
           Explore All Albums
@@ -180,7 +168,7 @@ export default function Home() {
         <Button
           variant="outline"
           className="w-full"
-          onClick={() => navigate("/draft-album")}
+          onClick={() => navigate("/create-draft")}
         >
           Create New Album
         </Button>
@@ -265,13 +253,6 @@ export default function Home() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="hidden lg:flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary dark:text-primary">
-            <span className="mr-2">●</span>
-            <span className="font-mono">
-              {address?.slice(0, 6)}...{address?.slice(-4)}
-            </span>
-          </div>
-
           <ConnectButton />
           {/* Mobile Profile Avatar */}
           <Avatar
@@ -346,12 +327,17 @@ export default function Home() {
                                     {album.owner.slice(-4)}
                                   </span>
                                   <Badge
-                                    variant="outline"
                                     className={`${
-                                      tierColors[album.tier]
-                                    } text-white h-5`}
+                                      tierColors[
+                                        album.tier as keyof typeof tierColors
+                                      ]
+                                    } text-white text-sm`}
                                   >
-                                    {tierNames[album.tier]}
+                                    {
+                                      tierNames[
+                                        album.tier as keyof typeof tierNames
+                                      ]
+                                    }
                                   </Badge>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
@@ -506,10 +492,16 @@ export default function Home() {
                                 </h3>
                                 <Badge
                                   className={`${
-                                    tierColors[album.tier]
-                                  } text-white ml-2 w-fit shrink-0`}
+                                    tierColors[
+                                      album.tier as keyof typeof tierColors
+                                    ]
+                                  } text-white text-sm`}
                                 >
-                                  {tierNames[album.tier]}
+                                  {
+                                    tierNames[
+                                      album.tier as keyof typeof tierNames
+                                    ]
+                                  }
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
@@ -581,10 +573,16 @@ export default function Home() {
                               </CardTitle>
                               <Badge
                                 className={`${
-                                  tierColors[album.tier]
-                                } text-white ml-2 w-fit shrink-0`}
+                                  tierColors[
+                                    album.tier as keyof typeof tierColors
+                                  ]
+                                } text-white text-sm`}
                               >
-                                {tierNames[album.tier]}
+                                {
+                                  tierNames[
+                                    album.tier as keyof typeof tierNames
+                                  ]
+                                }
                               </Badge>
                             </div>
                             <CardDescription className="line-clamp-2">

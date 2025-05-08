@@ -1,7 +1,13 @@
 import { useState, ChangeEvent } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Timestamp } from "firebase/firestore";
-import { AlbumTier, DraftAlbum, DraftAlbumStatus } from "@/types/album";
+import {
+  AlbumTier,
+  DraftAlbum,
+  DraftAlbumStatus,
+  tierColors,
+  tierNames,
+} from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { fileToBase64 } from "@/utils/fileFormat";
 import { motion } from "framer-motion";
@@ -219,7 +225,7 @@ export default function CreateAlbumPage() {
 
       const draftAlbum: DraftAlbum = {
         ...draft,
-        albumId: uuidv4(),
+        id: uuidv4(),
         owner: address,
         contents: base64Contents,
         contentInfos: base64Previews,
@@ -266,20 +272,6 @@ export default function CreateAlbumPage() {
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
   };
 
-  const tierLabels = {
-    [AlbumTier.standard]: "Standard",
-    [AlbumTier.premium]: "Premium",
-    [AlbumTier.exclusive]: "Exclusive",
-    [AlbumTier.principle]: "Principle",
-  };
-
-  const tierColors = {
-    [AlbumTier.standard]: "bg-amber-700",
-    [AlbumTier.premium]: "bg-neutral-400",
-    [AlbumTier.exclusive]: "bg-amber-400",
-    [AlbumTier.principle]: "bg-blue-400",
-  };
-
   const renderAlbumForm = () => (
     <motion.div
       variants={container}
@@ -289,18 +281,18 @@ export default function CreateAlbumPage() {
     >
       <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
         <CardHeader>
-          <CardTitle>Album Details</CardTitle>
+          <CardTitle>Content Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <motion.div variants={item} className="space-y-4">
             <div className="flex flex-col gap-1">
-              <Label htmlFor="name">Album Name</Label>
+              <Label htmlFor="name">Content Name</Label>
               <Input
                 id="name"
                 name="name"
                 value={draft.name}
                 onChange={handleChange}
-                placeholder="Enter album name"
+                placeholder="Enter content name"
                 className="mt-1"
               />
             </div>
@@ -315,7 +307,7 @@ export default function CreateAlbumPage() {
                     <SelectValue placeholder="Select tier" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(tierLabels).map(([key, value]) => (
+                    {Object.entries(tierNames).map(([key, value]) => (
                       <SelectItem key={key} value={key}>
                         <div className="flex items-center gap-2">
                           <span
@@ -358,7 +350,7 @@ export default function CreateAlbumPage() {
                 name="description"
                 value={draft.description}
                 onChange={handleChange}
-                placeholder="Describe your album"
+                placeholder="Describe your content"
                 className="mt-1 min-h-24"
               />
             </div>
@@ -468,7 +460,7 @@ export default function CreateAlbumPage() {
       <motion.div variants={item}>
         <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
           <CardHeader>
-            <CardTitle>Album Exclusive Content</CardTitle>
+            <CardTitle>Exclusive Content</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {previewContents.length === 0 ? (
@@ -477,7 +469,7 @@ export default function CreateAlbumPage() {
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Upload className="h-8 w-8 text-muted-foreground" />
                     <span className="font-medium">
-                      Upload Album Exclusive Content
+                      Upload Exclusive Content
                     </span>
                     <span className="text-xs text-muted-foreground">
                       These files will be accessible to users after purchase
@@ -566,7 +558,7 @@ export default function CreateAlbumPage() {
   );
 
   return (
-    <Protected description="Connect wallet to create album.">
+    <Protected description="Connect wallet to create content.">
       <div className="container max-w-4xl mx-auto py-12 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -576,7 +568,7 @@ export default function CreateAlbumPage() {
         >
           <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
-            Create New Album
+            Create New Content
           </h1>
           <p className="text-muted-foreground">
             Share your exclusive content with your fans and supporters

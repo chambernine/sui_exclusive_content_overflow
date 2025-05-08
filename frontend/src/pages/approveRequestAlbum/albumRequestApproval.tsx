@@ -221,10 +221,10 @@ export default function AlbumRequestApproval() {
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <ClipboardCheck className="h-12 w-12 mb-4 opacity-30" />
           <p className="text-center mb-1">
-            No pending albums found to approve.
+            No pending contents found to approve.
           </p>
           <p className="text-sm">
-            Albums awaiting your approval will appear here.
+            Contents awaiting your approval will appear here.
           </p>
         </div>
       );
@@ -245,8 +245,12 @@ export default function AlbumRequestApproval() {
                   <CardTitle className="text-lg font-medium">
                     {album.name}
                   </CardTitle>
-                  <Badge className={`${tierColors[album.tier]} text-white`}>
-                    {tierNames[album.tier]}
+                  <Badge
+                    className={`${
+                      tierColors[album.tier as keyof typeof tierColors]
+                    } text-white text-sm`}
+                  >
+                    {tierNames[album.tier as keyof typeof tierNames]}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -354,10 +358,10 @@ export default function AlbumRequestApproval() {
               <CardFooter>
                 <Button
                   className="w-full glass bg-primary hover:bg-primary/90 text-white"
-                  onClick={() => handleApprove(album.albumId)}
+                  onClick={() => handleApprove(album.id)}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Approve Album
+                  Approve Content
                 </Button>
               </CardFooter>
             </Card>
@@ -372,7 +376,7 @@ export default function AlbumRequestApproval() {
       return (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <Album className="h-12 w-12 mb-4 opacity-30" />
-          <p>Connect to wallet first to view your albums</p>
+          <p>Connect to wallet first to view your contents</p>
         </div>
       );
     }
@@ -386,9 +390,9 @@ export default function AlbumRequestApproval() {
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <Album className="h-12 w-12 mb-4 opacity-30" />
           <p className="text-center mb-1">
-            You don't have any albums in the approval process.
+            You don't have any contents in the approval process.
           </p>
-          <p className="text-sm">Create a new album to see it here.</p>
+          <p className="text-sm">Create a new content to see it here.</p>
         </div>
       );
     }
@@ -411,8 +415,12 @@ export default function AlbumRequestApproval() {
                   <div>{renderStatusBadge(album.status)}</div>
                 </div>
                 <div className="flex justify-between items-center mt-2">
-                  <Badge className={`${tierColors[album.tier]} text-white`}>
-                    {tierNames[album.tier]}
+                  <Badge
+                    className={`${
+                      tierColors[album.tier as keyof typeof tierColors]
+                    } text-white text-sm`}
+                  >
+                    {tierNames[album.tier as keyof typeof tierNames]}
                   </Badge>
                   <span className="text-sm font-medium">{album.price} SUI</span>
                 </div>
@@ -502,7 +510,7 @@ export default function AlbumRequestApproval() {
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         <CheckSquare className="h-4 w-4 mr-2" />
-                        Publish Album
+                        Publish Content
                       </Button>
                     </motion.div>
                   ) : (
@@ -535,7 +543,7 @@ export default function AlbumRequestApproval() {
   };
 
   return (
-    <Protected description="Connect wallet to manage album requests">
+    <Protected description="Connect wallet to manage content requests">
       <div className="container max-w-6xl mx-auto py-6 md:py-12 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -545,10 +553,11 @@ export default function AlbumRequestApproval() {
         >
           <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 gradient-text">
             <ClipboardCheck className="h-6 w-6" />
-            Album Request Management
+            Content Request Management
           </h1>
           <p className="text-muted-foreground">
-            Review submitted albums and manage your album publication process
+            Review submitted contents and manage your content publication
+            process
           </p>
         </motion.div>
 
@@ -561,11 +570,11 @@ export default function AlbumRequestApproval() {
             <TabsList className="w-full md:w-auto">
               <TabsTrigger value="pending-approval" className="flex gap-2">
                 <CheckCircle className="h-4 w-4" />
-                <span>Albums to Approve</span>
+                <span>Contents to Approve</span>
               </TabsTrigger>
               <TabsTrigger value="my-albums" className="flex gap-2">
                 <Album className="h-4 w-4" />
-                <span>My Albums Request</span>
+                <span>My Contents Request</span>
               </TabsTrigger>
             </TabsList>
 
@@ -591,14 +600,14 @@ export default function AlbumRequestApproval() {
                   <div>
                     <h3 className="text-lg font-medium mb-1 flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-primary" />
-                      Albums Awaiting Your Approval
+                      Contents Awaiting Your Approval
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Review and approve albums submitted by creators
+                      Review and approve contents submitted by creators
                     </p>
                   </div>
                   <Badge variant="outline" className="bg-primary/10">
-                    {filteredPendingApproval.length} album
+                    {filteredPendingApproval.length} content
                     {filteredPendingApproval.length !== 1 ? "s" : ""}
                   </Badge>
                 </div>
@@ -616,15 +625,15 @@ export default function AlbumRequestApproval() {
                   <div>
                     <h3 className="text-lg font-medium mb-1 flex items-center gap-2">
                       <Album className="h-5 w-5 text-primary" />
-                      My Albums Ready to Publish
+                      My Contents Ready to Publish
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Track the status of your submitted albums and publish
+                      Track the status of your submitted contents and publish
                       approved ones
                     </p>
                   </div>
                   <Badge variant="outline" className="bg-primary/10">
-                    {filteredMyAlbums.length} album
+                    {filteredMyAlbums.length} content
                     {filteredMyAlbums.length !== 1 ? "s" : ""}
                   </Badge>
                 </div>

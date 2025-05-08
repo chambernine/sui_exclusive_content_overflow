@@ -1,14 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useExploreAlbums } from "@/hooks/api/useAlbums";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Card,
   CardDescription,
@@ -20,8 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
-  ShoppingCart,
-  Award,
   LayoutGrid,
   List,
   Search,
@@ -42,15 +33,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoadingWrapper } from "@/components/ui/loading-wrapper";
 import { CardWithLens } from "@/components/custom/card-with-lens";
-import { Lens } from "@/components/magicui/lens";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import { Protected } from "@/components/auth/Protected";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
-
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
+import { ThreeDContentsLists } from "@/components/custom/3d-contents-lists";
+import { tierColors, tierNames } from "@/types/album";
 
 interface Album {
   albumId: string;
@@ -67,20 +53,6 @@ interface Album {
     saves: number;
   };
 }
-
-const tierNames: { [key: number]: string } = {
-  0: "Standard",
-  1: "Premium",
-  2: "Exclusive",
-  3: "Principle",
-};
-
-const tierColors: { [key: number]: string } = {
-  0: "bg-green-500",
-  1: "bg-blue-500",
-  2: "bg-purple-500",
-  3: "bg-amber-500",
-};
 
 export default function ExploreAlbums() {
   const { address } = useSuiAccount();
@@ -149,68 +121,16 @@ export default function ExploreAlbums() {
           </p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8 text-center h-100"
-        >
-          <Swiper
-            spaceBetween={30}
-            centeredSlides={true}
-            autoplay={{
-              delay: 2500,
-              disableOnInteraction: false,
-            }}
-            pagination={{
-              clickable: true,
-            }}
-            navigation={true}
-            modules={[Autoplay, Pagination, Navigation]}
-            className="mySwiper"
+        {albums.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8 text-center h-100"
           >
-            {albums.length > 0 ? (
-              albums.map((album: Album) => (
-                <SwiperSlide key={album.albumId}>
-                  <CardWithLens
-                    imageSrc={album.contentInfos?.[0] || ""}
-                    imageAlt={album.name}
-                    className="overflow-hidden h-full flex flex-col bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
-                  >
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-xl">{album.name}</CardTitle>
-                        <Badge
-                          className={`${
-                            tierColors[album.tier]
-                          } text-white ml-2 w-fit shrink-0`}
-                        >
-                          {tierNames[album.tier]}
-                        </Badge>
-                      </div>
-                      <CardDescription className="line-clamp-2">
-                        {album.description}
-                      </CardDescription>
-                    </CardHeader>
-                  </CardWithLens>
-                </SwiperSlide>
-              ))
-            ) : (
-              <SwiperSlide>
-                <div className="h-64 w-full flex items-center justify-center bg-card border border-dashed border-border rounded-lg">
-                  <div className="text-center px-4">
-                    <h3 className="text-lg font-medium mb-2">
-                      No albums available
-                    </h3>
-                    <p className="text-muted-foreground">
-                      There are currently no albums to display
-                    </p>
-                  </div>
-                </div>
-              </SwiperSlide>
-            )}
-          </Swiper>
-        </motion.div>
+            <ThreeDContentsLists contents={albums} isLoading={isLoading} />
+          </motion.div>
+        )}
         {albums.length > 0 && (
           <>
             <div className="mb-6 flex flex-col sm:flex-row gap-4">
@@ -278,7 +198,7 @@ export default function ExploreAlbums() {
                             imageSrc={album.contentInfos?.[0] || ""}
                             imageAlt={album.name}
                             className="overflow-hidden h-full flex flex-col bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
-                            onClick={() => setSelectedAlbum(album)}
+                            onClick={() => handlePurchase(album.albumId)}
                           >
                             <CardHeader className="pb-2">
                               <div className="flex justify-between items-start">
@@ -287,17 +207,24 @@ export default function ExploreAlbums() {
                                 </CardTitle>
                                 <Badge
                                   className={`${
-                                    tierColors[album.tier]
-                                  } text-white ml-2 w-fit shrink-0`}
+                                    tierColors[
+                                      album.tier as keyof typeof tierColors
+                                    ]
+                                  } text-white text-sm`}
                                 >
-                                  {tierNames[album.tier]}
+                                  {
+                                    tierNames[
+                                      album.tier as keyof typeof tierNames
+                                    ]
+                                  }
                                 </Badge>
                               </div>
                               <CardDescription className="line-clamp-2">
-                                {album.description}
+                                {album.owner?.slice(0, 6)}...
+                                {album.owner?.slice(-4)}
                               </CardDescription>
                             </CardHeader>
-                            <CardFooter className="pt-2 flex-col gap-3">
+                            <CardFooter className="flex-col gap-3">
                               <div className="flex justify-between items-center w-full border-t border-border pt-3">
                                 <div className="flex items-center gap-4 text-muted-foreground">
                                   <div className="flex items-center gap-1">
@@ -327,6 +254,10 @@ export default function ExploreAlbums() {
                                 variant="outline"
                                 size="sm"
                                 className="w-full"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePurchase(album.albumId);
+                                }}
                               >
                                 View Details
                               </Button>
@@ -364,7 +295,7 @@ export default function ExploreAlbums() {
                         <motion.div key={album.albumId} variants={item}>
                           <Card
                             className="overflow-hidden bg-card border-border hover:shadow-lg transition-shadow cursor-pointer p-0"
-                            onClick={() => setSelectedAlbum(album)}
+                            onClick={() => handlePurchase(album.albumId)}
                           >
                             <div className="flex flex-col sm:flex-row h-full">
                               <div className="hidden sm:block w-full sm:w-48 h-40 sm:h-auto relative">
@@ -391,10 +322,16 @@ export default function ExploreAlbums() {
                                   </div>
                                   <Badge
                                     className={`${
-                                      tierColors[album.tier]
-                                    } text-white w-fit shrink-0 sm:ml-2`}
+                                      tierColors[
+                                        album.tier as keyof typeof tierColors
+                                      ]
+                                    } text-white w-fit shrink-0  text-sm sm:ml-2`}
                                   >
-                                    {tierNames[album.tier]}
+                                    {
+                                      tierNames[
+                                        album.tier as keyof typeof tierNames
+                                      ]
+                                    }
                                   </Badge>
                                 </div>
                                 <div className="flex items-center justify-between mt-auto pt-2 border-t border-border">
@@ -428,7 +365,7 @@ export default function ExploreAlbums() {
                                       className="h-8 px-2 sm:px-3"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        setSelectedAlbum(album);
+                                        handlePurchase(album.albumId);
                                       }}
                                     >
                                       View Details
@@ -451,100 +388,6 @@ export default function ExploreAlbums() {
                 </LoadingWrapper>
               </TabsContent>
             </Tabs>
-
-            <AnimatePresence>
-              {selectedAlbum && (
-                <Dialog
-                  open={!!selectedAlbum}
-                  onOpenChange={() => setSelectedAlbum(null)}
-                >
-                  <DialogContent className="sm:max-w-[600px] border-border rounded-lg">
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <DialogHeader>
-                        <DialogTitle className="text-2xl">
-                          {selectedAlbum.name}
-                        </DialogTitle>
-                        <DialogDescription className="text-muted-foreground mt-2">
-                          {selectedAlbum.description}
-                        </DialogDescription>
-                        <Badge
-                          variant="outline"
-                          className={`${
-                            tierColors[selectedAlbum.tier]
-                          } text-white mt-2 w-fit`}
-                        >
-                          {tierNames[selectedAlbum.tier]}
-                        </Badge>
-                      </DialogHeader>
-
-                      <div className="mt-4">
-                        <Lens
-                          zoomFactor={2}
-                          lensSize={150}
-                          isStatic={false}
-                          ariaLabel="Zoom Area"
-                          className="rounded-lg"
-                        >
-                          <AspectRatio ratio={16 / 9} className="w-full h-full">
-                            {selectedAlbum.contentInfos[0] ? (
-                              <img
-                                src={selectedAlbum.contentInfos[0]}
-                                alt={selectedAlbum.name}
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded-t-lg">
-                                No preview available
-                              </div>
-                            )}
-                          </AspectRatio>
-                        </Lens>
-                      </div>
-
-                      <div className="mt-6 pt-4 border-t border-border">
-                        <div className="flex justify-around text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <Heart className="h-5 w-5" />
-                            <span>{selectedAlbum.interaction.likes}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Share2 className="h-5 w-5" />
-                            <span>{selectedAlbum.interaction.shares}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Bookmark className="h-5 w-5" />
-                            <span>{selectedAlbum.interaction.saves}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <Award className="h-5 w-5 text-amber-500" />
-                          <span className="text-lg font-semibold">
-                            {selectedAlbum.price} SUI
-                          </span>
-                        </div>
-                        <Button
-                          onClick={() => {
-                            handlePurchase(selectedAlbum.albumId);
-                            setSelectedAlbum(null);
-                          }}
-                          className="gap-2"
-                        >
-                          <ShoppingCart className="h-4 w-4" />
-                          Purchase Now
-                        </Button>
-                      </div>
-                    </motion.div>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </AnimatePresence>
           </>
         )}
       </div>

@@ -24,7 +24,7 @@ export const submitDraftAlbumForApproval = async (draftAlbum: DraftAlbum) => {
 };
 
 export const fetchPendingApprovalAlbums = async (address: string) => {
-  const response = await api.get(`/album-approval/${address}`);
+  const response = await api.get(`/draft-album-approval/${address}`);
   return response.data;
 };
 
@@ -38,7 +38,7 @@ export const approveAlbum = async (
   approverAddress: string
 ) => {
   const response = await api.patch(
-    `/album-approval/${albumId}/${approverAddress}`
+    `/draft-album-approval/${albumId}/${approverAddress}`
   );
   return response.data;
 };

@@ -48,7 +48,7 @@ export function CardWithLens({
         >
           <AspectRatio ratio={16 / 9} className="w-full h-full">
             {imageSrc ? (
-              <img src={imageSrc} alt={imageAlt} />
+              <img src={imageSrc} alt={imageAlt} className="w-full h-full" />
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded-t-lg">
                 No preview

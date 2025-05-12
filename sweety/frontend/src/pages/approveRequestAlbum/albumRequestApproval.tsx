@@ -6,6 +6,8 @@ import { AlbumTier, DraftAlbum } from "@/types/album";
 
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 
+import { DOMAIN_DEV } from "@/constant/constant";
+
 // interface Album {
 //   id: string;
 //   albumId: string;
@@ -28,8 +30,9 @@ export default function AlbumRequestApproval() {
 
   const fetchAlbums = async () => {
     try {
+      
       const res = await axios.get(
-        `http://localhost:3000/draft-album-approval/${address}`
+        `${DOMAIN_DEV}/draft-album-approval/${address}`
       );
       console.log(res.data.data)
       setAlbums(res.data.data);
@@ -42,7 +45,7 @@ export default function AlbumRequestApproval() {
 
   const handleApprove = async (albumID: string) => {
     try {
-      const response = await axios.patch(`http://localhost:3000/draft-album-approval/${albumID}/${address}`);
+      const response = await axios.patch(`${DOMAIN_DEV}/draft-album-approval/${albumID}/${address}`);
       console.log(albumID)
       alert (response.data.message)
       setAlbums((prev) => prev.filter((a) => a.id !== albumID));

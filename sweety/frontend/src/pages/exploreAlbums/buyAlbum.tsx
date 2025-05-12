@@ -1,3 +1,4 @@
+import { DOMAIN_DEV } from "@/constant/constant";
 import useInteractContract from "@/hooks/useInteractContract";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { useEffect, useState } from "react";
@@ -20,7 +21,7 @@ interface Album {
 }
 
 const onPurchaseAlbum = async (albumId: string, address: string) => {
-  await fetch(`http://localhost:3000/explore-album/purchase/${albumId}/${address}`, {
+  await fetch(`${DOMAIN_DEV}/explore-album/purchase/${albumId}/${address}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
   });
@@ -34,7 +35,7 @@ export default function BuyAlbum() {
   
   useEffect(() => {
     const fetchAlbum = async () => {
-      const res = await fetch(`http://localhost:3000/explore-album/${albumId}`);
+      const res = await fetch(`${DOMAIN_DEV}/explore-album/${albumId}`);
       const json = await res.json();
       setAlbum(json.data);
     };

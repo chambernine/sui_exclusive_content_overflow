@@ -11,6 +11,7 @@ import type { SocialBanner } from "@/types/profile";
 
 import axios from "axios";
 import { fileToBase64 } from "@/utils/fileFormat";
+import { DOMAIN_DEV } from "@/constant/constant";
 
 interface  IUserData {
   walletAddress?: string;
@@ -86,7 +87,7 @@ export default function Profile() {
       banner_image_files: bannerImagesBase64
     };
     console.log(form);
-    const response = await axios.post('http://localhost:3000/edit-profile', form, {
+    const response = await axios.post(`${DOMAIN_DEV}/edit-profile`, form, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AlbumTier, DraftAlbum } from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { useNavigate } from "react-router-dom";
+import { DOMAIN_DEV } from "@/constant/constant";
 
 export default function MyAlbumRequest() {
   const { address } = useSuiAccount();
@@ -15,7 +16,7 @@ export default function MyAlbumRequest() {
   const fetchMyAlbums = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/my-album/${address}`
+        `${DOMAIN_DEV}/my-album/${address}`
       );
       const allAlbums = response.data.data;
       console.log(allAlbums)

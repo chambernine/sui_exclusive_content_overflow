@@ -3,18 +3,18 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // ✅ React Router
 import { useSuiAccount } from '@/hooks/useSuiAccount';
 import { useUserInfo } from '@/hooks/useUserInfo';
+import { DOMAIN_DEV } from '@/constant/constant';
 
 export default function Home() {
   const { account, address } = useSuiAccount();
   const { userInfo, setUserInfo, loading, setLoading } = useUserInfo();
   const navigate = useNavigate(); // ✅ For redirects
-
+  console.log(DOMAIN_DEV)
   useEffect(() => {
     if (!account || !address) return;
-
     const fetchUserProfile = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/profile/${address}`);
+        const res = await fetch(`${DOMAIN_DEV}/profile/${address}`);
         const result = await res.json();
         console.log('User profile:', result);
         if (result.data === undefined) {

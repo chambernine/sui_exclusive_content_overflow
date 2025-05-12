@@ -6,6 +6,7 @@ import { useSuiAccount } from "@/hooks/useSuiAccount";
 import useInteractContract from "@/hooks/useInteractContract";
 import type { DraftAlbum } from "@/types/album";
 import { PublishStatus } from "@/types/interact";
+import { DOMAIN_DEV } from "@/constant/constant";
 
 export default function PublishDraftAlbum() {
   const { albumId: dbId } = useParams();
@@ -19,7 +20,7 @@ export default function PublishDraftAlbum() {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:3000/draft-album/${dbId}`
+        `${DOMAIN_DEV}/draft-album/${dbId}`
       );
       console.log(res.data.data)
       setAlbum(res.data.data);
@@ -34,7 +35,7 @@ export default function PublishDraftAlbum() {
   const markBlobAsPublished = async (blobId: string) => {
     try {
       await axios.patch(
-        `http://localhost:3000/my-album/publish/${dbId}/${blobId}`
+        `${DOMAIN_DEV}/my-album/publish/${dbId}/${blobId}`
       );
       await fetchAlbum(); // Refresh data
     } catch (err) {
@@ -45,7 +46,7 @@ export default function PublishDraftAlbum() {
   const onPublishAlbumOnChain = async () => {
     if (!album) return;
     await axios.patch(
-      `http://localhost:3000/my-album/publish`,
+      `${DOMAIN_DEV}/my-album/publish`,
       {id: dbId},
       {
         headers: {

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { DOMAIN_DEV } from "@/constant/constant";
 
 export interface IFormDraftAlbum {
   albumId: string;
@@ -144,7 +145,7 @@ export default function CreateDraftAlbum() {
     console.log(draftAlbum)
     try {
       const response = await axios.post(
-        "http://localhost:3000/draft-album/request-approval",
+        `${DOMAIN_DEV}/draft-album/request-approval`,
         draftAlbum,
         {
           headers: { "Content-Type": "application/json" },

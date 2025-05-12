@@ -1,3 +1,4 @@
+import { DOMAIN_DEV } from "@/constant/constant";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -25,7 +26,7 @@ export default function ExploreAlbums() {
   useEffect(() => {
     const fetchAlbums = async () => {
       try {
-        const res = await fetch("http://localhost:3000/explore-albums");
+        const res = await fetch(`${DOMAIN_DEV}/explore-albums`);
         const json = await res.json();
         setAlbums(json.data);
       } catch (err) {

@@ -224,10 +224,10 @@ app.patch("/my-album/publish", async (c) => {
     const walrusObjectIds: WalrusObjectResponse[] = await publishWalrus(
       encryptedBlobs
     );
-    // console.log("album & capId : ", albumAccessId, capId);
-    // console.log("publishWalrus: ", walrusObjectIds);
+    console.log("album & capId : ", albumAccessId, capId);
+    console.log("publishWalrus: ", walrusObjectIds);
 
-    if (walrusObjectIds.length < 0) {
+    if (walrusObjectIds.length <= 0) {
       throw new Error("❌ Failed to publish album");
     }
 

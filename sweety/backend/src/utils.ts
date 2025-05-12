@@ -54,12 +54,12 @@ async function createAlbum(
 async function sealEncryptions(albumId: string, contents: string[]) {
   const encryptedBytes = await Promise.all(
     contents.map(async (content: string, index: number) => {
-      const file = await base64ToFile(
+      const { blob } = base64ToFileLike(
         content,
         `image_${index}.png`,
         "image/png"
       );
-      const arrayBuffer = await file.arrayBuffer();
+      const arrayBuffer = await blob.arrayBuffer();
       const fileBytes = new Uint8Array(arrayBuffer);
 
       const nonce = crypto.getRandomValues(new Uint8Array(5));
@@ -118,28 +118,22 @@ async function publishWalrus(
       };
       responses.push(response);
     } catch (error) {
-      console.log("something wrong in here ")
+      console.error("❌ Failed to publish walrus blob:", error);
     }
   }
   return responses;
 }
 
-function base64ToFile(
+function base64ToFileLike(
   base64String: string,
   filename: string,
   mimeType: string
-): File {
+): { blob: Blob; name: string } {
   const arr = base64String.split(",");
   const mime = mimeType || arr[0].match(/:(.*?);/)?.[1] || "";
-  const bstr = atob(arr[arr.length - 1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-
-  return new File([u8arr], filename, { type: mime });
+  const bstr = Buffer.from(arr[arr.length - 1], "base64");
+  const blob = new Blob([bstr], { type: mime });
+  return { blob, name: filename };
 }
 
-export { createAlbum, sealEncryptions, publishWalrus, base64ToFile };
+export { createAlbum, sealEncryptions, publishWalrus, base64ToFileLike as base64ToFile };

@@ -9,6 +9,7 @@ import "./App.css";
 import ExploreAlbums from "./pages/exploreAlbums/exploreAlbums";
 import BuyAlbum from "./pages/exploreAlbums/buyAlbum";
 import PublishDraftAlbum from "./pages/myAlbumPublish/waitForSign";
+import MyPurchasedAlbums from "./pages/myPurchase/my-purchashed";
 
 function App() {
   return (
@@ -24,7 +25,7 @@ function App() {
           <Route path="/my-request/:albumId" element={<PublishDraftAlbum />} />
           <Route path="/explore-albums" element={<ExploreAlbums />} />
           <Route path="/explore-albums/:albumId" element={<BuyAlbum />} />
-
+          <Route path="/myPurchase" element={<MyPurchasedAlbums />} />
         </Routes>
       </BrowserRouter>
     </main>

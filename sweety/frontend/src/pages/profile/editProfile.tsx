@@ -13,7 +13,7 @@ import axios from "axios";
 import { fileToBase64 } from "@/utils/fileFormat";
 import { DOMAIN_DEV } from "@/constant/constant";
 
-interface  IUserData {
+interface IUserData {
   walletAddress?: string;
   username: string;
   profile_image_file: File | null;
@@ -73,25 +73,25 @@ export default function Profile() {
     e.preventDefault();
     const profileImageBase64 = formData.profile_image_file
       ? await fileToBase64(formData.profile_image_file as File)
-      : null
+      : null;
     const bannerImagesBase64 = formData.banner_image_files
       ? await Promise.all(
           formData.banner_image_files.map((f) => fileToBase64(f))
         )
-      : []
+      : [];
 
     const form = {
       ...formData,
       walletAddress: address,
       profile_image_file: profileImageBase64,
-      banner_image_files: bannerImagesBase64
+      banner_image_files: bannerImagesBase64,
     };
     console.log(form);
     const response = await axios.post(`${DOMAIN_DEV}/edit-profile`, form, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
-    })
+    );
 
     console.log(response);
     // const result = await response.json();

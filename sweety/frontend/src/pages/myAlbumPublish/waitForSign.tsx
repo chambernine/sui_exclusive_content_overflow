@@ -54,7 +54,7 @@ export default function PublishDraftAlbum() {
         },
       }
     );
-  }
+  };
 
   // useEffect(() => {
   //   (async () => {
@@ -86,26 +86,27 @@ export default function PublishDraftAlbum() {
       </p>
       <h2 className="text-xl mt-6 font-semibold">🔐 Pending Blob Signatures</h2>
       <div>
-        
-          <Button
+        <Button
           className="bg-blue-400"
-            onClick={async () => {
-              console.log("Publishing album on chain...");
-              setLoading(true)
-              await onPublishAlbumOnChain()
-              await fetchAlbum()
-              setLoading(false)
-            }}
-            disabled={album.albumId !== undefined && album.publishedBlobs && album.publishedBlobs.length > 0}
-          >
-            Click to publih album & content
-          </Button>
+          onClick={async () => {
+            console.log("Publishing album on chain...");
+            setLoading(true);
+            await onPublishAlbumOnChain();
+            await fetchAlbum();
+            setLoading(false);
+          }}
+          disabled={
+            album.albumId !== undefined &&
+            album.publishedBlobs &&
+            album.publishedBlobs.length > 0
+          }
+        >
+          Click to publih album & content
+        </Button>
       </div>
       <div>
         {album.albumId && (
-          <p className="text-sm text-gray-500">
-            Album ID: {album.albumId}
-          </p>
+          <p className="text-sm text-gray-500">Album ID: {album.albumId}</p>
         )}
       </div>
       <div className="space-y-3">
@@ -121,26 +122,25 @@ export default function PublishDraftAlbum() {
               </p>
             </div>
 
-
             {!blob.ispublished && (
               <Button
                 onClick={async () => {
                   try {
-                    if (!album.albumId) return
-                    
+                    if (!album.albumId) return;
+
                     const txResult: PublishStatus = await publishBlobsToAlbum(
                       album.albumId,
                       album.capId!,
                       blob.blobId
                     );
 
-                    if (txResult.status === 'approved') {
+                    if (txResult.status === "approved") {
                       // Success logic
                       await markBlobAsPublished(blob.blobId);
-                    } else if (txResult.status === 'failed') {
+                    } else if (txResult.status === "failed") {
                       // Failed logic
                       alert("Transaction failed. Check console.");
-                    } else if (txResult.status === 'rejected') {
+                    } else if (txResult.status === "rejected") {
                       // Rejected logic
                       alert("Transaction rejected. Check console.");
                     }

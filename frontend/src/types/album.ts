@@ -17,6 +17,8 @@ export enum AlbumTier {
 
 export interface DraftAlbum {
   id: string;
+  albumId?: string;
+  capId?: string;
   owner: string;
   name: string;
   tier: AlbumTier;
@@ -27,6 +29,10 @@ export interface DraftAlbum {
   contentInfos: string[];
   contents: string[];
   created_at: Timestamp;
+  publishedBlobs?: {
+    blobId: string;
+    ispublished: boolean;
+  }[];
 }
 
 export interface PublishedAlbum {

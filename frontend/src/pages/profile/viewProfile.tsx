@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,7 +9,6 @@ import {
   Edit,
   Check,
   X,
-  Upload,
   Twitter,
   Instagram,
   Twitch,
@@ -17,17 +16,20 @@ import {
   Heart,
   Share2,
   Bookmark,
+  User,
+  Search,
+  Filter,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -36,7 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { CardWithLens } from "@/components/custom/card-with-lens";
+import { LoadingWrapper } from "@/components/ui/loading-wrapper";
 
 import {
   Form,
@@ -47,9 +49,26 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
-import { fileToBase64 } from "@/utils/fileFormat";
 import { AlbumTier, tierColors, tierNames } from "@/types/album";
 import { Protected } from "@/components/auth/Protected";
+import { useProfile, useUpdateProfile } from "@/hooks/api/useProfile";
+import { useMyAlbums, useMyPurchasedAlbums } from "@/hooks/api/useAlbums";
+import { CardWithLens } from "@/components/custom/card-with-lens";
+
+interface ProfileMetaData {
+  userAddress: string;
+  username: string;
+  description: string;
+  profileImageBase64: string;
+  bannerImagesBase64: string[];
+  socialLinks: {
+    x: string;
+    twitch: string;
+    ig: string;
+    youtube: string;
+  };
+  createdAt: number;
+}
 
 interface Album {
   id: string;
@@ -140,17 +159,18 @@ const formSchema = z.object({
 export function ProfilePage() {
   const { address } = useSuiAccount();
   const [editMode, setEditMode] = useState(false);
-  const [profileImage, setProfileImage] = useState(
-    "https://i.pravatar.cc/150?img=12"
-  );
-  const [isLoading, setIsLoading] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [userInfo, setUserInfo] = useState<ProfileMetaData | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filterTier, setFilterTier] = useState<string>("all");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "Web3Creator",
-      bio: "Digital artist specializing in cosmic and abstract themes. Collector of rare digital art and NFTs since 2018.",
+      username: "anonymous",
+      bio: "",
       profileImage: profileImage,
       social_links: {
         x: null,
@@ -160,6 +180,59 @@ export function ProfilePage() {
       },
     },
   });
+
+  // Fetch profile data using useProfile hook
+  const {
+    data: profileData,
+    isLoading: isProfileLoading,
+    error: profileError,
+  } = useProfile(address);
+
+  // Fetch user's created albums
+  const { data: myAlbumsData, isLoading: isMyAlbumsLoading } =
+    useMyAlbums(address);
+
+  // Fetch user's purchased albums
+  const { data: purchasedAlbumsData, isLoading: isPurchasedAlbumsLoading } =
+    useMyPurchasedAlbums(address);
+
+  console.log(myAlbumsData, "myAlbumsData");
+  console.log(purchasedAlbumsData, "purchasedAlbumsData");
+
+  // Update profile state when data is fetched
+  useEffect(() => {
+    if (profileData) {
+      // Set user info
+      setUserInfo(profileData.data);
+
+      // Update form values with fetched data from the new response format
+      form.reset({
+        username: profileData.data.username || "",
+        bio: profileData.data.description || "",
+        profileImage: profileData.data.profileImageBase64 || profileImage,
+        social_links: {
+          x: profileData.data.socialLinks?.x || null,
+          instagram: profileData.data.socialLinks?.ig || null, // Map 'ig' to 'instagram' for the form
+          twitch: profileData.data.socialLinks?.twitch || null,
+          youtube: profileData.data.socialLinks?.youtube || null,
+        },
+      });
+
+      if (profileData.data.profileImageBase64) {
+        setProfileImage(profileData.data.profileImageBase64);
+      }
+    } else if (profileError) {
+      console.error("❌ Failed to fetch user profile:", profileError);
+      setEditMode(true);
+    }
+  }, [
+    profileData,
+    isProfileLoading,
+    profileError,
+    address,
+    form,
+    profileImage,
+  ]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -184,48 +257,38 @@ export function ProfilePage() {
     },
   };
 
+  // Get update profile mutation hook
+  const { mutate: updateProfileMutation, isPending: isUpdatingProfile } =
+    useUpdateProfile();
+
   const handleSaveProfile = async (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
+    setIsUpdating(true);
+    const profileImageBase64 = values.profileImage
+      ? await fileToBase64(values.profileImage as File)
+      : null;
+    // const bannerImagesBase64 = values.banner_image_files
+    //   ? await Promise.all(values.banner_image_files.map((f) => fileToBase64(f)))
+    //   : [];
 
-    try {
-      // Process the profile image if it's a File object
-      let profileImageBase64 = null;
-      if (values.profileImage instanceof File) {
-        profileImageBase64 = await fileToBase64(values.profileImage);
-      }
+    const formData = {
+      ...values,
+      walletAddress: address,
+      profile_image_file: profileImageBase64,
+      // banner_image_files: bannerImagesBase64,
+    };
 
-      const formData = {
-        ...values,
-        walletAddress: address,
-        profileImage: profileImageBase64 || values.profileImage,
-      };
-
-      // In a real app, you would save the profile data
-      console.log(formData);
-
-      // Simulate API call
-      setTimeout(() => {
-        setIsLoading(false);
-        setIsSaved(true);
+    // Use the updateProfile mutation from TanStack Query
+    updateProfileMutation(formData, {
+      onSuccess: () => {
+        setIsUpdating(false);
         setEditMode(false);
-
-        // Show success toast
-        // toast({
-        //   title: "Profile updated",
-        //   description: "Your profile has been updated successfully.",
-        // });
-
         setTimeout(() => setIsSaved(false), 3000);
-      }, 1000);
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      setIsLoading(false);
-      //   toast({
-      //     title: "Error",
-      //     description: "Failed to update profile.",
-      //     variant: "destructive",
-      //   });
-    }
+      },
+      onError: (error) => {
+        console.error("Error saving profile:", error);
+        setIsUpdating(false);
+      },
+    });
   };
 
   const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -251,6 +314,125 @@ export function ProfilePage() {
     }
   };
 
+  const filterAlbums = (albums: any[]) => {
+    if (!albums) return [];
+
+    return albums.filter((album: any) => {
+      const title = album.title || album.name || "";
+      const description = album.description || "";
+
+      const matchesSearch =
+        title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        description.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesTier =
+        filterTier === "all" || album.tier?.toString() === filterTier;
+
+      return matchesSearch && matchesTier;
+    });
+  };
+
+  // Album display components
+  const renderAlbumGrid = (albums: any, loading: boolean) => {
+    if (loading) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((item) => (
+            <Card key={item} className="overflow-hidden">
+              <div className="h-48 bg-muted animate-pulse" />
+              <CardContent className="p-4">
+                <div className="h-4 w-3/4 bg-muted animate-pulse mb-2" />
+                <div className="h-4 w-1/2 bg-muted animate-pulse" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
+    if (!albums || albums.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No albums found</p>
+        </div>
+      );
+    }
+
+    const filteredAlbums = filterAlbums(albums);
+
+    if (filteredAlbums.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            No albums match your search criteria
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredAlbums.map((album: any) => (
+          <CardWithLens
+            key={album.id || album.albumId}
+            className="overflow-hidden"
+          >
+            <AspectRatio ratio={1 / 1}>
+              <div className="h-full bg-muted overflow-hidden relative">
+                <div className="absolute top-2 right-2">
+                  <Badge
+                    className={`${
+                      tierColors[album.tier as keyof typeof tierColors]
+                    } text-white text-sm`}
+                  >
+                    {tierNames[album.tier as keyof typeof tierNames]}
+                  </Badge>
+                </div>
+                <img
+                  src={
+                    album.preview ||
+                    album.contentInfos?.[0] ||
+                    "https://via.placeholder.com/300"
+                  }
+                  alt={album.title || album.name}
+                  className="w-full h-full object-cover transition-all hover:scale-105"
+                />
+              </div>
+            </AspectRatio>
+            <CardContent className="p-4">
+              <h3 className="font-medium text-lg">
+                {album.title || album.name}
+              </h3>
+              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                {album.description}
+              </p>
+            </CardContent>
+            <CardFooter className="p-4 pt-0 flex justify-between text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Heart className="h-4 w-4" />
+                </Button>
+                <span>{album.interaction?.likes || 0}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+                <span>{album.interaction?.shares || 0}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Bookmark className="h-4 w-4" />
+                </Button>
+                <span>{album.interaction?.saves || 0}</span>
+              </div>
+            </CardFooter>
+          </CardWithLens>
+        ))}
+      </div>
+    );
+  };
+
   const renderProfileContent = () => (
     <motion.div
       variants={container}
@@ -264,9 +446,9 @@ export function ProfilePage() {
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="relative">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={profileImage} alt="Profile" />
+                  <AvatarImage src={profileImage || ""} alt="Profile" />
                   <AvatarFallback className="bg-muted text-muted-foreground">
-                    <Upload className="h-8 w-8" />
+                    <User className="h-10 w-10" />
                   </AvatarFallback>
                 </Avatar>
                 {editMode && (
@@ -326,32 +508,32 @@ export function ProfilePage() {
                       <div className="space-y-2">
                         <Label>Social Links</Label>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {Object.entries(
-                            form.getValues("social_links") || {}
-                          ).map(([platform, _]) => (
-                            <FormField
-                              key={platform}
-                              control={form.control}
-                              name={`social_links.${platform}` as any}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <div className="relative">
-                                      <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                                        {getSocialIcon(platform)}
-                                      </span>
-                                      <Input
-                                        placeholder={`Your ${platform} profile URL`}
-                                        className="pl-8"
-                                        value={field.value || ""}
-                                        onChange={field.onChange}
-                                      />
-                                    </div>
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          ))}
+                          {["x", "instagram", "twitch", "youtube"].map(
+                            (platform) => (
+                              <FormField
+                                key={platform}
+                                control={form.control}
+                                name={`social_links.${platform}` as any}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <div className="relative">
+                                        <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                                          {getSocialIcon(platform)}
+                                        </span>
+                                        <Input
+                                          placeholder={`Your ${platform} profile URL`}
+                                          className="pl-8"
+                                          value={field.value || ""}
+                                          onChange={field.onChange}
+                                        />
+                                      </div>
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            )
+                          )}
                         </div>
                       </div>
 
@@ -365,8 +547,8 @@ export function ProfilePage() {
                           <X className="h-4 w-4 mr-1" />
                           Cancel
                         </Button>
-                        <Button size="sm" type="submit" disabled={isLoading}>
-                          {isLoading ? (
+                        <Button size="sm" type="submit" disabled={isUpdating}>
+                          {isUpdating ? (
                             <div className="flex items-center">
                               <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-1"></div>
                               <span>Saving...</span>
@@ -422,15 +604,19 @@ export function ProfilePage() {
 
                     <div className="flex items-center gap-3 mt-4">
                       <div className="flex items-center gap-1">
-                        <span className="font-medium">4</span>
+                        <span className="font-medium">
+                          {myAlbumsData?.data?.length || 0}
+                        </span>
                         <span className="text-muted-foreground text-sm">
                           Albums
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="font-medium">2</span>
+                        <span className="font-medium">
+                          {purchasedAlbumsData?.data?.length || 0}
+                        </span>
                         <span className="text-muted-foreground text-sm">
-                          NFTs
+                          Purchased
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -458,152 +644,112 @@ export function ProfilePage() {
             <h2 className="text-xl font-bold">My Collection</h2>
           </div>
 
-          <Tabs defaultValue="grid">
+          <Tabs defaultValue="purchased">
             <div className="flex justify-between items-center mb-4">
-              <p className="text-muted-foreground">
-                {mockPurchasedAlbums.length} items
-              </p>
               <TabsList>
-                <TabsTrigger value="grid">
-                  <LayoutGrid className="h-4 w-4" />
-                </TabsTrigger>
-                <TabsTrigger value="list">
-                  <List className="h-4 w-4" />
-                </TabsTrigger>
+                <TabsTrigger value="purchased">Purchased Albums</TabsTrigger>
+                <TabsTrigger value="created">Created Albums</TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="grid" className="m-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockPurchasedAlbums.map((album) => (
-                  <motion.div key={album.id} variants={item}>
-                    <CardWithLens
-                      imageSrc={album.preview}
-                      imageAlt={album.title}
-                      className="overflow-hidden h-full flex flex-col bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
-                    >
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <CardTitle className="text-xl">
-                            {album.title}
-                          </CardTitle>
-                          <Badge
-                            className={`${
-                              tierColors[album.tier]
-                            } text-white ml-2 w-fit shrink-0`}
-                          >
-                            {tierNames[album.tier]}
-                          </Badge>
-                        </div>
-                        <CardDescription className="line-clamp-2">
-                          {album.description}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardFooter className="pt-2 flex-col gap-3">
-                        <div className="flex justify-between items-center w-full border-t border-border pt-3">
-                          <div className="flex p-4 w-full items-center justify-between text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Heart className="h-4 w-4" />
-                              <span className="text-sm">
-                                {album.interaction?.likes || 0}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Share2 className="h-4 w-4" />
-                              <span className="text-sm">
-                                {album.interaction?.shares || 0}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Bookmark className="h-4 w-4" />
-                              <span className="text-sm">
-                                {album.interaction?.saves || 0}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <Button variant="outline" size="sm" className="w-full">
-                          View Details
-                        </Button>
-                      </CardFooter>
-                    </CardWithLens>
-                  </motion.div>
-                ))}
+            <TabsContent value="purchased" className="m-0">
+              <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="h-4 w-4 absolute top-2.5 left-3 text-muted-foreground" />
+                  <Input
+                    placeholder="Search albums..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Select value={filterTier} onValueChange={setFilterTier}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <div className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      <SelectValue placeholder="Filter by tier" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Tiers</SelectItem>
+                    <SelectItem value="0">Standard</SelectItem>
+                    <SelectItem value="1">Premium</SelectItem>
+                    <SelectItem value="2">Exclusive</SelectItem>
+                    <SelectItem value="3">Principle</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              <Tabs defaultValue="grid" className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-muted-foreground">
+                    {isPurchasedAlbumsLoading
+                      ? "Loading albums..."
+                      : `${filterAlbums.length} albums available`}
+                  </p>
+                  <TabsList>
+                    <TabsTrigger value="grid">
+                      <LayoutGrid className="h-4 w-4" />
+                    </TabsTrigger>
+                    <TabsTrigger value="list">
+                      <List className="h-4 w-4" />
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+              </Tabs>
+
+              {renderAlbumGrid(
+                purchasedAlbumsData?.data,
+                isPurchasedAlbumsLoading
+              )}
             </TabsContent>
 
-            <TabsContent value="list" className="m-0">
-              <div className="space-y-3">
-                {mockPurchasedAlbums.map((album) => (
-                  <Card
-                    key={album.id}
-                    className="overflow-hidden bg-card border-border hover:shadow-lg transition-shadow cursor-pointer p-0"
-                  >
-                    <div className="flex flex-col sm:flex-row h-full">
-                      <div className="hidden sm:block w-full sm:w-48 h-40 sm:h-auto relative">
-                        <AspectRatio ratio={16 / 9} className="h-full">
-                          {album.preview ? (
-                            <img
-                              src={album.preview}
-                              alt={album.title}
-                              className="object-cover w-full h-full"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                              No preview
-                            </div>
-                          )}
-                        </AspectRatio>
-                      </div>
-                      <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-2">
-                          <div>
-                            <h3 className="font-semibold text-lg line-clamp-1">
-                              {album.title}
-                            </h3>
-                          </div>
-                          <Badge
-                            className={`${
-                              tierColors[album.tier]
-                            } text-white w-fit shrink-0 sm:ml-2`}
-                          >
-                            {tierNames[album.tier]}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between mt-auto pt-2 border-t border-border">
-                          <div className="flex items-center gap-3 text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Heart className="h-4 w-4" />
-                              <span className="text-xs sm:text-sm">
-                                {album.interaction?.likes || 0}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Share2 className="h-4 w-4" />
-                              <span className="text-xs sm:text-sm">
-                                {album.interaction?.shares || 0}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Bookmark className="h-4 w-4" />
-                              <span className="text-xs sm:text-sm">
-                                {album.interaction?.saves || 0}
-                              </span>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-2 sm:px-3"
-                          >
-                            View Details
-                          </Button>
-                        </div>
-                      </div>
+            <TabsContent value="created" className="m-0">
+              <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="h-4 w-4 absolute top-2.5 left-3 text-muted-foreground" />
+                  <Input
+                    placeholder="Search albums..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Select value={filterTier} onValueChange={setFilterTier}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <div className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      <SelectValue placeholder="Filter by tier" />
                     </div>
-                  </Card>
-                ))}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Tiers</SelectItem>
+                    <SelectItem value="0">Standard</SelectItem>
+                    <SelectItem value="1">Premium</SelectItem>
+                    <SelectItem value="2">Exclusive</SelectItem>
+                    <SelectItem value="3">Principle</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              <Tabs defaultValue="grid" className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-muted-foreground">
+                    {isMyAlbumsLoading
+                      ? "Loading albums..."
+                      : `${filterAlbums.length} albums available`}
+                  </p>
+                  <TabsList>
+                    <TabsTrigger value="grid">
+                      <LayoutGrid className="h-4 w-4" />
+                    </TabsTrigger>
+                    <TabsTrigger value="list">
+                      <List className="h-4 w-4" />
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+              </Tabs>
+              {renderAlbumGrid(myAlbumsData?.data, isMyAlbumsLoading)}
             </TabsContent>
           </Tabs>
         </div>
@@ -614,7 +760,9 @@ export function ProfilePage() {
   return (
     <Protected description="Connect wallet to view profile">
       <div className="container py-12 px-10">
-        <div className="w-full mx-auto">{renderProfileContent()}</div>
+        <LoadingWrapper isLoading={isProfileLoading} variant="profile">
+          <div className="w-full mx-auto">{renderProfileContent()}</div>
+        </LoadingWrapper>
       </div>
     </Protected>
   );

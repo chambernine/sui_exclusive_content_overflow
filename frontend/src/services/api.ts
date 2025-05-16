@@ -1,7 +1,8 @@
 import axios from "axios";
 import { DraftAlbum } from "@/types/album";
+import { DOMAIN_DEV } from "@/constant/constant";
 
-const API_URL = "http://localhost:3000";
+const API_URL = DOMAIN_DEV;
 const api = axios.create({
   baseURL: API_URL,
 });
@@ -33,6 +34,11 @@ export const fetchMyAlbums = async (address: string) => {
   return response.data;
 };
 
+export const fetchPurchasedAlbums = async (address: string) => {
+  const response = await api.get(`/my-album/purchase/${address}`);
+  return response.data;
+};
+
 export const approveAlbum = async (
   albumId: string,
   approverAddress: string
@@ -47,5 +53,20 @@ export const publishAlbum = async (album: string) => {
   const response = await api.patch(JSON.stringify({ album }), {
     headers: { "Content-Type": "application/json" },
   });
+  return response.data;
+};
+
+export const updateProfile = async (formData: any) => {
+  const response = await api.post("/edit-profile", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+export const fetchProfile = async (address: string) => {
+  const response = await api.get(`/profile/${address}`);
+
   return response.data;
 };

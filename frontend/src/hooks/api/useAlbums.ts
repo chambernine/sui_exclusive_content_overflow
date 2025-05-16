@@ -4,6 +4,7 @@ import {
   fetchExploreAlbumById,
   fetchMyAlbums,
   fetchPendingApprovalAlbums,
+  fetchPurchasedAlbums,
   approveAlbum,
   publishAlbum,
   submitDraftAlbumForApproval,
@@ -18,6 +19,8 @@ export const albumKeys = {
   details: () => [...albumKeys.all, "detail"] as const,
   detail: (id: string) => [...albumKeys.details(), id] as const,
   myAlbums: (address: string) => [...albumKeys.lists(), "my", address] as const,
+  myPurchased: (address: string) =>
+    [...albumKeys.lists(), "purchased", address] as const,
   pendingApproval: (address: string) =>
     [...albumKeys.lists(), "approval", address] as const,
 };
@@ -33,11 +36,11 @@ export const useExploreAlbums = (address?: string) => {
 };
 
 // Fetch a single album by ID
-export const useExploreAlbumById = (albumId: string) => {
+export const useExploreAlbumById = (albumId: string, address?: string) => {
   return useQuery({
     queryKey: albumKeys.detail(albumId),
     queryFn: () => fetchExploreAlbumById(albumId),
-    enabled: !!albumId,
+    enabled: !!albumId && !!address,
   });
 };
 
@@ -55,6 +58,15 @@ export const useMyAlbums = (address: string | undefined) => {
   return useQuery({
     queryKey: albumKeys.myAlbums(address || ""),
     queryFn: () => fetchMyAlbums(address || ""),
+    enabled: !!address,
+  });
+};
+
+// Fetch my purchased albums
+export const useMyPurchasedAlbums = (address: string | undefined) => {
+  return useQuery({
+    queryKey: albumKeys.myPurchased(address || ""),
+    queryFn: () => fetchPurchasedAlbums(address || ""),
     enabled: !!address,
   });
 };
@@ -108,13 +120,10 @@ export const useApproveAlbum = (approverAddress: string | undefined) => {
 // Publish an album
 export const usePublishAlbum = (album) => {
   // const queryClient = useQueryClient();
-  console.log("album", album);
-
   // return useMutation({
   //   mutationFn: publishAlbum,
   //   onSuccess: (response) => {
   //     toast.success("Album prepared for publishing!");
-
   //     if (album) {
   //       queryClient.invalidateQueries({
   //         queryKey: albumKeys.myAlbums(album),
@@ -123,7 +132,6 @@ export const usePublishAlbum = (album) => {
   //         queryKey: albumKeys.lists(),
   //       });
   //     }
-
   //     // Return response data directly to the component for state updates
   //     return response.data;
   //   },

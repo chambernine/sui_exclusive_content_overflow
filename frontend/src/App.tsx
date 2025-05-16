@@ -10,6 +10,8 @@ import { ProfilePage } from "./pages/profile/viewProfile";
 import CreateAlbumPage from "./pages/draftAlbum/createAlbumForm";
 import ExploreAlbums from "./pages/exploreAlbums/exploreAlbums";
 import BuyAlbum from "./pages/exploreAlbums/buyAlbum";
+import PublishDraftAlbum from "./pages/approveRequestAlbum/waitForSign";
+import MyPurchasedAlbums from "./pages/myPurchase/my-purchashed";
 
 function App() {
   const router = createBrowserRouter([
@@ -30,8 +32,12 @@ function App() {
           element: <CreateAlbumPage />,
         },
         {
-          path: "album-requests",
+          path: "management-contents",
           element: <AlbumRequestApproval />,
+        },
+        {
+          path: "management-contents/:albumId",
+          element: <PublishDraftAlbum />,
         },
         {
           path: "explore-albums",
@@ -40,6 +46,10 @@ function App() {
         {
           path: "explore-albums/:albumId",
           element: <BuyAlbum />,
+        },
+        {
+          path: "myPurchase",
+          element: <MyPurchasedAlbums />,
         },
       ],
     },

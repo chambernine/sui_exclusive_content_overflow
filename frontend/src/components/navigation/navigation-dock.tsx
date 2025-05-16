@@ -54,7 +54,7 @@ export function NavigationDock() {
       label: "Create",
     },
     {
-      path: "/album-requests",
+      path: "/management-contents",
       icon: <ClipboardList className="h-5 w-5" />,
       label: "Requests",
     },

@@ -88,7 +88,11 @@ export default function CreateAlbumPage() {
       }));
     }
     if (name === "price") {
-      return setDraft((prev) => ({ ...prev, price: parseInt(value) }));
+      const floatValue = parseFloat(value);
+      return setDraft((prev) => ({
+        ...prev,
+        price: isNaN(floatValue) ? 0 : parseFloat(floatValue.toFixed(5)),
+      }));
     }
     if (name === "tags") {
       return setDraft((prev) => ({

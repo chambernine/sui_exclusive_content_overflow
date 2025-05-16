@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import useInteractContract from "@/hooks/useInteractContract";
@@ -34,6 +34,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { tierColors, tierNames } from "@/types/album";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { DOMAIN_DEV } from "@/constant/constant";
 
 interface Album {
   albumId: string;
@@ -54,14 +63,34 @@ interface Album {
 export default function BuyAlbum() {
   const { albumId } = useParams();
   const navigate = useNavigate();
-  const { data, isLoading } = useExploreAlbumById(albumId || "");
-  const album = data?.data || null;
   const { address } = useSuiAccount();
+  const { data, isLoading } = useExploreAlbumById(albumId || "", address);
+  const album = data?.data || null;
   const { CreateSupportAlbumTx } = useInteractContract();
 
   const [selectedImage, setSelectedImage] = useState<number>(0);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [purchaseInProgress, setPurchaseInProgress] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("previews");
+
+  useEffect(() => {
+    if (!carouselApi) return;
+    carouselApi.scrollTo(selectedImage);
+  }, [carouselApi, selectedImage]);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const handleSelect = () => {
+      setSelectedImage(carouselApi.selectedScrollSnap());
+    };
+
+    carouselApi.on("select", handleSelect);
+
+    return () => {
+      carouselApi.off("select", handleSelect);
+    };
+  }, [carouselApi]);
 
   // Animation variants
   const containerVariants = {
@@ -86,6 +115,13 @@ export default function BuyAlbum() {
     },
   };
 
+  const onPurchaseAlbum = async (albumId: string, address: string) => {
+    await fetch(`${DOMAIN_DEV}/explore-album/purchase/${albumId}/${address}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
   const handlePurchase = async () => {
     if (!address) {
       toast.error("Please connect your wallet first");
@@ -101,6 +137,7 @@ export default function BuyAlbum() {
         album.price * 1_000_000_000,
         20
       );
+      await onPurchaseAlbum(album.albumId, address);
       toast.success("Purchase initiated! Check your wallet for confirmation.");
     } catch (error) {
       console.error("Purchase failed:", error);
@@ -206,7 +243,7 @@ export default function BuyAlbum() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 lg:justify-center gap-8">
           {/* Left Column - Image Gallery */}
           <motion.div
             className="lg:col-span-2 space-y-6"
@@ -219,20 +256,59 @@ export default function BuyAlbum() {
               variants={itemVariants}
             >
               {album.contentInfos?.length > 0 ? (
-                <AspectRatio
-                  ratio={16 / 9}
-                  className="bg-card/50 backdrop-blur-sm"
+                <Carousel
+                  opts={{
+                    loop: true,
+                    align: "center",
+                  }}
+                  setApi={setCarouselApi}
+                  className="relative"
                 >
-                  <CardWithLens
-                    imageSrc={album.contentInfos[selectedImage]}
-                    imageAlt={`${album.name} - Preview ${selectedImage + 1}`}
-                    className="h-full w-full overflow-hidden border-none shadow-none"
-                  >
-                    <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs">
-                      Preview {selectedImage + 1} of {album.contentInfos.length}
-                    </div>
-                  </CardWithLens>
-                </AspectRatio>
+                  <CarouselContent>
+                    {album.contentInfos.map((img: string, i: number) => (
+                      <CarouselItem key={i}>
+                        <AspectRatio
+                          ratio={16 / 9}
+                          className="bg-card/50 backdrop-blur-sm"
+                        >
+                          <CardWithLens
+                            imageSrc={img}
+                            imageAlt={`${album.name} - Preview ${i + 1}`}
+                            className="h-full w-full overflow-hidden border-none shadow-none"
+                          >
+                            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs">
+                              Preview {i + 1} of {album.contentInfos.length}
+                            </div>
+                          </CardWithLens>
+                        </AspectRatio>
+                      </CarouselItem>
+                    ))}
+                    {/* Locked content item */}
+                    <CarouselItem key="locked">
+                      <AspectRatio
+                        ratio={16 / 9}
+                        className="bg-card/50 backdrop-blur-sm"
+                      >
+                        <div className="h-full w-full overflow-hidden border-none shadow-none relative bg-black/20">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <Lock className="h-16 w-16 text-muted-foreground mb-3 opacity-70" />
+                            <p className="text-lg text-white font-medium">
+                              Exclusive Content
+                            </p>
+                            <p className="text-sm text-white/80 mt-2">
+                              Purchase to unlock more content
+                            </p>
+                          </div>
+                          <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs">
+                            Locked Content
+                          </div>
+                        </div>
+                      </AspectRatio>
+                    </CarouselItem>
+                  </CarouselContent>
+                  <CarouselPrevious className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70" />
+                  <CarouselNext className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70" />
+                </Carousel>
               ) : (
                 <AspectRatio ratio={16 / 9}>
                   <div className="flex items-center justify-center h-full w-full bg-muted rounded-lg text-muted-foreground">
@@ -243,9 +319,9 @@ export default function BuyAlbum() {
             </motion.div>
 
             {/* Thumbnail Gallery */}
-            {album.contentInfos?.length > 1 && (
+            {album.contentInfos?.length > 0 && (
               <motion.div
-                className="flex flex-wrap gap-3"
+                className="flex flex-wrap gap-3 justify-center"
                 variants={itemVariants}
               >
                 {album.contentInfos.map((img: string, i: number) => (
@@ -253,7 +329,7 @@ export default function BuyAlbum() {
                     key={i}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`cursor-pointer overflow-hidden rounded-md border-2 transition-all ${
+                    className={`cursor-pointer overflow-hidden rounded-md border-4 transition-all ${
                       selectedImage === i
                         ? "border-primary shadow-lg"
                         : "border-border hover:border-primary/50"
@@ -269,6 +345,24 @@ export default function BuyAlbum() {
                     </AspectRatio>
                   </motion.div>
                 ))}
+                {/* Locked content thumbnail */}
+                <motion.div
+                  key="locked-thumbnail"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`cursor-pointer overflow-hidden rounded-md border-4 transition-all ${
+                    selectedImage === album.contentInfos.length
+                      ? "border-primary shadow-lg"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                  onClick={() => setSelectedImage(album.contentInfos.length)}
+                >
+                  <AspectRatio ratio={1} className="w-20 sm:w-24 bg-black/20">
+                    <div className="flex items-center justify-center h-full w-full">
+                      <Lock className="h-6 w-6 text-white/70" />
+                    </div>
+                  </AspectRatio>
+                </motion.div>
               </motion.div>
             )}
 

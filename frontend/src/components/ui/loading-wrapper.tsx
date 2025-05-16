@@ -7,7 +7,10 @@ import {
   SkeletonText,
   SkeletonAlbum,
   SkeletonProfile,
+  Skeleton,
 } from "./skeleton";
+
+import { Card, CardContent, CardFooter, CardHeader } from "./card";
 
 interface LoadingWrapperProps {
   /**
@@ -22,7 +25,14 @@ interface LoadingWrapperProps {
    * The type of skeleton to show while loading
    * @default "default"
    */
-  variant?: "default" | "album" | "profile" | "card" | "text" | "none";
+  variant?:
+    | "default"
+    | "album"
+    | "profile"
+    | "card"
+    | "text"
+    | "none"
+    | "publish-album";
   /**
    * The number of skeleton items to render in a grid
    * Works with album, card variants
@@ -98,6 +108,107 @@ export function LoadingWrapper({
               <p className="text-sm text-muted-foreground">{loadingText}</p>
             )}
           </div>
+        </div>
+      );
+    }
+
+    if (variant === "publish-album") {
+      return (
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          {/* Back link and title section */}
+          <div className="mb-6">
+            <div className="flex items-center mb-2">
+              <Skeleton className="h-4 w-4 mr-1" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-6 w-40" />
+            </div>
+          </div>
+
+          {/* Album Details Card */}
+          <Card className="overflow-hidden border-border mb-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-6 w-24 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-full mt-2" />
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  {[1, 2].map((i) => (
+                    <div
+                      key={`detail-left-${i}`}
+                      className="flex justify-between items-center py-2 border-b border-border/50"
+                    >
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-28" />
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  {[1, 2].map((i) => (
+                    <div
+                      key={`detail-right-${i}`}
+                      className="flex justify-between items-center py-2 border-b border-border/50"
+                    >
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-28" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Publishing Status Card */}
+          <Card className="overflow-hidden border-border">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-6 w-24 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-64 mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Progress bar */}
+              <div>
+                <div className="flex justify-between text-xs mb-2">
+                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-3 w-12" />
+                </div>
+                <Skeleton className="h-2 w-full" />
+              </div>
+
+              {/* Content publication section */}
+              <div className="bg-card/50 p-3 rounded-lg border border-border">
+                <div className="flex justify-between items-center mb-3">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-9 w-32 rounded-md" />
+                </div>
+
+                {/* Content blobs */}
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={`blob-${i}`}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border overflow-hidden border-border hover:shadow-md transition-shadow"
+                    >
+                      <div className="mb-3 sm:mb-0">
+                        <Skeleton className="h-5 w-64 mb-2" />
+                        <Skeleton className="h-5 w-24 rounded-full" />
+                      </div>
+                      <Skeleton className="h-9 w-28 sm:w-32 rounded-md" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       );
     }

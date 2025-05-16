@@ -8,13 +8,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  DraftAlbumStatus,
-  AlbumTier,
-  tierColors,
-  tierNames,
-  WaitForSignPublishResponse,
-} from "@/types/album";
+import { DraftAlbumStatus, tierColors, tierNames } from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Protected } from "@/components/auth/Protected";
@@ -38,6 +32,7 @@ import {
   useApproveAlbum,
   usePublishAlbum,
 } from "@/hooks/api/useAlbums";
+import { useNavigate } from "react-router-dom";
 
 interface Album {
   id: string;
@@ -59,8 +54,8 @@ export default function AlbumRequestApproval() {
   const [currentTab, setCurrentTab] = useState<string>("pending-approval");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [waitForSign, setWaitForSign] =
-    useState<WaitForSignPublishResponse | null>(null);
+
+  const navigate = useNavigate();
 
   // Fetching data with React Query
   const { data: pendingApprovalData, isLoading: isLoadingPendingApproval } =
@@ -121,14 +116,7 @@ export default function AlbumRequestApproval() {
   };
 
   const handlePublish = async (album: Album) => {
-    setWaitForSign(null);
-    console.log("Publishing album:", album);
-
-    // publishMutation.mutate(album, {
-    //   onSuccess: (response) => {
-    //     setWaitForSign(response);
-    //   },
-    // });
+    navigate(`/management-contents/${album.id}`);
   };
 
   const formatTimestamp = (ts: Album["created_at"]) => {

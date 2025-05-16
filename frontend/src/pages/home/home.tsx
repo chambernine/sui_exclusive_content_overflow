@@ -17,11 +17,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, Share2, Bookmark, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { LoadingWrapper } from "@/components/ui/loading-wrapper";
-import { CardWithLens } from "@/components/custom/card-with-lens";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -49,7 +47,6 @@ export default function Home() {
   const { data, isLoading } = useExploreAlbums(address);
   const albums = data?.data || [];
 
-  const [activeTab, setActiveTab] = useState<string>("featured");
   const [showMobileProfile, setShowMobileProfile] = useState<boolean>(false);
 
   // Animation variants
@@ -75,25 +72,6 @@ export default function Home() {
       },
     },
   };
-
-  // Featured albums - take top 3 albums based on interactions
-  const featuredAlbums = [...albums]
-    .sort(
-      (a, b) =>
-        b.interaction?.likes +
-        b.interaction?.shares +
-        b.interaction?.saves -
-        (a.interaction?.likes + a.interaction?.shares + a.interaction?.saves)
-    )
-    .slice(0, 3);
-
-  // Recent albums - assuming the array is already sorted by recency
-  const recentAlbums = [...albums].slice(0, 5);
-
-  // Albums by tier - removed filter
-  const popularByTier = [...albums]
-    .sort((a, b) => b.interaction?.likes - a.interaction?.likes)
-    .slice(0, 4);
 
   if (!account) {
     return (
@@ -235,9 +213,19 @@ export default function Home() {
     </motion.div>
   );
 
+  const handleNavigateToAlbum = (albumId: string) => {
+    navigate(`/album/${albumId}`);
+  };
+
+  const handleViewAlbumDetails = () => {
+    // navigate(`/album/${albumId}`);
+    navigate(`/myPurchase`);
+  };
+
   return (
     <div className="min-h-screen w-full flex flex-col p-4 md:p-6">
       {/* Welcome Header */}
+      <Button onClick={() => handleViewAlbumDetails()}>go to purchase</Button>
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -287,290 +275,36 @@ export default function Home() {
           animate="show"
           className="lg:col-span-6 space-y-6"
         >
-          {/* Feed Tabs */}
-          <motion.div variants={item}>
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
+          {/* Feed Content */}
+          <motion.div variants={item} className="space-y-6">
+            <h2 className="text-xl font-semibold">Your Feed</h2>
+            <LoadingWrapper
+              isLoading={isLoading}
+              variant="card"
+              count={3}
+              layout="block"
+              loadingText="Loading feed..."
             >
-              <TabsList className="w-full justify-start mb-4">
-                <TabsTrigger value="featured">Featured</TabsTrigger>
-                <TabsTrigger value="recent">Recent</TabsTrigger>
-                <TabsTrigger value="popular">Popular</TabsTrigger>
-              </TabsList>
-
-              {/* Featured Albums Tab */}
-              <TabsContent value="featured" className="space-y-4">
-                <LoadingWrapper
-                  isLoading={isLoading}
-                  variant="card"
-                  count={3}
-                  layout="block"
-                  loadingText="Loading featured albums..."
-                >
-                  {featuredAlbums.length > 0 ? (
-                    featuredAlbums.map((album: Album) => (
-                      <Card className="overflow-hidden border-border hover:shadow-md transition-shadow">
-                        <CardHeader className="pb-2 space-y-0">
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8 border-2 border-primary">
-                                <span className="font-medium text-xs">
-                                  {album.owner.slice(0, 2).toUpperCase()}
-                                </span>
-                              </Avatar>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-sm">
-                                    {album.owner.slice(0, 6)}...
-                                    {album.owner.slice(-4)}
-                                  </span>
-                                  <Badge
-                                    className={`${
-                                      tierColors[
-                                        album.tier as keyof typeof tierColors
-                                      ]
-                                    } text-white text-sm`}
-                                  >
-                                    {
-                                      tierNames[
-                                        album.tier as keyof typeof tierNames
-                                      ]
-                                    }
-                                  </Badge>
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                  Content Creator
-                                </p>
-                              </div>
-                            </div>
-                            <span className="text-sm font-medium">
-                              {album.price} SUI
-                            </span>
-                          </div>
-                        </CardHeader>
-
-                        <CardContent className="pb-0 space-y-3">
-                          <h3 className="font-medium text-lg">{album.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {album.description}
-                          </p>
-
-                          {/* Tags */}
-                          <div className="flex flex-wrap gap-1">
-                            {album.tags?.slice(0, 3).map((tag, i) => (
-                              <Badge
-                                key={i}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                            {album.tags?.length > 3 && (
-                              <Badge variant="secondary" className="text-xs">
-                                +{album.tags.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-
-                          {/* Album Preview */}
-                          <div className="mt-2 relative">
-                            <div>
-                              {album.contentInfos?.[0] && (
-                                <AspectRatio
-                                  ratio={16 / 9}
-                                  className="overflow-hidden rounded-md"
-                                >
-                                  <img
-                                    src={album.contentInfos[0]}
-                                    alt={album.name}
-                                    className="w-full h-full object-cover hover:scale-105 transition-transform"
-                                    onClick={() =>
-                                      handleNavigateToAlbum(album.albumId)
-                                    }
-                                  />
-                                </AspectRatio>
-                              )}
-                            </div>
-
-                            {/* Multiple images indicator */}
-                            {album.contentInfos?.length > 1 && (
-                              <div className="absolute top-2 right-2">
-                                <Badge className="bg-black/60 backdrop-blur-sm text-white">
-                                  +{album.contentInfos.length} images
-                                </Badge>
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-
-                        <CardFooter className="pt-2 pb-3">
-                          <div className="w-full border-t border-border pt-2">
-                            <div className="flex justify-between">
-                              <div className="flex space-x-4 text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                  <Heart className="h-4 w-4" />
-                                  <span className="text-xs">
-                                    {album.interaction?.likes || 0}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <MessageCircle className="h-4 w-4" />
-                                  <span className="text-xs">
-                                    {album.interaction?.shares || 0}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Bookmark className="h-4 w-4" />
-                                  <span className="text-xs">
-                                    {album.interaction?.saves || 0}
-                                  </span>
-                                </div>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleNavigateToAlbum(album.albumId)
-                                }
-                              >
-                                View Details
-                              </Button>
-                            </div>
-                          </div>
-                        </CardFooter>
-                      </Card>
-                    ))
-                  ) : (
-                    <div className="text-center py-12 border border-dashed border-border rounded-lg">
-                      <p className="text-muted-foreground">
-                        No featured albums available
-                      </p>
-                    </div>
-                  )}
-                </LoadingWrapper>
-              </TabsContent>
-
-              {/* Recent Albums Tab */}
-              <TabsContent value="recent" className="space-y-4">
-                <LoadingWrapper
-                  isLoading={isLoading}
-                  variant="card"
-                  count={5}
-                  layout="block"
-                  loadingText="Loading recent albums..."
-                >
-                  {recentAlbums.length > 0 ? (
-                    recentAlbums.map((album: Album) => (
-                      <Card
-                        key={album.albumId}
-                        className="overflow-hidden bg-card border-border hover:shadow-lg transition-shadow"
-                      >
-                        <div className="flex flex-col sm:flex-row">
-                          <div className="sm:w-48 h-40 sm:h-auto relative">
-                            <AspectRatio ratio={16 / 9} className="h-full">
-                              {album.contentInfos?.[0] ? (
-                                <img
-                                  src={album.contentInfos[0]}
-                                  alt={album.name}
-                                  className="object-cover w-full h-full"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-muted flex items-center justify-center">
-                                  No preview
-                                </div>
-                              )}
-                            </AspectRatio>
-                          </div>
-                          <div className="p-4 flex-1 flex flex-col justify-between">
-                            <div>
-                              <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-medium text-lg">
-                                  {album.name}
-                                </h3>
-                                <Badge
-                                  className={`${
-                                    tierColors[
-                                      album.tier as keyof typeof tierColors
-                                    ]
-                                  } text-white text-sm`}
-                                >
-                                  {
-                                    tierNames[
-                                      album.tier as keyof typeof tierNames
-                                    ]
-                                  }
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                                {album.description}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between pt-2 border-t border-border">
-                              <div className="flex items-center gap-3 text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                  <Heart className="h-4 w-4" />
-                                  <span className="text-xs">
-                                    {album.interaction?.likes || 0}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Share2 className="h-4 w-4" />
-                                  <span className="text-xs">
-                                    {album.interaction?.shares || 0}
-                                  </span>
-                                </div>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleViewAlbumDetails(album.albumId)
-                                }
-                              >
-                                Details
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))
-                  ) : (
-                    <div className="text-center py-12 border border-dashed border-border rounded-lg">
-                      <p className="text-muted-foreground">
-                        No recent albums available
-                      </p>
-                    </div>
-                  )}
-                </LoadingWrapper>
-              </TabsContent>
-
-              {/* Popular Albums Tab */}
-              <TabsContent value="popular" className="space-y-4">
-                <LoadingWrapper
-                  isLoading={isLoading}
-                  variant="card"
-                  count={4}
-                  layout="block"
-                  loadingText="Loading popular albums..."
-                >
-                  {popularByTier.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      {popularByTier.map((album: Album) => (
-                        <CardWithLens
-                          key={album.albumId}
-                          imageSrc={album.contentInfos?.[0] || ""}
-                          imageAlt={album.name}
-                          className="overflow-hidden h-full flex flex-col bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
-                          onClick={() => handleViewAlbumDetails(album.albumId)}
-                        >
-                          <CardHeader className="pb-2">
-                            <div className="flex justify-between items-start">
-                              <CardTitle className="text-xl">
-                                {album.name}
-                              </CardTitle>
+              {albums.length > 0 ? (
+                albums.map((album: Album) => (
+                  <Card
+                    key={album.albumId}
+                    className="overflow-hidden border-border hover:shadow-md transition-shadow mb-4"
+                  >
+                    <CardHeader className="pb-2 space-y-0">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8 border-2 border-primary">
+                            <AvatarFallback>
+                              {album.owner.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm">
+                                {album.owner.slice(0, 6)}...
+                                {album.owner.slice(-4)}
+                              </span>
                               <Badge
                                 className={`${
                                   tierColors[
@@ -585,44 +319,115 @@ export default function Home() {
                                 }
                               </Badge>
                             </div>
-                            <CardDescription className="line-clamp-2">
-                              {album.description}
-                            </CardDescription>
-                          </CardHeader>
-                          <CardFooter className="pt-2 flex-col gap-3 mt-auto">
-                            <div className="flex justify-between items-center w-full border-t border-border pt-3">
-                              <div className="flex items-center gap-4 text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                  <Heart className="h-4 w-4" />
-                                  <span className="text-sm">
-                                    {album.interaction?.likes || 0}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Share2 className="h-4 w-4" />
-                                  <span className="text-sm">
-                                    {album.interaction?.shares || 0}
-                                  </span>
-                                </div>
-                              </div>
-                              <p className="font-medium text-lg">
-                                {album.price} SUI
-                              </p>
-                            </div>
-                          </CardFooter>
-                        </CardWithLens>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 border border-dashed border-border rounded-lg">
-                      <p className="text-muted-foreground">
-                        No popular albums available
+                            <p className="text-xs text-muted-foreground">
+                              Content Creator
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-medium">
+                          {album.price} SUI
+                        </span>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="pb-0 space-y-3">
+                      <h3 className="font-medium text-lg">{album.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {album.description}
                       </p>
-                    </div>
-                  )}
-                </LoadingWrapper>
-              </TabsContent>
-            </Tabs>
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-1">
+                        {album.tags?.slice(0, 3).map((tag, i) => (
+                          <Badge
+                            key={i}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                        {album.tags?.length > 3 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{album.tags.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Album Preview */}
+                      <div className="mt-2 relative">
+                        <div>
+                          {album.contentInfos?.[0] && (
+                            <AspectRatio
+                              ratio={16 / 9}
+                              className="overflow-hidden rounded-md"
+                            >
+                              <img
+                                src={album.contentInfos[0]}
+                                alt={album.name}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform"
+                                onClick={() =>
+                                  handleNavigateToAlbum(album.albumId)
+                                }
+                              />
+                            </AspectRatio>
+                          )}
+                        </div>
+
+                        {/* Multiple images indicator */}
+                        {album.contentInfos?.length > 1 && (
+                          <div className="absolute top-2 right-2">
+                            <Badge className="bg-black/60 backdrop-blur-sm text-white">
+                              +{album.contentInfos.length} images
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+
+                    <CardFooter className="pt-2 pb-3">
+                      <div className="w-full border-t border-border pt-2">
+                        <div className="flex justify-between">
+                          <div className="flex space-x-4 text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Heart className="h-4 w-4" />
+                              <span className="text-xs">
+                                {album.interaction?.likes || 0}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MessageCircle className="h-4 w-4" />
+                              <span className="text-xs">
+                                {album.interaction?.shares || 0}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Bookmark className="h-4 w-4" />
+                              <span className="text-xs">
+                                {album.interaction?.saves || 0}
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleNavigateToAlbum(album.albumId)}
+                          >
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-12 border border-dashed border-border rounded-lg">
+                  <p className="text-muted-foreground">
+                    No albums available in your feed
+                  </p>
+                </div>
+              )}
+            </LoadingWrapper>
           </motion.div>
         </motion.div>
 

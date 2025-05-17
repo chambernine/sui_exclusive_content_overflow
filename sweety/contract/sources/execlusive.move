@@ -1,12 +1,12 @@
 module sweety::exclusive;
 
-use std::string::String;
-
 use sui::balance::{Self, Balance};
 use sui::coin::{Coin};
-use sui::dynamic_field;
-use sui::event;
 use sui::sui::SUI;
+use sui::event;
+
+use std::string::String;
+use sui::dynamic_field;
 use sui::table;
 
 use sweety::utils::is_prefix;
@@ -44,8 +44,7 @@ public struct Vault has key, store {
     id: UID,
     admin: address,
     admin_cap_id: ID,
-    // platform_balance: Balance<SUI>,
-    balances: table::Table<address, table::Table<ID, u64>>,
+    balances: table::Table<address, u64>,
 }
 
 public struct SupportEvent has copy, drop {
@@ -85,17 +84,12 @@ fun create_admin_vault(_witness: EXCLUSIVE, ctx: &mut TxContext): (Vault, AdminC
     let admin_cap = create_admin_cap(ctx);
     let admin_cap_id = object::id(&admin_cap);
 
-    let mut balances = table::new<address, table::Table<ID, u64>>(ctx);
-    let mut admin_bag = table::new<ID, u64>(ctx);
-    table::add(&mut admin_bag, admin_cap_id, 0);
-    table::add(&mut balances, admin_address, admin_bag);
-
+    let balance = table::new<address, u64>(ctx);
     let vault = Vault {
         id: object::new(ctx),
         admin: admin_address,
         admin_cap_id,
-        // platform_balance: balance::zero(),
-        balances,
+        balances: balance,
     };
 
     (vault, admin_cap)
@@ -133,6 +127,119 @@ entry fun create_album_entry(
 ) {
     transfer::transfer(create_album(name, price, creator, ctx), creator);
 }
+
+fun update_creator_balance(
+    creator: address,
+    vault: &mut Vault,
+    amount: u64,
+    _ctx: &mut TxContext
+) {
+    let prev = if (table::contains(&vault.balances, creator)) {
+        *table::borrow(&vault.balances, creator)
+    } else {
+        0
+    };
+    table::add(&mut vault.balances, creator, prev + amount);
+}
+
+// === Album Support ===
+entry fun support_album(
+    album: &mut Album,
+    mut payment: Coin<SUI>,
+    fee: u64,
+    _vault: &mut Vault,
+    ctx: &mut TxContext
+) {
+    let sender = ctx.sender();
+    assert!(!album.insider.contains(&sender), E_DUPLICATE);
+    assert!(payment.value() == album.price, E_NOT_EQUAL);
+    assert!(fee >= 1 && fee <= 20, E_INVALID_FEE_RANGE);
+
+    let total_payment = album.price;
+    let platform_fee = (total_payment * fee).divide_and_round_up(100);
+    let creator_fee = total_payment - platform_fee;
+
+    assert!(platform_fee+creator_fee == payment.value(),E_INSUFFICIENT_BALANCE);
+    let platform_coin = payment.split(platform_fee, ctx);
+    let creator_coin = payment.split(creator_fee, ctx);
+
+    transfer::public_transfer(platform_coin, _vault.admin);
+    transfer::public_transfer(creator_coin, album.owner);
+
+    update_creator_balance(album.owner, _vault, creator_fee, ctx);
+    album.insider.push_back(sender);
+    event::emit(SupportEvent {
+        supporter: sender,
+        album_id: object::id(album),
+        creator: album.owner,
+        total_payment: total_payment,
+        creator_fee,
+        platform_fee,
+    });
+    payment.destroy_zero();
+}
+
+entry fun tip_to_creator(
+    creator: address,
+    mut payment: Coin<SUI>,
+    fee: u64,
+    _vault: &mut Vault,
+    ctx: &mut TxContext
+){
+    let total_payment = payment.value();
+    let platform_fee = (total_payment * fee).divide_and_round_up(100);
+    let creator_fee = total_payment - platform_fee;
+
+    assert!(platform_fee+creator_fee == payment.value(),E_INSUFFICIENT_BALANCE);
+    let platform_coin = payment.split(platform_fee, ctx);
+    let creator_coin = payment.split(creator_fee, ctx);
+
+    transfer::public_transfer(platform_coin, _vault.admin);
+    transfer::public_transfer(creator_coin, creator);
+
+    update_creator_balance(creator, _vault, creator_fee, ctx);
+    
+    event::emit(CreatorTipEvent {
+        supporter: ctx.sender(),
+        creator: creator,
+        total_payment: total_payment,
+        creator_fee,
+        platform_fee,
+    });
+    payment.destroy_zero();
+}
+
+public fun creator_add(album: &mut Album, album_cap: &AlbumCap, account: address) {
+    assert!(album_cap.album_id == object::id(album), E_INVALID_CAP);
+    assert!(!album.insider.contains(&account), E_DUPLICATE);
+    album.insider.push_back(account);
+}
+
+public fun creator_remove(album: &mut Album, album_cap: &AlbumCap, account: address) {
+    assert!(album_cap.album_id == object::id(album), E_INVALID_CAP);
+    album.insider = album.insider.filter!(|x| x != account);
+}
+
+public fun namespace(album: &Album): vector<u8> {
+    album.id.to_bytes()
+}
+
+fun approve_internal(caller: address, id: vector<u8>, album: &Album): bool {
+    let ns = namespace(album);
+    if (!is_prefix(ns, id)) return false;
+    album.insider.contains(&caller)
+}
+
+entry fun seal_approve(id: vector<u8>, album: &Album, ctx: &TxContext) {
+    assert!(approve_internal(ctx.sender(), id, album), E_NO_ACCESS);
+}
+
+entry fun publish(album: &mut Album, album_cap: &AlbumCap, blobId: String) {
+    assert!(album_cap.album_id == object::id(album), E_INVALID_CAP);
+    assert!(!dynamic_field::exists_(&album.id, blobId), E_DUPLICATE);
+    dynamic_field::add(&mut album.id, blobId, MARKER);
+}
+
 
 // fun update_creator_balance(
 //     creator: address,
@@ -182,70 +289,6 @@ entry fun create_album_entry(
 //     update_admin_balance(vault, platform_fee, fee);
 // }
 
-// === Album Support ===
-entry fun support_album(
-    album: &mut Album,
-    mut payment: Coin<SUI>,
-    fee: u64,
-    _vault: &mut Vault,
-    ctx: &mut TxContext
-) {
-    let sender = ctx.sender();
-    assert!(!album.insider.contains(&sender), E_DUPLICATE);
-    assert!(payment.value() == album.price, E_NOT_EQUAL);
-    assert!(fee >= 1 && fee <= 20, E_INVALID_FEE_RANGE);
-
-    let total_payment = album.price;
-    let platform_fee = (total_payment * fee).divide_and_round_up(100);
-    let creator_fee = total_payment - platform_fee;
-
-    assert!(platform_fee+creator_fee == payment.value(),E_INSUFFICIENT_BALANCE);
-    let platoform_coin = payment.split(platform_fee, ctx);
-    let creator_coin = payment.split(creator_fee, ctx);
-
-    transfer::public_transfer(platoform_coin, _vault.admin);
-    transfer::public_transfer(creator_coin, album.owner);
-
-    // update_balance(album, platform_fee, creator_fee, fee, _vault, ctx);
-    album.insider.push_back(sender);
-    event::emit(SupportEvent {
-        supporter: sender,
-        album_id: object::id(album),
-        creator: album.owner,
-        total_payment: total_payment,
-        creator_fee,
-        platform_fee,
-    });
-    payment.destroy_zero();
-}
-
-entry fun tip_to_creator(
-    creator: address,
-    mut payment: Coin<SUI>,
-    fee: u64,
-    _vault: &mut Vault,
-    ctx: &mut TxContext
-){
-    let total_payment = payment.value();
-    let platform_fee = (total_payment * fee).divide_and_round_up(100);
-    let creator_fee = total_payment - platform_fee;
-
-    assert!(platform_fee+creator_fee == payment.value(),E_INSUFFICIENT_BALANCE);
-    let platoform_coin = payment.split(platform_fee, ctx);
-    let creator_coin = payment.split(creator_fee, ctx);
-
-    transfer::public_transfer(platoform_coin, _vault.admin);
-    transfer::public_transfer(creator_coin, creator);
-    event::emit(CreatorTipEvent {
-        supporter: ctx.sender(),
-        creator: creator,
-        total_payment: total_payment,
-        creator_fee,
-        platform_fee,
-    });
-    payment.destroy_zero();
-}
-
 // entry fun withdraw_platform_balances(
 //     _admin_cap: &AdminCap,
 //     vault: &mut Vault,
@@ -286,34 +329,3 @@ entry fun tip_to_creator(
 //     let coin = balance::split<SUI>(&mut vault.platform_balance, request_amount).into_coin(ctx);
 //     transfer::public_transfer(coin, creator);
 // }
-
-public fun creator_add(album: &mut Album, album_cap: &AlbumCap, account: address) {
-    assert!(album_cap.album_id == object::id(album), E_INVALID_CAP);
-    assert!(!album.insider.contains(&account), E_DUPLICATE);
-    album.insider.push_back(account);
-}
-
-public fun creator_remove(album: &mut Album, album_cap: &AlbumCap, account: address) {
-    assert!(album_cap.album_id == object::id(album), E_INVALID_CAP);
-    album.insider = album.insider.filter!(|x| x != account);
-}
-
-public fun namespace(album: &Album): vector<u8> {
-    album.id.to_bytes()
-}
-
-fun approve_internal(caller: address, id: vector<u8>, album: &Album): bool {
-    let ns = namespace(album);
-    if (!is_prefix(ns, id)) return false;
-    album.insider.contains(&caller)
-}
-
-entry fun seal_approve(id: vector<u8>, album: &Album, ctx: &TxContext) {
-    assert!(approve_internal(ctx.sender(), id, album), E_NO_ACCESS);
-}
-
-entry fun publish(album: &mut Album, album_cap: &AlbumCap, blobId: String) {
-    assert!(album_cap.album_id == object::id(album), E_INVALID_CAP);
-    assert!(!dynamic_field::exists_(&album.id, blobId), E_DUPLICATE);
-    dynamic_field::add(&mut album.id, blobId, MARKER);
-}

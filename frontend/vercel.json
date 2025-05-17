@@ -1,8 +1,0 @@
-{
-  "build": {
-    "env": {
-      "NPM_FLAGS": "--platform=linux --no-optional"
-    }
-  },
-  "buildCommand": "npm run vercel-build"
-}

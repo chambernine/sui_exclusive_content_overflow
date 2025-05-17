@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, Share2, Bookmark, MessageCircle } from "lucide-react";
+import { Heart, Share2, Bookmark } from "lucide-react";
 import { useState } from "react";
 import { LoadingWrapper } from "@/components/ui/loading-wrapper";
 import { toast } from "sonner";
@@ -141,14 +141,14 @@ export default function Home() {
           className="w-full"
           onClick={() => navigate("/explore-albums")}
         >
-          Explore All Albums
+          Explore All Contents
         </Button>
         <Button
           variant="outline"
           className="w-full"
           onClick={() => navigate("/create-draft")}
         >
-          Create New Album
+          Create New Content
         </Button>
       </CardContent>
     </Card>
@@ -217,15 +217,9 @@ export default function Home() {
     navigate(`/album/${albumId}`);
   };
 
-  const handleViewAlbumDetails = () => {
-    // navigate(`/album/${albumId}`);
-    navigate(`/myPurchase`);
-  };
-
   return (
     <div className="min-h-screen w-full flex flex-col p-4 md:p-6">
       {/* Welcome Header */}
-      <Button onClick={() => handleViewAlbumDetails()}>go to purchase</Button>
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -237,7 +231,7 @@ export default function Home() {
             Welcome to SUI Exclusive Content
           </h1>
           <p className="text-muted-foreground">
-            Discover and collect unique digital content
+            Discover and collect exclusive content
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -396,7 +390,7 @@ export default function Home() {
                               </span>
                             </div>
                             <div className="flex items-center gap-1">
-                              <MessageCircle className="h-4 w-4" />
+                              <Share2 className="h-4 w-4" />
                               <span className="text-xs">
                                 {album.interaction?.shares || 0}
                               </span>

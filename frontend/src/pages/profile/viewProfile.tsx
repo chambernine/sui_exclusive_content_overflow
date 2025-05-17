@@ -29,7 +29,14 @@ import {
 } from "@/components/ui/select";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -54,6 +61,8 @@ import { Protected } from "@/components/auth/Protected";
 import { useProfile, useUpdateProfile } from "@/hooks/api/useProfile";
 import { useMyAlbums, useMyPurchasedAlbums } from "@/hooks/api/useAlbums";
 import { CardWithLens } from "@/components/custom/card-with-lens";
+import { fileToBase64 } from "@/utils/fileFormat";
+import { useNavigate } from "react-router-dom";
 
 interface ProfileMetaData {
   userAddress: string;
@@ -71,74 +80,20 @@ interface ProfileMetaData {
 }
 
 interface Album {
-  id: string;
-  title: string;
-  tier: AlbumTier;
-  preview: string;
-  description?: string;
-  interaction?: {
+  albumId: string;
+  name: string;
+  owner: string;
+  tier: number;
+  price: number;
+  description: string;
+  tags: string[];
+  contentInfos: string[];
+  interaction: {
     likes: number;
     shares: number;
     saves: number;
   };
 }
-
-const mockPurchasedAlbums: Album[] = [
-  {
-    id: "1",
-    title: "City Nights",
-    tier: AlbumTier.premium,
-    preview:
-      "https://images.pexels.com/photos/1722183/pexels-photo-1722183.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    description: "A stunning collection of urban nightscapes and city lights",
-    interaction: {
-      likes: 124,
-      shares: 32,
-      saves: 56,
-    },
-  },
-  {
-    id: "2",
-    title: "Ocean Waves",
-    tier: AlbumTier.exclusive,
-    preview:
-      "https://images.pexels.com/photos/1295138/pexels-photo-1295138.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    description: "Serene ocean landscapes and the beauty of water in motion",
-    interaction: {
-      likes: 98,
-      shares: 14,
-      saves: 43,
-    },
-  },
-  {
-    id: "3",
-    title: "Desert Dreams",
-    tier: AlbumTier.standard,
-    preview:
-      "https://images.pexels.com/photos/691668/pexels-photo-691668.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    description:
-      "Explore the mysterious and beautiful landscapes of sand and sky",
-    interaction: {
-      likes: 76,
-      shares: 22,
-      saves: 38,
-    },
-  },
-  {
-    id: "4",
-    title: "Celestial Beyond",
-    tier: AlbumTier.principle,
-    preview:
-      "https://images.pexels.com/photos/1169754/pexels-photo-1169754.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    description:
-      "Journey through the cosmos with these stellar space photographs",
-    interaction: {
-      likes: 142,
-      shares: 47,
-      saves: 83,
-    },
-  },
-];
 
 const formSchema = z.object({
   username: z.string().min(3, {
@@ -165,6 +120,8 @@ export function ProfilePage() {
   const [isSaved, setIsSaved] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filterTier, setFilterTier] = useState<string>("all");
+
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -336,9 +293,12 @@ export function ProfilePage() {
   const renderAlbumGrid = (albums: any, loading: boolean) => {
     if (loading) {
       return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ">
           {[1, 2, 3].map((item) => (
-            <Card key={item} className="overflow-hidden">
+            <Card
+              key={item}
+              className="overflow-hidden bg-card border-border hover:shadow-lg transition-shadow cursor-pointer p-0"
+            >
               <div className="h-48 bg-muted animate-pulse" />
               <CardContent className="p-4">
                 <div className="h-4 w-3/4 bg-muted animate-pulse mb-2" />
@@ -370,16 +330,25 @@ export function ProfilePage() {
       );
     }
 
+    const handleViewDetails = (album: Album) => {
+      localStorage.setItem("viewingAlbum", JSON.stringify(album));
+
+      navigate(`profile/myPurchase/${album.albumId}`);
+    };
+
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAlbums.map((album: any) => (
-          <CardWithLens
-            key={album.id || album.albumId}
-            className="overflow-hidden"
-          >
-            <AspectRatio ratio={1 / 1}>
-              <div className="h-full bg-muted overflow-hidden relative">
-                <div className="absolute top-2 right-2">
+        {filteredAlbums.map((album: Album) => (
+          <motion.div key={album.albumId} variants={item}>
+            <CardWithLens
+              imageSrc={album.contentInfos?.[0] || ""}
+              imageAlt={album.name}
+              className="overflow-hidden h-full flex flex-col bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => handleViewDetails(album)}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-xl">{album.name}</CardTitle>
                   <Badge
                     className={`${
                       tierColors[album.tier as keyof typeof tierColors]
@@ -388,46 +357,46 @@ export function ProfilePage() {
                     {tierNames[album.tier as keyof typeof tierNames]}
                   </Badge>
                 </div>
-                <img
-                  src={
-                    album.preview ||
-                    album.contentInfos?.[0] ||
-                    "https://via.placeholder.com/300"
-                  }
-                  alt={album.title || album.name}
-                  className="w-full h-full object-cover transition-all hover:scale-105"
-                />
-              </div>
-            </AspectRatio>
-            <CardContent className="p-4">
-              <h3 className="font-medium text-lg">
-                {album.title || album.name}
-              </h3>
-              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                {album.description}
-              </p>
-            </CardContent>
-            <CardFooter className="p-4 pt-0 flex justify-between text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Heart className="h-4 w-4" />
+                <CardDescription className="line-clamp-2">
+                  {album.owner?.slice(0, 6)}...
+                  {album.owner?.slice(-4)}
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="flex-col gap-3">
+                <div className="flex justify-between items-center w-full border-t border-border pt-3">
+                  <div className="flex items-center gap-4 text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Heart className="h-4 w-4" />
+                      <span className="text-sm">
+                        {album.interaction?.likes || 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Share2 className="h-4 w-4" />
+                      <span className="text-sm">
+                        {album.interaction?.shares || 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Bookmark className="h-4 w-4" />
+                      <span className="text-sm">
+                        {album.interaction?.saves || 0}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="font-medium text-lg">{album.price} SUI</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary border border-primary/20"
+                  onClick={() => handleViewDetails(album)}
+                >
+                  View Details
                 </Button>
-                <span>{album.interaction?.likes || 0}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Share2 className="h-4 w-4" />
-                </Button>
-                <span>{album.interaction?.shares || 0}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Bookmark className="h-4 w-4" />
-                </Button>
-                <span>{album.interaction?.saves || 0}</span>
-              </div>
-            </CardFooter>
-          </CardWithLens>
+              </CardFooter>
+            </CardWithLens>
+          </motion.div>
         ))}
       </div>
     );

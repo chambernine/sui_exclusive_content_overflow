@@ -80,7 +80,11 @@ export function NavigationDock() {
             to={route.path}
             icon={route.icon}
             label={route.label}
-            isActive={location.pathname === route.path}
+            isActive={
+              route.path === "/"
+                ? location.pathname === "/"
+                : location.pathname.startsWith(route.path)
+            }
           />
         ))}
       </div>

@@ -12,7 +12,7 @@ export function ThemeToggle() {
   return (
     <motion.button
       onClick={toggleTheme}
-      className="relative h-10 w-10 rounded-full bg-background/10 backdrop-blur-md flex items-center justify-center border border-border/50"
+      className="cursor-pointer relative h-10 w-10 rounded-full bg-background/10 backdrop-blur-md flex items-center justify-center border border-border/50"
       whileTap={{ scale: 0.9 }}
       whileHover={{ scale: 1.05 }}
       initial={{ opacity: 0 }}

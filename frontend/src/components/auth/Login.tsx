@@ -36,7 +36,6 @@ export function Login({
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4">
       <div className="relative w-full max-w-4xl">
-        {/* Background elements */}
         <motion.div
           className="absolute top-[-20%] right-[5%] w-64 h-64 rounded-full bg-primary/20 blur-3xl dark:bg-primary/10"
           initial={{ opacity: 0, scale: 0.8 }}

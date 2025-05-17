@@ -194,8 +194,6 @@ export default function MyPurchasedAlbums() {
     );
   }
 
-  console.log(decryptedFileUrls, "decryptedFileUrls");
-
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8">My Purchased Albums</h1>
@@ -216,7 +214,7 @@ export default function MyPurchasedAlbums() {
               <div className="flex gap-2 mt-4">
                 <Button
                   className="flex-1"
-                  onClick={() => navigate(`/album/${album.albumId}`)}
+                  onClick={() => navigate(`/myPurchase/${album.albumId}`)}
                 >
                   View Details
                 </Button>

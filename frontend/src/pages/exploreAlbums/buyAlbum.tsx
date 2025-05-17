@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import useInteractContract from "@/hooks/useInteractContract";
@@ -26,11 +26,9 @@ import {
   Info,
   CreditCard,
   ArrowLeft,
-  Eye,
   MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { tierColors, tierNames } from "@/types/album";
@@ -53,6 +51,7 @@ interface Album {
   description: string;
   tags: string[];
   contentInfos: string[];
+  created_at: object;
   interaction: {
     likes: number;
     shares: number;
@@ -65,13 +64,12 @@ export default function BuyAlbum() {
   const navigate = useNavigate();
   const { address } = useSuiAccount();
   const { data, isLoading } = useExploreAlbumById(albumId || "", address);
-  const album = data?.data || null;
+  const album: Album | null = data?.data || null;
   const { CreateSupportAlbumTx } = useInteractContract();
 
   const [selectedImage, setSelectedImage] = useState<number>(0);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [purchaseInProgress, setPurchaseInProgress] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>("previews");
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -152,32 +150,127 @@ export default function BuyAlbum() {
     toast.success("Link copied to clipboard!");
   };
 
+  const formatDate = (created_at: any) => {
+    if (!created_at || !created_at.seconds) return "Unknown date";
+    const date = new Date(created_at.seconds * 1000);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   if (isLoading) {
     return (
-      <div className="container mx-auto py-12 px-4 max-w-7xl">
+      <div className="container mx-auto py-4 md:py-6 max-w-7xl">
+        {/* Back button skeleton */}
+        <div className="mb-4">
+          <Skeleton className="h-10 w-28" />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Image Gallery & Content */}
           <div className="lg:col-span-2 space-y-6">
-            <Skeleton className="h-8 w-48" />
-            <div className="aspect-video">
+            {/* Main image carousel skeleton */}
+            <div className="aspect-video rounded-lg overflow-hidden">
               <Skeleton className="h-full w-full rounded-lg" />
             </div>
-            <div className="flex gap-3">
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-20 w-20 rounded-md" />
-              ))}
+
+            {/* Content Details Card */}
+            <div className="rounded-lg overflow-hidden">
+              <div className="p-6 space-y-4">
+                {/* Title and tier */}
+                <div className="flex flex-col sm:flex-row justify-between gap-2">
+                  <Skeleton className="h-9 w-3/4" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-5 w-16 rounded-full" />
+                  ))}
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2 pt-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+
+                <Skeleton className="h-px w-full my-4" />
+
+                {/* Content Details */}
+                <div className="space-y-4">
+                  <Skeleton className="h-6 w-32" />
+                  <div className="grid grid-cols-3 gap-y-3 bg-muted/30 p-4 rounded-lg">
+                    {[1, 2, 3, 4].map((i) => (
+                      <React.Fragment key={i}>
+                        <Skeleton className="h-4 w-20" />
+                        <div className="col-span-2 flex justify-end">
+                          <Skeleton className="h-5 w-32" />
+                        </div>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Community Engagement */}
+                <div className="space-y-4 mt-6">
+                  <Skeleton className="h-6 w-40" />
+                  <div className="flex justify-between p-4 bg-muted/30 rounded-lg">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <Skeleton className="h-5 w-5" />
+                        <Skeleton className="h-5 w-8" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* Right Column - Purchase Card */}
           <div className="space-y-6">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-8 w-32" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-5/6" />
+            <div className="bg-card/30 backdrop-blur-sm border-border rounded-lg overflow-hidden">
+              {/* Card Header */}
+              <div className="p-6 pb-2">
+                <Skeleton className="h-7 w-48 mb-2" />
+                <Skeleton className="h-4 w-64" />
+              </div>
+
+              {/* Card Content */}
+              <div className="p-6 space-y-4">
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-5 w-12" />
+                  <Skeleton className="h-8 w-24" />
+                </div>
+
+                <Skeleton className="h-px w-full" />
+
+                <div className="rounded-md bg-primary/10 p-3 border border-primary/20">
+                  <Skeleton className="h-5 w-32 mb-3" />
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-start">
+                        <Skeleton className="h-4 w-4 mr-2 mt-1" />
+                        <Skeleton className="h-4 w-full" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Card Footer */}
+              <div className="p-6 pt-0 flex flex-col space-y-3">
+                <Skeleton className="h-10 w-full rounded-md" />
+                <Skeleton className="h-10 w-full rounded-md" />
+              </div>
             </div>
-            <Skeleton className="h-12 w-full rounded-md" />
           </div>
         </div>
       </div>
@@ -207,12 +300,11 @@ export default function BuyAlbum() {
 
   return (
     <Protected description="Connect wallet to view and purchase content">
-      <div className="container mx-auto py-8 md:py-12 px-4 max-w-7xl">
+      <div className="container mx-auto py-4 md:py-6 max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-6"
         >
           <Button
             variant="ghost"
@@ -222,31 +314,12 @@ export default function BuyAlbum() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Explore
           </Button>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h1 className="text-3xl font-bold">{album.name}</h1>
-            <Badge
-              className={`${
-                tierColors[album.tier as keyof typeof tierColors]
-              } text-white text-sm`}
-            >
-              {tierNames[album.tier as keyof typeof tierNames]}
-            </Badge>
-          </div>
-
-          <div className="flex flex-wrap gap-2 mt-2">
-            {album.tags?.map((tag: string, i: number) => (
-              <Badge key={i} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 lg:justify-center gap-8">
           {/* Left Column - Image Gallery */}
           <motion.div
-            className="lg:col-span-2 space-y-6"
+            className="lg:col-span-2 space-y-4 sm:space-y-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -367,155 +440,110 @@ export default function BuyAlbum() {
             )}
 
             {/* Content Details Section */}
-            <motion.div className="mt-8" variants={itemVariants}>
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="w-full">
-                  <TabsTrigger value="previews" className="flex-1">
-                    <Eye className="h-4 w-4 mr-2" />
-                    Preview Content
-                  </TabsTrigger>
-                  <TabsTrigger value="details" className="flex-1">
-                    <Info className="h-4 w-4 mr-2" />
-                    Description
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="previews" className="mt-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {album.contentInfos?.map((img: string, i: number) => (
-                          <motion.div
-                            key={i}
-                            whileHover={{ scale: 1.02 }}
-                            className="group relative aspect-square rounded-md overflow-hidden border border-border"
-                          >
-                            <img
-                              src={img}
-                              alt={`Preview ${i + 1}`}
-                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-                              <div className="p-2 text-white text-xs w-full">
-                                Preview {i + 1}
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
+            <motion.div variants={itemVariants}>
+              <Card className="overflow-hidden h-full flex flex-col bg-card border-border cursor-default hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  {/* Creator Card moved here */}
+                  <div className="prose prose-sm dark:prose-invert ">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <h1 className="text-3xl font-bold">{album.name}</h1>
+                      <Badge
+                        className={`${
+                          tierColors[album.tier as keyof typeof tierColors]
+                        } text-white text-sm`}
+                      >
+                        {tierNames[album.tier as keyof typeof tierNames]}
+                      </Badge>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {album.tags?.map((tag: string, i: number) => (
+                        <Badge key={i} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    <p className="leading-relaxed whitespace-pre-line mt-4">
+                      {album.description}
+                    </p>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  <Separator className="my-2" />
+                  {/* Content Details - Updated to match image layout */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-base font-semibold mb-2">
+                      <TagIcon className="h-5 w-5 text-primary" />
+                      Content Details
+                    </div>
+                    <div className="grid grid-cols-3 gap-y-3 bg-muted/50 p-4 rounded-lg text-sm">
+                      <span className="text-muted-foreground col-span-1">
+                        Created
+                      </span>
+                      <span className="col-span-2 flex justify-end">
+                        <span className="bg-background px-2 py-1 rounded text-xs truncate max-w-full">
+                          {formatDate(album.created_at)}
+                        </span>
+                      </span>
+
+                      <span className="text-muted-foreground col-span-1">
+                        Creator
+                      </span>
+                      <span className="col-span-2 flex justify-end">
+                        <span className="font-mono bg-background px-2 py-1 rounded text-xs truncate max-w-full">
+                          {album.owner}
+                        </span>
+                      </span>
+
+                      <span className="text-muted-foreground col-span-1">
+                        Content ID
+                      </span>
+                      <span className="col-span-2 flex justify-end">
+                        <span className="font-mono bg-background px-2 py-1 rounded text-xs truncate max-w-full">
+                          {album.albumId}
+                        </span>
+                      </span>
+
+                      <span className="text-muted-foreground col-span-1">
+                        Contract Address
+                      </span>
+                      <span className="col-span-2 flex justify-end">
+                        <span className="font-mono bg-background px-2 py-1 rounded text-xs truncate max-w-full">
+                          {album.albumId}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Community Engagement section - kept from original */}
+                  <div className="space-y-4 mt-6">
+                    <div className="flex items-center gap-2 text-base font-semibold mb-2">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                      Community Engagement
+                    </div>
+                    <div className="flex w-full items-center justify-between text-muted-foreground p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Heart className="h-5 w-5" />
+                        <span className="text-xs sm:text-base">
+                          {album.interaction?.likes || 0}
+                        </span>
                       </div>
-
-                      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {[
-                          ...Array(
-                            Math.min(6, album.contentInfos?.length || 0)
-                          ),
-                        ].map((_, i) => (
-                          <div
-                            key={`locked-${i}`}
-                            className="relative aspect-square rounded-md overflow-hidden border border-border bg-black/10 backdrop-blur-sm"
-                          >
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <Lock className="h-6 w-6 text-muted-foreground mb-1" />
-                              <p className="text-sm text-muted-foreground">
-                                Locked Content
-                              </p>
-                            </div>
-                            <div className="absolute bottom-2 right-2">
-                              <Badge
-                                variant="outline"
-                                className="bg-background/80 backdrop-blur-sm"
-                              >
-                                Exclusive
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="flex items-center gap-2">
+                        <Share2 className="h-5 w-5" />
+                        <span className="text-xs sm:text-base">
+                          {album.interaction?.shares || 0}
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-                <TabsContent value="details" className="mt-4">
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="prose prose-sm dark:prose-invert">
-                        <h4 className="font-semibold text-lg mb-2">
-                          About this Content
-                        </h4>
-                        <p className="leading-relaxed whitespace-pre-line">
-                          {album.description}
-                        </p>
-
-                        <Separator className="my-4" />
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <h5 className="font-semibold mb-2 flex items-center gap-1">
-                              <TagIcon className="h-4 w-4" />
-                              Content Details
-                            </h5>
-                            <ul className="space-y-1 text-sm">
-                              <li className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Content ID:
-                                </span>
-                                <span className="font-mono">
-                                  {album.albumId.substring(0, 8)}...
-                                </span>
-                              </li>
-                              <li className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Creator:
-                                </span>
-                                <span className="font-mono">
-                                  {album.owner.substring(0, 6)}...
-                                  {album.owner.substring(
-                                    album.owner.length - 4
-                                  )}
-                                </span>
-                              </li>
-                              <li className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                  Files:
-                                </span>
-                                <span>
-                                  {album.contentInfos?.length || 0} previews +
-                                  locked content
-                                </span>
-                              </li>
-                            </ul>
-                          </div>
-
-                          <div>
-                            <h5 className="font-semibold mb-2 flex items-center gap-1">
-                              <MessageSquare className="h-4 w-4" />
-                              Community Engagement
-                            </h5>
-                            <ul className="space-y-1 text-sm">
-                              <li className="flex items-center gap-2">
-                                <Heart className="h-4 w-4 text-rose-500" />
-                                <span>
-                                  {album.interaction?.likes || 0} likes
-                                </span>
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Share2 className="h-4 w-4 text-blue-500" />
-                                <span>
-                                  {album.interaction?.shares || 0} shares
-                                </span>
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Bookmark className="h-4 w-4 text-emerald-500" />
-                                <span>
-                                  {album.interaction?.saves || 0} saves
-                                </span>
-                              </li>
-                            </ul>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <Bookmark className="h-5 w-5" />
+                        <span className="text-xs sm:text-base">
+                          {album.interaction?.saves || 0}
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           </motion.div>
 
@@ -586,17 +614,7 @@ export default function BuyAlbum() {
                   )}
                 </Button>
 
-                <div className="flex w-full gap-3">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => {
-                      toast.success("Content liked!");
-                    }}
-                  >
-                    <Heart className="h-4 w-4 mr-2" />
-                    Like
-                  </Button>
+                <div className="flex w-full">
                   <Button
                     variant="outline"
                     className="flex-1"
@@ -607,30 +625,6 @@ export default function BuyAlbum() {
                   </Button>
                 </div>
               </CardFooter>
-            </Card>
-
-            {/* Creator Card */}
-            <Card className="bg-card/80 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-medium">
-                    {album.owner.substring(0, 2)}
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">Creator</CardTitle>
-                    <CardDescription className="text-xs font-mono">
-                      {album.owner.substring(0, 8)}...
-                      {album.owner.substring(album.owner.length - 4)}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-3 text-sm">
-                <p className="text-muted-foreground">
-                  This content is created and provided directly by the creator.
-                  By purchasing, you're supporting them directly.
-                </p>
-              </CardContent>
             </Card>
           </motion.div>
         </div>

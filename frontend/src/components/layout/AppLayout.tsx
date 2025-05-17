@@ -17,7 +17,7 @@ export function AppLayout() {
         <Outlet />
       </motion.main>
       <NavigationDock />
-      <Toaster />
+      <Toaster position={"top-right"} />
     </div>
   );
 }

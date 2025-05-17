@@ -12,6 +12,7 @@ import ExploreAlbums from "./pages/exploreAlbums/exploreAlbums";
 import BuyAlbum from "./pages/exploreAlbums/buyAlbum";
 import PublishDraftAlbum from "./pages/approveRequestAlbum/waitForSign";
 import MyPurchasedAlbums from "./pages/myPurchase/my-purchashed";
+import ViewPurchasedAlbum from "./pages/myPurchase/viewPurchasedAlbum";
 
 function App() {
   const router = createBrowserRouter([
@@ -50,6 +51,10 @@ function App() {
         {
           path: "myPurchase",
           element: <MyPurchasedAlbums />,
+        },
+        {
+          path: "profile/myPurchase/:albumId",
+          element: <ViewPurchasedAlbum />,
         },
       ],
     },

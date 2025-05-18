@@ -350,7 +350,7 @@ export function ProfilePage() {
 
     const handleViewDetails = (album: Album) => {
       localStorage.setItem("viewingAlbum", JSON.stringify(album));
-      navigate(`profile/myPurchase/${album.albumId}`);
+      navigate(`/profile/myPurchase/${album.albumId}`);
     };
 
     return (
@@ -407,7 +407,10 @@ export function ProfilePage() {
                   variant="outline"
                   size="sm"
                   className="w-full bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary border border-primary/20"
-                  onClick={() => handleViewDetails(album)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewDetails(album);
+                  }}
                 >
                   View Details
                 </Button>

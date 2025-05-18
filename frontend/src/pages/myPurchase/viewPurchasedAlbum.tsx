@@ -136,7 +136,7 @@ export default function ViewPurchasedAlbum() {
 
     setIsDecrypting(true);
     // Use the correct property based on the PublishedAlbum interface
-    const blobIds = albumData.contentInfo || [];
+    const blobIds = albumData.contentsObjectId || [];
 
     if (
       currentSessionKey &&

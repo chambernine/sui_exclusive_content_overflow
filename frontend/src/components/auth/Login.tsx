@@ -59,7 +59,7 @@ export function Login({
   return (
     <div className="relative w-full max-w-4xl">
       <motion.div
-        className="absolute top-[-20%] right-[5%] w-64 h-64 rounded-full bg-primary/20 blur-3xl dark:bg-primary/10"
+        className="absolute top-[-20%] right-[5%] w-64 h-64 rounded-full bg-primary/50 blur-3xl dark:bg-primary/10"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.5, ease: "easeOut" }}

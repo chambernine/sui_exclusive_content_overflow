@@ -44,6 +44,7 @@ export interface PublishedAlbum {
   description: string;
   tags: string[];
   contentInfo: string[];
+  contentsObjectId: string[];
   interaction: {
     likes: number;
     shares: number;

@@ -124,7 +124,7 @@ export default function ViewPurchasedAlbum() {
   function constructMoveCall(albumId: string): MoveCallConstructor {
     return (tx: Transaction, id: string) => {
       tx.moveCall({
-        target: `${TESTNET_PACKAGE_ID}::execlusive::seal_approve`,
+        target: `${TESTNET_PACKAGE_ID}::exclusive::seal_approve`,
         arguments: [tx.pure.vector("u8", fromHex(id)), tx.object(albumId)],
       });
     };

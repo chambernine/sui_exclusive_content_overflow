@@ -56,7 +56,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
-import { AlbumTier, tierColors, tierNames } from "@/types/album";
+import { tierColors, tierNames } from "@/types/album";
 import { Protected } from "@/components/auth/Protected";
 import { useProfile, useUpdateProfile } from "@/hooks/api/useProfile";
 import { useMyAlbums, useMyPurchasedAlbums } from "@/hooks/api/useAlbums";
@@ -73,7 +73,7 @@ interface ProfileMetaData {
   socialLinks: {
     x: string;
     twitch: string;
-    ig: string;
+    instagram: string;
     youtube: string;
   };
   createdAt: number;
@@ -117,16 +117,28 @@ export function ProfilePage() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [userInfo, setUserInfo] = useState<ProfileMetaData | null>(null);
-  const [isSaved, setIsSaved] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filterTier, setFilterTier] = useState<string>("all");
+  // New state to track if user needs to create a profile
+  const [needsProfileCreation, setNeedsProfileCreation] = useState(false);
 
   const navigate = useNavigate();
+
+  // Check localStorage for editMode flag from Login component
+  useEffect(() => {
+    const enableEditMode = localStorage.getItem("enableProfileEditMode");
+    if (enableEditMode === "true") {
+      setEditMode(true);
+      setNeedsProfileCreation(true);
+      // Clear the flag after using it
+      localStorage.removeItem("enableProfileEditMode");
+    }
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "anonymous",
+      username: "",
       bio: "",
       profileImage: profileImage,
       social_links: {
@@ -143,6 +155,7 @@ export function ProfilePage() {
     data: profileData,
     isLoading: isProfileLoading,
     error: profileError,
+    refetch: refetchProfile,
   } = useProfile(address);
 
   // Fetch user's created albums
@@ -153,12 +166,12 @@ export function ProfilePage() {
   const { data: purchasedAlbumsData, isLoading: isPurchasedAlbumsLoading } =
     useMyPurchasedAlbums(address);
 
-  console.log(myAlbumsData, "myAlbumsData");
-  console.log(purchasedAlbumsData, "purchasedAlbumsData");
-
   // Update profile state when data is fetched
   useEffect(() => {
-    if (profileData) {
+    if (profileData && profileData.data) {
+      // Profile exists, no need for creation
+      setNeedsProfileCreation(false);
+
       // Set user info
       setUserInfo(profileData.data);
 
@@ -169,7 +182,7 @@ export function ProfilePage() {
         profileImage: profileData.data.profileImageBase64 || profileImage,
         social_links: {
           x: profileData.data.socialLinks?.x || null,
-          instagram: profileData.data.socialLinks?.ig || null, // Map 'ig' to 'instagram' for the form
+          instagram: profileData.data.socialLinks?.instagram || null,
           twitch: profileData.data.socialLinks?.twitch || null,
           youtube: profileData.data.socialLinks?.youtube || null,
         },
@@ -178,9 +191,11 @@ export function ProfilePage() {
       if (profileData.data.profileImageBase64) {
         setProfileImage(profileData.data.profileImageBase64);
       }
-    } else if (profileError) {
+    } else if (profileError || (profileData && !profileData.data)) {
+      // Profile doesn't exist, needs creation
       console.error("❌ Failed to fetch user profile:", profileError);
       setEditMode(true);
+      setNeedsProfileCreation(true);
     }
   }, [
     profileData,
@@ -239,7 +254,7 @@ export function ProfilePage() {
       onSuccess: () => {
         setIsUpdating(false);
         setEditMode(false);
-        setTimeout(() => setIsSaved(false), 3000);
+        refetchProfile();
       },
       onError: (error) => {
         console.error("Error saving profile:", error);
@@ -324,7 +339,7 @@ export function ProfilePage() {
       return (
         <div className="text-center py-12">
           <p className="text-muted-foreground">
-            No albums match your search criteria
+            No contents match your search criteria
           </p>
         </div>
       );
@@ -332,8 +347,7 @@ export function ProfilePage() {
 
     const handleViewDetails = (album: Album) => {
       localStorage.setItem("viewingAlbum", JSON.stringify(album));
-
-      navigate(`profile/myPurchase/${album.albumId}`);
+      navigate(`/myPurchase/${album.albumId}`);
     };
 
     return (
@@ -402,333 +416,480 @@ export function ProfilePage() {
     );
   };
 
-  const renderProfileContent = () => (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="space-y-8"
-    >
-      <motion.div variants={item}>
-        <Card className="overflow-hidden bg-card border-border hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="relative">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={profileImage || ""} alt="Profile" />
-                  <AvatarFallback className="bg-muted text-muted-foreground">
-                    <User className="h-10 w-10" />
-                  </AvatarFallback>
-                </Avatar>
-                {editMode && (
-                  <label
-                    htmlFor="profile-picture"
-                    className="absolute bottom-0 right-0 cursor-pointer"
-                  >
-                    <div className="bg-primary text-primary-foreground rounded-full p-1">
-                      <Edit className="h-4 w-4" />
-                    </div>
-                    <input
-                      id="profile-picture"
-                      type="file"
-                      accept="image/*"
-                      className="sr-only"
-                      onChange={handleProfileImageUpload}
-                    />
-                  </label>
-                )}
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                {editMode ? (
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(handleSaveProfile)}
-                      className="space-y-4"
+  const renderProfileContent = () => {
+    // If user needs to create a profile, show the profile creation interface only
+    if (needsProfileCreation) {
+      return (
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="space-y-8 max-w-2xl mx-auto"
+        >
+          <motion.div variants={item}>
+            <Card className="overflow-hidden bg-card border-border hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-0 text-center">
+                <CardTitle className="text-2xl md:text-3xl">
+                  Create Your Profile
+                </CardTitle>
+                <CardDescription>
+                  You need to set up profile before using this app
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-6">
+                <div className="flex flex-col items-center gap-6 mb-6">
+                  <div className="relative">
+                    <Avatar className="h-24 w-24">
+                      <AvatarImage src={profileImage || ""} alt="Profile" />
+                      <AvatarFallback className="bg-muted text-muted-foreground">
+                        <User className="h-10 w-10" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <label
+                      htmlFor="profile-picture"
+                      className="absolute bottom-0 right-0 cursor-pointer"
                     >
-                      <FormField
-                        control={form.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Username</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                      <div className="bg-primary text-primary-foreground rounded-full p-1">
+                        <Edit className="h-4 w-4" />
+                      </div>
+                      <input
+                        id="profile-picture"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={handleProfileImageUpload}
                       />
+                    </label>
+                  </div>
+                </div>
 
-                      <FormField
-                        control={form.control}
-                        name="bio"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Bio</FormLabel>
-                            <FormControl>
-                              <Textarea {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(handleSaveProfile)}
+                    className="space-y-4"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter a username" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="bio"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>About You</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Tell others about yourself"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Social Links Section */}
+                    <div className="space-y-2">
+                      <Label>Social Links (Optional)</Label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {["x", "instagram", "twitch", "youtube"].map(
+                          (platform) => (
+                            <FormField
+                              key={platform}
+                              control={form.control}
+                              name={`social_links.${platform}` as any}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                                        {getSocialIcon(platform)}
+                                      </span>
+                                      <Input
+                                        placeholder={`Your ${platform} profile URL`}
+                                        className="pl-8"
+                                        value={field.value || ""}
+                                        onChange={field.onChange}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          )
                         )}
-                      />
+                      </div>
+                    </div>
 
-                      {/* Social Links Section */}
-                      <div className="space-y-2">
-                        <Label>Social Links</Label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {["x", "instagram", "twitch", "youtube"].map(
-                            (platform) => (
-                              <FormField
-                                key={platform}
-                                control={form.control}
-                                name={`social_links.${platform}` as any}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <div className="relative">
-                                        <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                                          {getSocialIcon(platform)}
-                                        </span>
-                                        <Input
-                                          placeholder={`Your ${platform} profile URL`}
-                                          className="pl-8"
-                                          value={field.value || ""}
-                                          onChange={field.onChange}
-                                        />
-                                      </div>
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                            )
+                    <Button
+                      type="submit"
+                      className="w-full mt-6"
+                      disabled={isUpdating}
+                    >
+                      {isUpdating ? (
+                        <div className="flex items-center justify-center">
+                          <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-1"></div>
+                          <span>Creating Profile...</span>
+                        </div>
+                      ) : (
+                        "Create Profile"
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
+      );
+    }
+
+    // Regular profile view for users who already have profiles
+    return (
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="space-y-8"
+      >
+        <motion.div variants={item}>
+          <Card className="overflow-hidden bg-card border-border hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="relative">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={profileImage || ""} alt="Profile" />
+                    <AvatarFallback className="bg-muted text-muted-foreground">
+                      <User className="h-10 w-10" />
+                    </AvatarFallback>
+                  </Avatar>
+                  {editMode && (
+                    <label
+                      htmlFor="profile-picture"
+                      className="absolute bottom-0 right-0 cursor-pointer"
+                    >
+                      <div className="bg-primary text-primary-foreground rounded-full p-1">
+                        <Edit className="h-4 w-4" />
+                      </div>
+                      <input
+                        id="profile-picture"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={handleProfileImageUpload}
+                      />
+                    </label>
+                  )}
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  {editMode ? (
+                    <Form {...form}>
+                      <form
+                        onSubmit={form.handleSubmit(handleSaveProfile)}
+                        className="space-y-4"
+                      >
+                        <FormField
+                          control={form.control}
+                          name="username"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Username</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
                           )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="bio"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Bio</FormLabel>
+                              <FormControl>
+                                <Textarea {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Social Links Section */}
+                        <div className="space-y-2">
+                          <Label>Social Links</Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {["x", "instagram", "twitch", "youtube"].map(
+                              (platform) => (
+                                <FormField
+                                  key={platform}
+                                  control={form.control}
+                                  name={`social_links.${platform}` as any}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <div className="relative">
+                                          <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                                            {getSocialIcon(platform)}
+                                          </span>
+                                          <Input
+                                            placeholder={`Your ${platform} profile URL`}
+                                            className="pl-8"
+                                            value={field.value || ""}
+                                            onChange={field.onChange}
+                                          />
+                                        </div>
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              )
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditMode(false)}
+                            type="button"
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Cancel
+                          </Button>
+                          <Button size="sm" type="submit" disabled={isUpdating}>
+                            {isUpdating ? (
+                              <div className="flex items-center">
+                                <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-1"></div>
+                                <span>Saving...</span>
+                              </div>
+                            ) : (
+                              <>
+                                <Check className="h-4 w-4 mr-1" />
+                                Save
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  ) : (
+                    <div>
+                      <div className="flex justify-between items-center">
+                        <h2 className="text-2xl font-bold">
+                          {form.getValues("username")}
+                        </h2>
+                        <div className="flex items-center gap-2">
+                          <ThemeToggle />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setEditMode(true)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
+                      <p className="text-muted-foreground mt-2">
+                        {form.getValues("bio") || ""}
+                      </p>
 
-                      <div className="flex justify-end gap-2 pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditMode(false)}
-                          type="button"
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Cancel
-                        </Button>
-                        <Button size="sm" type="submit" disabled={isUpdating}>
-                          {isUpdating ? (
-                            <div className="flex items-center">
-                              <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-1"></div>
-                              <span>Saving...</span>
-                            </div>
-                          ) : (
-                            <>
-                              <Check className="h-4 w-4 mr-1" />
-                              Save
-                            </>
-                          )}
-                        </Button>
+                      {/* Social Links Display */}
+                      <div className="flex items-center gap-2 mt-3">
+                        {Object.entries(
+                          form.getValues("social_links") || {}
+                        ).map(
+                          ([platform, value]) =>
+                            value && (
+                              <a
+                                key={platform}
+                                href={value}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-primary transition-colors"
+                              >
+                                {getSocialIcon(platform)}
+                              </a>
+                            )
+                        )}
                       </div>
-                    </form>
-                  </Form>
-                ) : (
-                  <div>
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-2xl font-bold">
-                        {form.getValues("username")}
-                      </h2>
-                      <div className="flex items-center gap-2">
-                        <ThemeToggle />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setEditMode(true)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+
+                      <div className="flex items-center gap-3 mt-4">
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">
+                            {myAlbumsData?.data?.length || 0}
+                          </span>
+                          <span className="text-muted-foreground text-sm">
+                            Albums
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">
+                            {purchasedAlbumsData?.data?.length || 0}
+                          </span>
+                          <span className="text-muted-foreground text-sm">
+                            Purchased
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">
+                            {address
+                              ? `${address.slice(0, 6)}...${address.slice(-4)}`
+                              : "0x83f...9e21"}
+                          </span>
+                          <span className="text-muted-foreground text-sm">
+                            Wallet
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <p className="text-muted-foreground mt-2">
-                      {form.getValues("bio")}
-                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-                    {/* Social Links Display */}
-                    <div className="flex items-center gap-2 mt-3">
-                      {Object.entries(form.getValues("social_links") || {}).map(
-                        ([platform, value]) =>
-                          value && (
-                            <a
-                              key={platform}
-                              href={value}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-primary transition-colors"
-                            >
-                              {getSocialIcon(platform)}
-                            </a>
-                          )
-                      )}
-                    </div>
+        <motion.div variants={item}>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">My Collection</h2>
+            </div>
 
-                    <div className="flex items-center gap-3 mt-4">
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium">
-                          {myAlbumsData?.data?.length || 0}
-                        </span>
-                        <span className="text-muted-foreground text-sm">
-                          Albums
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium">
-                          {purchasedAlbumsData?.data?.length || 0}
-                        </span>
-                        <span className="text-muted-foreground text-sm">
-                          Purchased
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium">
-                          {address
-                            ? `${address.slice(0, 6)}...${address.slice(-4)}`
-                            : "0x83f...9e21"}
-                        </span>
-                        <span className="text-muted-foreground text-sm">
-                          Wallet
-                        </span>
-                      </div>
-                    </div>
+            <Tabs defaultValue="purchased">
+              <div className="flex justify-between items-center mb-4">
+                <TabsList>
+                  <TabsTrigger value="purchased">Purchased Albums</TabsTrigger>
+                  <TabsTrigger value="created">Created Albums</TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="purchased" className="m-0">
+                <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="h-4 w-4 absolute top-2.5 left-3 text-muted-foreground" />
+                    <Input
+                      placeholder="Search albums..."
+                      className="pl-10"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                   </div>
+                  <Select value={filterTier} onValueChange={setFilterTier}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        <SelectValue placeholder="Filter by tier" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Tiers</SelectItem>
+                      <SelectItem value="0">Standard</SelectItem>
+                      <SelectItem value="1">Premium</SelectItem>
+                      <SelectItem value="2">Exclusive</SelectItem>
+                      <SelectItem value="3">Principle</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Tabs defaultValue="grid" className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-muted-foreground">
+                      {isPurchasedAlbumsLoading
+                        ? "Loading albums..."
+                        : `${
+                            filterAlbums(purchasedAlbumsData?.data).length
+                          } albums available`}
+                    </p>
+                    <TabsList>
+                      <TabsTrigger value="grid">
+                        <LayoutGrid className="h-4 w-4" />
+                      </TabsTrigger>
+                      <TabsTrigger value="list">
+                        <List className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                </Tabs>
+
+                {renderAlbumGrid(
+                  purchasedAlbumsData?.data,
+                  isPurchasedAlbumsLoading
                 )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+              </TabsContent>
 
-      <motion.div variants={item}>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold">My Collection</h2>
+              <TabsContent value="created" className="m-0">
+                <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="h-4 w-4 absolute top-2.5 left-3 text-muted-foreground" />
+                    <Input
+                      placeholder="Search albums..."
+                      className="pl-10"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <Select value={filterTier} onValueChange={setFilterTier}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        <SelectValue placeholder="Filter by tier" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Tiers</SelectItem>
+                      <SelectItem value="0">Standard</SelectItem>
+                      <SelectItem value="1">Premium</SelectItem>
+                      <SelectItem value="2">Exclusive</SelectItem>
+                      <SelectItem value="3">Principle</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Tabs defaultValue="grid" className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-muted-foreground">
+                      {isMyAlbumsLoading
+                        ? "Loading albums..."
+                        : `${
+                            filterAlbums(myAlbumsData?.data).length
+                          } albums available`}
+                    </p>
+                    <TabsList>
+                      <TabsTrigger value="grid">
+                        <LayoutGrid className="h-4 w-4" />
+                      </TabsTrigger>
+                      <TabsTrigger value="list">
+                        <List className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                </Tabs>
+                {renderAlbumGrid(myAlbumsData?.data, isMyAlbumsLoading)}
+              </TabsContent>
+            </Tabs>
           </div>
-
-          <Tabs defaultValue="purchased">
-            <div className="flex justify-between items-center mb-4">
-              <TabsList>
-                <TabsTrigger value="purchased">Purchased Albums</TabsTrigger>
-                <TabsTrigger value="created">Created Albums</TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="purchased" className="m-0">
-              <div className="mb-6 flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="h-4 w-4 absolute top-2.5 left-3 text-muted-foreground" />
-                  <Input
-                    placeholder="Search albums..."
-                    className="pl-10"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <Select value={filterTier} onValueChange={setFilterTier}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      <SelectValue placeholder="Filter by tier" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Tiers</SelectItem>
-                    <SelectItem value="0">Standard</SelectItem>
-                    <SelectItem value="1">Premium</SelectItem>
-                    <SelectItem value="2">Exclusive</SelectItem>
-                    <SelectItem value="3">Principle</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Tabs defaultValue="grid" className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="text-muted-foreground">
-                    {isPurchasedAlbumsLoading
-                      ? "Loading albums..."
-                      : `${filterAlbums.length} albums available`}
-                  </p>
-                  <TabsList>
-                    <TabsTrigger value="grid">
-                      <LayoutGrid className="h-4 w-4" />
-                    </TabsTrigger>
-                    <TabsTrigger value="list">
-                      <List className="h-4 w-4" />
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-              </Tabs>
-
-              {renderAlbumGrid(
-                purchasedAlbumsData?.data,
-                isPurchasedAlbumsLoading
-              )}
-            </TabsContent>
-
-            <TabsContent value="created" className="m-0">
-              <div className="mb-6 flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="h-4 w-4 absolute top-2.5 left-3 text-muted-foreground" />
-                  <Input
-                    placeholder="Search albums..."
-                    className="pl-10"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <Select value={filterTier} onValueChange={setFilterTier}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      <SelectValue placeholder="Filter by tier" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Tiers</SelectItem>
-                    <SelectItem value="0">Standard</SelectItem>
-                    <SelectItem value="1">Premium</SelectItem>
-                    <SelectItem value="2">Exclusive</SelectItem>
-                    <SelectItem value="3">Principle</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Tabs defaultValue="grid" className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="text-muted-foreground">
-                    {isMyAlbumsLoading
-                      ? "Loading albums..."
-                      : `${filterAlbums.length} albums available`}
-                  </p>
-                  <TabsList>
-                    <TabsTrigger value="grid">
-                      <LayoutGrid className="h-4 w-4" />
-                    </TabsTrigger>
-                    <TabsTrigger value="list">
-                      <List className="h-4 w-4" />
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-              </Tabs>
-              {renderAlbumGrid(myAlbumsData?.data, isMyAlbumsLoading)}
-            </TabsContent>
-          </Tabs>
-        </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
-  );
+    );
+  };
 
   return (
     <Protected description="Connect wallet to view profile">
-      <div className="container py-12 px-10">
+      <div className="container py-8 px-4">
         <LoadingWrapper isLoading={isProfileLoading} variant="profile">
           <div className="w-full mx-auto">{renderProfileContent()}</div>
         </LoadingWrapper>

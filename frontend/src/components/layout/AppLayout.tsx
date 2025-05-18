@@ -8,7 +8,7 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-background">
       <motion.main
-        className="container mx-auto px-4 pb-16 max-w-7xl"
+        className="container mx-auto px-4 pb-16 w-full flex flex-col items-center justify-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

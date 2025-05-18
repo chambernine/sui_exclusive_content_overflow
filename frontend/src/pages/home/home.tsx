@@ -18,12 +18,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Heart, Share2, Bookmark } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoadingWrapper } from "@/components/ui/loading-wrapper";
-import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { tierColors, tierNames } from "@/types/album";
+import { useProfile } from "@/hooks/api/useProfile";
 
 interface Album {
   albumId: string;
@@ -48,6 +48,23 @@ export default function Home() {
   const albums = data?.data || [];
 
   const [showMobileProfile, setShowMobileProfile] = useState<boolean>(false);
+
+  // Get profile data using the same hook that's used in viewProfile
+  const { data: profileData, error: profileError } = useProfile(
+    account?.address
+  );
+
+  useEffect(() => {
+    // If user has connected and we have profile data response (even if null)
+    if (account?.address && (profileData !== undefined || profileError)) {
+      // Check if user has no profile data, redirect to profile page with edit mode
+      if (!profileData?.data) {
+        // Store a flag in localStorage to indicate that edit mode should be enabled
+        localStorage.setItem("enableProfileEditMode", "true");
+        navigate("/profile");
+      }
+    }
+  }, [account, profileData, profileError, navigate]);
 
   // Animation variants
   const container = {
@@ -227,9 +244,7 @@ export default function Home() {
         className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
       >
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">
-            Welcome to SUI Exclusive Content
-          </h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Silvy</h1>
           <p className="text-muted-foreground">
             Discover and collect exclusive content
           </p>
@@ -417,7 +432,7 @@ export default function Home() {
               ) : (
                 <div className="text-center py-12 border border-dashed border-border rounded-lg">
                   <p className="text-muted-foreground">
-                    No albums available in your feed
+                    No contents available in your feed
                   </p>
                 </div>
               )}
@@ -440,13 +455,6 @@ export default function Home() {
 
             <motion.div variants={item}>
               <FeaturedTier />
-            </motion.div>
-          </div>
-
-          {/* Mobile Actions - Visible only on mobile/tablet */}
-          <div className="lg:hidden space-y-6">
-            <motion.div variants={item}>
-              <QuickActions />
             </motion.div>
           </div>
         </motion.div>

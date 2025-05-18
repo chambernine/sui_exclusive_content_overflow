@@ -103,7 +103,7 @@ export default function ExploreAlbums() {
 
   return (
     <Protected description="Connect wallet to manage album requests">
-      <div className="py-12 px-8">
+      <div className="py-12 px-8 w-full">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -265,7 +265,7 @@ export default function ExploreAlbums() {
                   ) : (
                     <div className="col-span-full text-center py-12">
                       <p className="text-muted-foreground">
-                        No albums match your search criteria
+                        No contents match your search criteria
                       </p>
                     </div>
                   )}
@@ -377,7 +377,7 @@ export default function ExploreAlbums() {
                   ) : (
                     <div className="text-center py-12">
                       <p className="text-muted-foreground">
-                        No albums match your search criteria
+                        No contents match your search criteria
                       </p>
                     </div>
                   )}

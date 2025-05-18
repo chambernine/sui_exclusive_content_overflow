@@ -1,6 +1,9 @@
-import { ConnectButton } from "@mysten/dapp-kit";
+import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
 import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useProfile } from "@/hooks/api/useProfile";
 
 interface LoginProps {
   description?: string;
@@ -11,6 +14,26 @@ export function Login({
   description = "Please connect your wallet to access exclusive content",
   className = "",
 }: LoginProps) {
+  const account = useCurrentAccount();
+  const navigate = useNavigate();
+
+  // Get profile data using the same hook that's used in viewProfile
+  const { data: profileData, error: profileError } = useProfile(
+    account?.address
+  );
+
+  useEffect(() => {
+    // If user has connected and we have profile data response (even if null)
+    if (account?.address && (profileData !== undefined || profileError)) {
+      // Check if user has no profile data, redirect to profile page with edit mode
+      if (!profileData?.data) {
+        // Store a flag in localStorage to indicate that edit mode should be enabled
+        localStorage.setItem("enableProfileEditMode", "true");
+        navigate("/profile");
+      }
+    }
+  }, [account, profileData, profileError, navigate]);
+
   const container = {
     hidden: { opacity: 0 },
     show: {

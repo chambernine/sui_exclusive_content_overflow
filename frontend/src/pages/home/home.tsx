@@ -24,6 +24,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { tierColors, tierNames } from "@/types/album";
 import { useProfile } from "@/hooks/api/useProfile";
+import { Protected } from "@/components/auth/Protected";
 
 interface Album {
   albumId: string;
@@ -89,14 +90,6 @@ export default function Home() {
       },
     },
   };
-
-  if (!account) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center p-4">
-        <Login description="Please connect your wallet to access exclusive content" />
-      </div>
-    );
-  }
 
   // Profile Card Component
   const ProfileCard = () => (
@@ -303,288 +296,282 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col p-4 md:p-6">
-      {/* Welcome Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 relative"
-      >
-        <div className="relative">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-              Silvy
-            </span>
-          </h1>
-          <motion.p
-            className="text-muted-foreground max-w-md"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            Discover and collect exclusive content on the Sui blockchain
-          </motion.p>
-          <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/10 via-primary/50 to-primary/10 hidden md:block" />
-        </div>
-        <div className="flex items-center gap-4">
-          <ConnectButton />
-          {/* Mobile Profile Avatar */}
-          <Avatar
-            className="h-8 w-8 lg:hidden cursor-pointer border border-border"
-            onClick={() => setShowMobileProfile(true)}
-          >
-            <AvatarFallback className="bg-primary/20 text-primary">
-              {address ? address.slice(0, 2) : ""}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-      </motion.div>
-
-      {/* 3-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column - Profile */}
+    <Protected>
+      <div className="min-h-screen w-full flex flex-col p-4 md:p-6">
+        {/* Welcome Header */}
         <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="hidden lg:block lg:col-span-3 space-y-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 relative"
         >
-          <motion.div variants={item}>
-            <ProfileCard />
-          </motion.div>
+          <div className="relative">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
+                Silvy
+              </span>
+            </h1>
+            <motion.p
+              className="text-muted-foreground max-w-md"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              Discover and collect exclusive content on the Sui blockchain
+            </motion.p>
+            <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/10 via-primary/50 to-primary/10 hidden md:block" />
+          </div>
+          <div className="flex items-center gap-4">
+            <ConnectButton />
+            {/* Mobile Profile Avatar */}
+            <Avatar
+              className="h-8 w-8 lg:hidden cursor-pointer border border-border"
+              onClick={() => setShowMobileProfile(true)}
+            >
+              <AvatarFallback className="bg-primary/20 text-primary">
+                {address ? address.slice(0, 2) : ""}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         </motion.div>
 
-        {/* Middle Column - Main Content */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="lg:col-span-6 space-y-6"
-        >
-          {/* Feed Content */}
-          <motion.div variants={item} className="space-y-6">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              Your Feed
-              <span className="text-xs font-normal px-2 py-1 bg-primary/10 text-primary rounded-md">
-                Latest content
-              </span>
-            </h2>
-            <LoadingWrapper
-              isLoading={isLoading}
-              variant="card"
-              count={3}
-              layout="block"
-              loadingText="Loading feed..."
-            >
-              {albums.length > 0 ? (
-                albums.map((album: Album) => (
-                  <Card
-                    key={album.albumId}
-                    className="overflow-hidden border-border hover:shadow-md transition-all duration-300 mb-4 group"
-                  >
-                    <CardHeader className="pb-2 space-y-0">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-9 w-9 border-2 border-primary ring-2 ring-background">
-                            <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white font-medium">
-                              {album.owner.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-sm">
-                                {album.owner.slice(0, 6)}...
-                                {album.owner.slice(-4)}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              Content Creator
-                            </p>
-                          </div>
-                        </div>
-                        <Badge
-                          className={`${
-                            tierColors[album.tier as keyof typeof tierColors]
-                          } text-white text-sm`}
-                        >
-                          {tierNames[album.tier as keyof typeof tierNames]}
-                        </Badge>
-                      </div>
-                    </CardHeader>
+        {/* 3-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Profile */}
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="hidden lg:block lg:col-span-3 space-y-6"
+          >
+            <motion.div variants={item}>
+              <ProfileCard />
+            </motion.div>
+          </motion.div>
 
-                    <CardContent className="pb-0 space-y-3">
-                      <h3 className="font-medium text-lg">{album.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {album.description}
-                      </p>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1">
-                        {album.tags?.slice(0, 3).map((tag, i) => (
-                          <Badge
-                            key={i}
-                            variant="secondary"
-                            className="text-xs bg-secondary/60 hover:bg-secondary/80 transition-colors"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                        {album.tags?.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{album.tags.length - 3} more
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Album Preview */}
-                      <div className="mt-3 relative overflow-hidden rounded-md">
-                        <div
-                          className="cursor-pointer"
-                          onClick={() => handleNavigateToAlbum(album.albumId)}
-                        >
-                          {album.contentInfos?.[0] ? (
-                            <AspectRatio
-                              ratio={16 / 9}
-                              className="overflow-hidden rounded-md"
-                            >
-                              <motion.img
-                                src={album.contentInfos[0]}
-                                alt={album.name}
-                                className="w-full h-full object-cover"
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ duration: 0.5 }}
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            </AspectRatio>
-                          ) : (
-                            <AspectRatio
-                              ratio={16 / 9}
-                              className="overflow-hidden rounded-md bg-muted/30 flex items-center justify-center"
-                            >
-                              <p className="text-muted-foreground text-sm">
-                                No preview available
+          {/* Middle Column - Main Content */}
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-6 space-y-6"
+          >
+            {/* Feed Content */}
+            <motion.div variants={item} className="space-y-6">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                Your Feed
+                <span className="text-xs font-normal px-2 py-1 bg-primary/10 text-primary rounded-md">
+                  Latest content
+                </span>
+              </h2>
+              <LoadingWrapper
+                isLoading={isLoading}
+                variant="card"
+                count={3}
+                layout="block"
+                loadingText="Loading feed..."
+              >
+                {albums.length > 0 ? (
+                  albums.map((album: Album) => (
+                    <Card
+                      key={album.albumId}
+                      className="overflow-hidden border-border hover:shadow-md transition-all duration-300 mb-4 group"
+                    >
+                      <CardHeader className="pb-2 space-y-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9 border-2 border-primary ring-2 ring-background">
+                              <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white font-medium">
+                                {album.owner.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm">
+                                  {album.owner.slice(0, 6)}...
+                                  {album.owner.slice(-4)}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Content Creator
                               </p>
-                            </AspectRatio>
+                            </div>
+                          </div>
+                          <Badge
+                            className={`${
+                              tierColors[album.tier as keyof typeof tierColors]
+                            } text-white text-sm`}
+                          >
+                            {tierNames[album.tier as keyof typeof tierNames]}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="pb-0 space-y-3">
+                        <h3 className="font-medium text-lg">{album.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {album.description}
+                        </p>
+
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-1">
+                          {album.tags?.slice(0, 3).map((tag, i) => (
+                            <Badge
+                              key={i}
+                              variant="secondary"
+                              className="text-xs bg-secondary/60 hover:bg-secondary/80 transition-colors"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                          {album.tags?.length > 3 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{album.tags.length - 3} more
+                            </Badge>
                           )}
                         </div>
 
-                        {/* Multiple images indicator */}
-                        {album.contentInfos?.length > 1 && (
-                          <div className="absolute top-2 right-2">
-                            <Badge className="bg-black/70 backdrop-blur-sm text-white border border-white/20">
-                              +{album.contentInfos.length} images
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-
-                    <CardFooter className="pt-3 pb-3">
-                      <div className="w-full border-t border-border pt-3">
-                        <div className="flex justify-between items-center">
-                          <div className="flex space-x-5 text-muted-foreground">
-                            <motion.div
-                              className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
-                              whileHover={{ scale: 1.05 }}
-                            >
-                              <Heart className="h-4 w-4" />
-                              <span className="text-xs font-medium">
-                                {album.interaction?.likes || 0}
-                              </span>
-                            </motion.div>
-                            <motion.div
-                              className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
-                              whileHover={{ scale: 1.05 }}
-                            >
-                              <Share2 className="h-4 w-4" />
-                              <span className="text-xs font-medium">
-                                {album.interaction?.shares || 0}
-                              </span>
-                            </motion.div>
-                            <motion.div
-                              className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
-                              whileHover={{ scale: 1.05 }}
-                            >
-                              <Bookmark className="h-4 w-4" />
-                              <span className="text-xs font-medium">
-                                {album.interaction?.saves || 0}
-                              </span>
-                            </motion.div>
-                          </div>
-                          <Button
-                            variant="default"
-                            size="sm"
+                        {/* Album Preview */}
+                        <div className="mt-3 relative overflow-hidden rounded-md">
+                          <div
+                            className="cursor-pointer"
                             onClick={() => handleNavigateToAlbum(album.albumId)}
-                            className="gap-1"
                           >
-                            View Details
-                          </Button>
+                            {album.contentInfos?.[0] ? (
+                              <AspectRatio
+                                ratio={16 / 9}
+                                className="overflow-hidden rounded-md"
+                              >
+                                <motion.img
+                                  src={album.contentInfos[0]}
+                                  alt={album.name}
+                                  className="w-full h-full object-cover"
+                                  whileHover={{ scale: 1.05 }}
+                                  transition={{ duration: 0.5 }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              </AspectRatio>
+                            ) : (
+                              <AspectRatio
+                                ratio={16 / 9}
+                                className="overflow-hidden rounded-md bg-muted/30 flex items-center justify-center"
+                              >
+                                <p className="text-muted-foreground text-sm">
+                                  No preview available
+                                </p>
+                              </AspectRatio>
+                            )}
+                          </div>
+
+                          {/* Multiple images indicator */}
+                          {album.contentInfos?.length > 1 && (
+                            <div className="absolute top-2 right-2">
+                              <Badge className="bg-black/70 backdrop-blur-sm text-white border border-white/20">
+                                +{album.contentInfos.length} images
+                              </Badge>
+                            </div>
+                          )}
                         </div>
+                      </CardContent>
+
+                      <CardFooter className="pt-3 pb-3">
+                        <div className="w-full border-t border-border pt-3">
+                          <div className="flex justify-between items-center">
+                            <div className="flex space-x-5 text-muted-foreground">
+                              <motion.div
+                                className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                <Heart className="h-4 w-4" />
+                                <span className="text-xs font-medium">
+                                  {album.interaction?.likes || 0}
+                                </span>
+                              </motion.div>
+                              <motion.div
+                                className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                <Share2 className="h-4 w-4" />
+                                <span className="text-xs font-medium">
+                                  {album.interaction?.shares || 0}
+                                </span>
+                              </motion.div>
+                              <motion.div
+                                className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                <Bookmark className="h-4 w-4" />
+                                <span className="text-xs font-medium">
+                                  {album.interaction?.saves || 0}
+                                </span>
+                              </motion.div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  ))
+                ) : (
+                  <motion.div
+                    className="text-center py-16 border border-dashed border-border rounded-lg bg-card/50"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <div className="flex flex-col items-center gap-4 max-w-md mx-auto">
+                      <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Bookmark className="h-7 w-7 text-primary opacity-70" />
                       </div>
-                    </CardFooter>
-                  </Card>
-                ))
-              ) : (
-                <motion.div
-                  className="text-center py-16 border border-dashed border-border rounded-lg bg-card/50"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <div className="flex flex-col items-center gap-4 max-w-md mx-auto">
-                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Bookmark className="h-7 w-7 text-primary opacity-70" />
+                      <h3 className="text-xl font-medium">No content yet</h3>
+                      <p className="text-muted-foreground text-center mb-2">
+                        There's no content available in your feed. Explore our
+                        marketplace or create your own content.
+                      </p>
+                      <div className="flex gap-3 mt-2">
+                        <Button
+                          variant="default"
+                          onClick={() => navigate("/explore-albums")}
+                          className="gap-1"
+                        >
+                          Explore Marketplace
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => navigate("/create-draft")}
+                        >
+                          Create Content
+                        </Button>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-medium">No content yet</h3>
-                    <p className="text-muted-foreground text-center mb-2">
-                      There's no content available in your feed. Explore our
-                      marketplace or create your own content.
-                    </p>
-                    <div className="flex gap-3 mt-2">
-                      <Button
-                        variant="default"
-                        onClick={() => navigate("/explore-albums")}
-                        className="gap-1"
-                      >
-                        Explore Marketplace
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => navigate("/create-draft")}
-                      >
-                        Create Content
-                      </Button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </LoadingWrapper>
+                  </motion.div>
+                )}
+              </LoadingWrapper>
+            </motion.div>
           </motion.div>
-        </motion.div>
 
-        {/* Right Column - Quick Actions and Featured Tier */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="lg:col-span-3 space-y-6"
-        >
-          {/* Display only on larger screens */}
-          <div className="hidden lg:block space-y-6">
-            <motion.div variants={item}>
-              <QuickActions />
-            </motion.div>
+          {/* Right Column - Quick Actions and Featured Tier */}
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-3 space-y-6"
+          >
+            {/* Display only on larger screens */}
+            <div className="hidden lg:block space-y-6">
+              <motion.div variants={item}>
+                <QuickActions />
+              </motion.div>
 
-            <motion.div variants={item}>
-              <FeaturedTier />
-            </motion.div>
-          </div>
-        </motion.div>
+              <motion.div variants={item}>
+                <FeaturedTier />
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Mobile Profile Drawer - Only shows when toggled */}
+        {showMobileProfile && <MobileProfileDrawer />}
       </div>
-
-      {/* Mobile Profile Drawer - Only shows when toggled */}
-      {showMobileProfile && <MobileProfileDrawer />}
-    </div>
+    </Protected>
   );
 }

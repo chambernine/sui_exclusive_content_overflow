@@ -42,7 +42,7 @@ app.post("/edit-profile", async (c) => {
   const socialLinks = {
     x: body.get("social_links[x]")?.toString() || "",
     twitch: body.get("social_links[twitch]")?.toString() || "",
-    ig: body.get("social_links[instragram]")?.toString() || "",
+    ig: body.get("social_links[instagram]")?.toString() || "",
     youtube: body.get("social_links[youtube]")?.toString() || "",
   };
 

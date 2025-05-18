@@ -24,6 +24,7 @@ export default function useInteractContract() {
   ): Promise<PublishStatus> {
     console.log(TESTNET_PACKAGE_ID);
     console.log(albumId, capId, blobId);
+
     const tx = new Transaction();
     tx.moveCall({
       target: `${TESTNET_PACKAGE_ID}::exclusive::publish`,

@@ -82,6 +82,10 @@ export const downloadAndDecrypt = async (
       onlyTransactionKind: true,
     });
 
+    console.log(ids, "ids");
+    console.log(txBytes, "txBytes");
+    console.log(sessionKey, "sessionKey");
+
     try {
       await sealClient.fetchKeys({ ids, txBytes, sessionKey, threshold: 2 });
     } catch (err) {

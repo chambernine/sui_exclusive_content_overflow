@@ -173,26 +173,94 @@ export default function Home() {
 
   // Featured Tier Component
   const FeaturedTier = () => (
-    <Card className="overflow-hidden border-border hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden border-border hover:shadow-md transition-all duration-300">
       <CardHeader>
-        <CardTitle>Featured Tier</CardTitle>
+        <CardTitle className="text-lg">Featured Tier</CardTitle>
         <CardDescription>
           Premium content with exclusive benefits
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg overflow-hidden border border-border">
-          <div className="bg-blue-500 p-3 text-white font-medium text-center">
+        <div className="rounded-lg overflow-hidden border border-border/50 shadow-sm">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 text-white font-medium text-center">
             Premium Tier
           </div>
-          <div className="p-4 space-y-2">
-            <p className="text-sm">
-              Get access to premium content with additional benefits
-            </p>
-            <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
-              <li>Early access to new releases</li>
-              <li>Exclusive creator content</li>
-              <li>Premium support</li>
+          <div className="p-4 space-y-3 bg-card">
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20 6L9 17L4 12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+              <p className="text-sm">Get access to premium content</p>
+            </div>
+            <ul className="text-sm space-y-2 text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Early access to new releases</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M20 8V14M17 11H23M12.5 7C12.5 9.20914 10.7091 11 8.5 11C6.29086 11 4.5 9.20914 4.5 7C4.5 4.79086 6.29086 3 8.5 3C10.7091 3 12.5 4.79086 12.5 7Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Exclusive creator content</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4.93 4.93L19.07 19.07M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Ad-free experience</span>
+              </li>
             </ul>
           </div>
         </div>
@@ -241,13 +309,23 @@ export default function Home() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
+        className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 relative"
       >
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">Silvy</h1>
-          <p className="text-muted-foreground">
-            Discover and collect exclusive content
-          </p>
+        <div className="relative">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
+              Silvy
+            </span>
+          </h1>
+          <motion.p
+            className="text-muted-foreground max-w-md"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            Discover and collect exclusive content on the Sui blockchain
+          </motion.p>
+          <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/10 via-primary/50 to-primary/10 hidden md:block" />
         </div>
         <div className="flex items-center gap-4">
           <ConnectButton />
@@ -286,7 +364,12 @@ export default function Home() {
         >
           {/* Feed Content */}
           <motion.div variants={item} className="space-y-6">
-            <h2 className="text-xl font-semibold">Your Feed</h2>
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              Your Feed
+              <span className="text-xs font-normal px-2 py-1 bg-primary/10 text-primary rounded-md">
+                Latest content
+              </span>
+            </h2>
             <LoadingWrapper
               isLoading={isLoading}
               variant="card"
@@ -298,13 +381,13 @@ export default function Home() {
                 albums.map((album: Album) => (
                   <Card
                     key={album.albumId}
-                    className="overflow-hidden border-border hover:shadow-md transition-shadow mb-4"
+                    className="overflow-hidden border-border hover:shadow-md transition-all duration-300 mb-4 group"
                   >
                     <CardHeader className="pb-2 space-y-0">
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8 border-2 border-primary">
-                            <AvatarFallback>
+                          <Avatar className="h-9 w-9 border-2 border-primary ring-2 ring-background">
+                            <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white font-medium">
                               {album.owner.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
@@ -314,34 +397,25 @@ export default function Home() {
                                 {album.owner.slice(0, 6)}...
                                 {album.owner.slice(-4)}
                               </span>
-                              <Badge
-                                className={`${
-                                  tierColors[
-                                    album.tier as keyof typeof tierColors
-                                  ]
-                                } text-white text-sm`}
-                              >
-                                {
-                                  tierNames[
-                                    album.tier as keyof typeof tierNames
-                                  ]
-                                }
-                              </Badge>
                             </div>
                             <p className="text-xs text-muted-foreground">
                               Content Creator
                             </p>
                           </div>
                         </div>
-                        <span className="text-sm font-medium">
-                          {album.price} SUI
-                        </span>
+                        <Badge
+                          className={`${
+                            tierColors[album.tier as keyof typeof tierColors]
+                          } text-white text-sm`}
+                        >
+                          {tierNames[album.tier as keyof typeof tierNames]}
+                        </Badge>
                       </div>
                     </CardHeader>
 
                     <CardContent className="pb-0 space-y-3">
                       <h3 className="font-medium text-lg">{album.name}</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
                         {album.description}
                       </p>
 
@@ -351,7 +425,7 @@ export default function Home() {
                           <Badge
                             key={i}
                             variant="secondary"
-                            className="text-xs"
+                            className="text-xs bg-secondary/60 hover:bg-secondary/80 transition-colors"
                           >
                             {tag}
                           </Badge>
@@ -364,21 +438,33 @@ export default function Home() {
                       </div>
 
                       {/* Album Preview */}
-                      <div className="mt-2 relative">
-                        <div>
-                          {album.contentInfos?.[0] && (
+                      <div className="mt-3 relative overflow-hidden rounded-md">
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => handleNavigateToAlbum(album.albumId)}
+                        >
+                          {album.contentInfos?.[0] ? (
                             <AspectRatio
                               ratio={16 / 9}
                               className="overflow-hidden rounded-md"
                             >
-                              <img
+                              <motion.img
                                 src={album.contentInfos[0]}
                                 alt={album.name}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform"
-                                onClick={() =>
-                                  handleNavigateToAlbum(album.albumId)
-                                }
+                                className="w-full h-full object-cover"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.5 }}
                               />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            </AspectRatio>
+                          ) : (
+                            <AspectRatio
+                              ratio={16 / 9}
+                              className="overflow-hidden rounded-md bg-muted/30 flex items-center justify-center"
+                            >
+                              <p className="text-muted-foreground text-sm">
+                                No preview available
+                              </p>
                             </AspectRatio>
                           )}
                         </div>
@@ -386,7 +472,7 @@ export default function Home() {
                         {/* Multiple images indicator */}
                         {album.contentInfos?.length > 1 && (
                           <div className="absolute top-2 right-2">
-                            <Badge className="bg-black/60 backdrop-blur-sm text-white">
+                            <Badge className="bg-black/70 backdrop-blur-sm text-white border border-white/20">
                               +{album.contentInfos.length} images
                             </Badge>
                           </div>
@@ -394,33 +480,43 @@ export default function Home() {
                       </div>
                     </CardContent>
 
-                    <CardFooter className="pt-2 pb-3">
-                      <div className="w-full border-t border-border pt-2">
-                        <div className="flex justify-between">
-                          <div className="flex space-x-4 text-muted-foreground">
-                            <div className="flex items-center gap-1">
+                    <CardFooter className="pt-3 pb-3">
+                      <div className="w-full border-t border-border pt-3">
+                        <div className="flex justify-between items-center">
+                          <div className="flex space-x-5 text-muted-foreground">
+                            <motion.div
+                              className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
+                              whileHover={{ scale: 1.05 }}
+                            >
                               <Heart className="h-4 w-4" />
-                              <span className="text-xs">
+                              <span className="text-xs font-medium">
                                 {album.interaction?.likes || 0}
                               </span>
-                            </div>
-                            <div className="flex items-center gap-1">
+                            </motion.div>
+                            <motion.div
+                              className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
+                              whileHover={{ scale: 1.05 }}
+                            >
                               <Share2 className="h-4 w-4" />
-                              <span className="text-xs">
+                              <span className="text-xs font-medium">
                                 {album.interaction?.shares || 0}
                               </span>
-                            </div>
-                            <div className="flex items-center gap-1">
+                            </motion.div>
+                            <motion.div
+                              className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
+                              whileHover={{ scale: 1.05 }}
+                            >
                               <Bookmark className="h-4 w-4" />
-                              <span className="text-xs">
+                              <span className="text-xs font-medium">
                                 {album.interaction?.saves || 0}
                               </span>
-                            </div>
+                            </motion.div>
                           </div>
                           <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={() => handleNavigateToAlbum(album.albumId)}
+                            className="gap-1"
                           >
                             View Details
                           </Button>
@@ -430,11 +526,38 @@ export default function Home() {
                   </Card>
                 ))
               ) : (
-                <div className="text-center py-12 border border-dashed border-border rounded-lg">
-                  <p className="text-muted-foreground">
-                    No contents available in your feed
-                  </p>
-                </div>
+                <motion.div
+                  className="text-center py-16 border border-dashed border-border rounded-lg bg-card/50"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <div className="flex flex-col items-center gap-4 max-w-md mx-auto">
+                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bookmark className="h-7 w-7 text-primary opacity-70" />
+                    </div>
+                    <h3 className="text-xl font-medium">No content yet</h3>
+                    <p className="text-muted-foreground text-center mb-2">
+                      There's no content available in your feed. Explore our
+                      marketplace or create your own content.
+                    </p>
+                    <div className="flex gap-3 mt-2">
+                      <Button
+                        variant="default"
+                        onClick={() => navigate("/explore-albums")}
+                        className="gap-1"
+                      >
+                        Explore Marketplace
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate("/create-draft")}
+                      >
+                        Create Content
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
               )}
             </LoadingWrapper>
           </motion.div>

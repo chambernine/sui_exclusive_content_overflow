@@ -234,6 +234,9 @@ export function ProfilePage() {
     useUpdateProfile();
 
   const handleSaveProfile = async (values: z.infer<typeof formSchema>) => {
+    console.log("Saving profile with values:", values);
+    console.log("Profile image base64:", values.profileImage);
+
     setIsUpdating(true);
     const profileImageBase64 = values.profileImage
       ? await fileToBase64(values.profileImage as File)

@@ -15,7 +15,7 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://sui-exclusive-content-overflow.vercel.app",
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   })

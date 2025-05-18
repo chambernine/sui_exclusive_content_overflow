@@ -296,7 +296,7 @@ export default function Home() {
   };
 
   return (
-    <Protected>
+    <Protected hideChildren>
       <div className="min-h-screen w-full flex flex-col p-4 md:p-6">
         {/* Welcome Header */}
         <motion.div

@@ -7,11 +7,13 @@ interface ProtectedProps {
   children: ReactNode;
   title?: string;
   description?: string;
+  hideChildren?: boolean;
 }
 
 export function Protected({
   children,
   description = "You need to connect your wallet to access this feature",
+  hideChildren = false,
 }: ProtectedProps) {
   const { address } = useSuiAccount();
 
@@ -24,9 +26,12 @@ export function Protected({
   return (
     <div className="relative w-full h-full min-h-[300px]">
       {/* Blurred content in background */}
-      <div className="absolute inset-0 filter blur-xl opacity-30 pointer-events-none overflow-hidden">
-        {children}
-      </div>
+
+      {!hideChildren && (
+        <div className="absolute inset-0 filter blur-xl opacity-30 pointer-events-none overflow-hidden">
+          {children}
+        </div>
+      )}
 
       {/* Login overlay */}
       <div className="min-h-screen w-full flex items-center justify-center p-4">

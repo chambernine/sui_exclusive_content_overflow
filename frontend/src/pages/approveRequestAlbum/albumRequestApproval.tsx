@@ -559,10 +559,22 @@ export default function AlbumRequestApproval() {
               <TabsTrigger value="pending-approval" className="flex gap-2">
                 <CheckCircle className="h-4 w-4" />
                 <span>Contents to Approve</span>
+                <Badge
+                  variant="secondary"
+                  className="ml-1 bg-secondary/30 text-xs"
+                >
+                  {filteredPendingApproval?.length || 0}
+                </Badge>
               </TabsTrigger>
               <TabsTrigger value="my-albums" className="flex gap-2">
                 <Album className="h-4 w-4" />
                 <span>My Contents Request</span>
+                <Badge
+                  variant="secondary"
+                  className="ml-1 bg-secondary/30 text-xs"
+                >
+                  {filteredMyAlbums?.length || 0}
+                </Badge>
               </TabsTrigger>
             </TabsList>
 

@@ -20,7 +20,7 @@ import {
   Heart,
   Share2,
   Bookmark,
-  Lock,
+  LockKeyhole,
   Tag as TagIcon,
   ArrowLeft,
   MessageSquare,
@@ -36,6 +36,7 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import LetterGlitch from "@/components/ui/LetterGlitch";
 
 const TTL_MIN = 10;
 
@@ -454,13 +455,16 @@ export default function ViewPurchasedAlbum() {
               <AspectRatio ratio={16 / 9}>
                 <div className="flex flex-col items-center justify-center h-full w-full bg-muted rounded-lg text-muted-foreground">
                   {isDecrypting ? (
-                    <>
-                      <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
-                      <p>Decrypting content...</p>
-                    </>
+                    <LetterGlitch
+                      glitchColors={["#2b4539", "#61dca3", "#61b3dc"]}
+                      glitchSpeed={50}
+                      centerVignette={false}
+                      outerVignette={false}
+                      smooth={true}
+                    />
                   ) : (
                     <>
-                      <Lock className="h-16 w-16 mb-3 opacity-70" />
+                      <LockKeyhole className="h-16 w-16 mb-3 opacity-70" />
                       <p>Content needs to be decrypted</p>
                       <Button
                         onClick={() => decryptAlbumContent(album!)}

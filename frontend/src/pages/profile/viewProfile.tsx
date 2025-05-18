@@ -39,7 +39,6 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -230,47 +229,60 @@ export function ProfilePage() {
   };
 
   // Get update profile mutation hook
-  const { mutate: updateProfileMutation, isPending: isUpdatingProfile } =
-    useUpdateProfile();
+  const { mutate: updateProfileMutation } = useUpdateProfile();
 
   const handleSaveProfile = async (values: z.infer<typeof formSchema>) => {
     console.log("Saving profile with values:", values);
-    console.log("Profile image base64:", values.profileImage);
 
     setIsUpdating(true);
-    const profileImageBase64 = values.profileImage
-      ? await fileToBase64(values.profileImage as File)
-      : null;
-    // const bannerImagesBase64 = values.banner_image_files
-    //   ? await Promise.all(values.banner_image_files.map((f) => fileToBase64(f)))
-    //   : [];
+    try {
+      // Handle file upload if it's a File object
+      let profileImageBase64 = profileImage;
+      if (values.profileImage instanceof File) {
+        profileImageBase64 = await fileToBase64(values.profileImage as File);
+      }
+      // If it's already a string (base64), keep it as is
+      else if (typeof values.profileImage === "string") {
+        profileImageBase64 = values.profileImage;
+      }
 
-    const formData = {
-      ...values,
-      walletAddress: address,
-      profile_image_file: profileImageBase64,
-      // banner_image_files: bannerImagesBase64,
-    };
+      // Check if we need to update the profile image
+      const formData = {
+        ...values,
+        walletAddress: address,
+        profile_image_file: profileImageBase64 || userInfo?.profileImageBase64,
+      };
 
-    // Use the updateProfile mutation from TanStack Query
-    updateProfileMutation(formData, {
-      onSuccess: () => {
-        setIsUpdating(false);
-        setEditMode(false);
-        refetchProfile();
-      },
-      onError: (error) => {
-        console.error("Error saving profile:", error);
-        setIsUpdating(false);
-      },
-    });
+      // Use the updateProfile mutation from TanStack Query
+      updateProfileMutation(formData, {
+        onSuccess: () => {
+          setIsUpdating(false);
+          setEditMode(false);
+          refetchProfile();
+        },
+        onError: (error) => {
+          console.error("Error saving profile:", error);
+          setIsUpdating(false);
+        },
+      });
+    } catch (error) {
+      console.error("Error processing profile data:", error);
+      setIsUpdating(false);
+    }
   };
 
   const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Store the file object for later processing during form submission
       form.setValue("profileImage", file);
-      setProfileImage(URL.createObjectURL(file));
+
+      // Create a temporary URL for preview
+      const previewUrl = URL.createObjectURL(file);
+      setProfileImage(previewUrl);
+
+      // Clean up the URL when it's no longer needed to prevent memory leaks
+      return () => URL.revokeObjectURL(previewUrl);
     }
   };
 

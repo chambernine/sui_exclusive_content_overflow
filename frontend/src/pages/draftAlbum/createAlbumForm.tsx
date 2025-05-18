@@ -21,6 +21,8 @@ import {
   FileText,
   Check,
   PlusCircle,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -56,6 +58,8 @@ export default function CreateAlbumPage() {
   const { address } = useSuiAccount();
   const { mutate: submitDraftAlbum, isPending: isSubmitting } =
     useSubmitDraftAlbum();
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const totalSteps = 2;
 
   const [draft, setDraft] = useState<IFormDraftAlbum>({
     albumId: "",
@@ -187,34 +191,60 @@ export default function CreateAlbumPage() {
     }));
   };
 
+  const validateStep1 = () => {
+    if (!draft.name) {
+      toast.error("Please enter an album name.");
+      return false;
+    }
+
+    if (!draft.description) {
+      toast.error("Please enter a description.");
+      return false;
+    }
+
+    if (draft.price <= 0) {
+      toast.error("Please enter a valid price.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const validateStep2 = () => {
+    if (!draft.contentInfos || draft.contentInfos.length === 0) {
+      toast.error("Please upload at least one preview image.");
+      return false;
+    }
+
+    if (!draft.contents || draft.contents.length === 0) {
+      toast.error("Please upload at least one content file.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleNext = () => {
+    if (currentStep === 1 && validateStep1()) {
+      setCurrentStep(2);
+    } else if (currentStep === 2 && validateStep2()) {
+      handleSave();
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const handleSave = async () => {
     if (!address) {
       toast.error("Wallet connect required.");
       return;
     }
 
-    if (!draft.name) {
-      toast.error("Please enter an album name.");
-      return;
-    }
-
-    if (!draft.description) {
-      toast.error("Please enter a description.");
-      return;
-    }
-
-    if (draft.price <= 0) {
-      toast.error("Please enter a valid price.");
-      return;
-    }
-
-    if (!draft.contentInfos || draft.contentInfos.length === 0) {
-      toast.error("Please upload at least one preview image.");
-      return;
-    }
-
-    if (!draft.contents || draft.contents.length === 0) {
-      toast.error("Please upload at least one content file.");
+    if (!validateStep1() || !validateStep2()) {
       return;
     }
 
@@ -253,6 +283,7 @@ export default function CreateAlbumPage() {
           });
           setPreviewContentInfos([]);
           setPreviewContents([]);
+          setCurrentStep(1);
         },
       });
     } catch (error) {
@@ -276,110 +307,152 @@ export default function CreateAlbumPage() {
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
   };
 
-  const renderAlbumForm = () => (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="space-y-6"
-    >
-      <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <CardTitle>Content Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <motion.div variants={item} className="space-y-4">
+  // Stepper component
+  const FormStepper = () => (
+    <div className="4">
+      <div className="flex items-center justify-between px-6">
+        {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
+          <div
+            key={step}
+            className="flex flex-col gap-2 sm:flex-row items-center"
+          >
+            <div
+              className={`flex items-center justify-center h-10 w-10 rounded-full border-2 
+                ${
+                  currentStep === step
+                    ? "border-primary bg-primary text-white"
+                    : currentStep > step
+                    ? "border-primary bg-primary/20 text-primary"
+                    : "border-border bg-background text-muted-foreground"
+                }`}
+            >
+              {currentStep > step ? (
+                <Check className="h-5 w-5" />
+              ) : (
+                <span>{step}</span>
+              )}
+            </div>
+            <div className="flex flex-col sm:block ml-2">
+              <p
+                className={`text-sm font-medium ${
+                  currentStep === step
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {step === 1 ? "Content Details" : "Upload Files"}
+              </p>
+            </div>
+            {step < totalSteps && (
+              <div className="flex-1 border-t border-border mx-4 hidden sm:block" />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderContentDetailsStep = () => (
+    <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
+      <CardHeader>
+        <CardTitle>Content Details</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <motion.div variants={item} className="space-y-4">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="name">Content Name</Label>
+            <Input
+              id="name"
+              name="name"
+              value={draft.name}
+              onChange={handleChange}
+              placeholder="Enter content name"
+              className="mt-1"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <Label htmlFor="name">Content Name</Label>
+              <Label htmlFor="tier">Tier</Label>
+              <Select
+                value={draft.tier.toString()}
+                onValueChange={handleSelectTier}
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Select tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(tierNames).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`w-3 h-3 rounded-full ${
+                            tierColors[key as unknown as AlbumTier]
+                          }`}
+                        />
+                        {value}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="price">
+                <div className="flex items-center gap-1">Price (SUI)</div>
+              </Label>
               <Input
-                id="name"
-                name="name"
-                value={draft.name}
+                id="price"
+                type="number"
+                name="price"
+                value={draft.price}
                 onChange={handleChange}
-                placeholder="Enter content name"
+                placeholder="0.00"
                 className="mt-1"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="tier">Tier</Label>
-                <Select
-                  value={draft.tier.toString()}
-                  onValueChange={handleSelectTier}
-                >
-                  <SelectTrigger className="w-full mt-1">
-                    <SelectValue placeholder="Select tier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(tierNames).map(([key, value]) => (
-                      <SelectItem key={key} value={key}>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-3 h-3 rounded-full ${
-                              tierColors[key as unknown as AlbumTier]
-                            }`}
-                          />
-                          {value}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="description">
+              <div className="flex items-center gap-1">
+                <FileText className="h-4 w-4" />
+                Description
               </div>
-
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="price">
-                  <div className="flex items-center gap-1">Price (SUI)</div>
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  name="price"
-                  value={draft.price}
-                  onChange={handleChange}
-                  placeholder="0.00"
-                  className="mt-1"
-                />
+            </Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={draft.description}
+              onChange={handleChange}
+              placeholder="Describe your content"
+              className="mt-1 min-h-24"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="tags">
+              <div className="flex items-center gap-1">
+                <TagIcon className="h-4 w-4" />
+                Tags (comma separated)
               </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="description">
-                <div className="flex items-center gap-1">
-                  <FileText className="h-4 w-4" />
-                  Description
-                </div>
-              </Label>
-              <Textarea
-                id="description"
-                name="description"
-                value={draft.description}
-                onChange={handleChange}
-                placeholder="Describe your content"
-                className="mt-1 min-h-24"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="tags">
-                <div className="flex items-center gap-1">
-                  <TagIcon className="h-4 w-4" />
-                  Tags (comma separated)
-                </div>
-              </Label>
-              <Input
-                id="tags"
-                name="tags"
-                value={draft.tags.join(", ")}
-                onChange={handleChange}
-                placeholder="art, photography, exclusive, etc."
-                className="mt-1"
-              />
-            </div>
-          </motion.div>
-        </CardContent>
-      </Card>
+            </Label>
+            <Input
+              id="tags"
+              name="tags"
+              value={draft.tags.join(", ")}
+              onChange={handleChange}
+              placeholder="art, photography, exclusive, etc."
+              className="mt-1"
+            />
+          </div>
+        </motion.div>
+      </CardContent>
+    </Card>
+  );
 
+  const renderUploadFilesStep = () => (
+    <>
       <motion.div variants={item}>
-        <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
+        <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow mb-6 gap-2 ">
           <CardHeader>
             <CardTitle>Preview Images</CardTitle>
           </CardHeader>
@@ -394,7 +467,7 @@ export default function CreateAlbumPage() {
                     <Image className="h-8 w-8 text-muted-foreground" />
                     <span className="font-medium">Upload Preview Images</span>
                     <span className="text-xs text-muted-foreground">
-                      These images will be shown as previews to potential buyers
+                      These images will be shown as previews
                     </span>
                   </div>
                 </label>
@@ -462,7 +535,7 @@ export default function CreateAlbumPage() {
       </motion.div>
 
       <motion.div variants={item}>
-        <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
+        <Card className="overflow-hidden backdrop-blur-sm border-border hover:shadow-lg transition-shadow gap-2">
           <CardHeader>
             <CardTitle>Exclusive Content</CardTitle>
           </CardHeader>
@@ -542,41 +615,68 @@ export default function CreateAlbumPage() {
           </CardContent>
         </Card>
       </motion.div>
+    </>
+  );
 
-      <motion.div variants={item} className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSubmitting}>
-          {isSubmitting ? (
-            <div className="flex items-center">
-              <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>
-              <span>Submitting...</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Check className="h-4 w-4" />
-              Submit for Approval
-            </div>
-          )}
-        </Button>
+  const renderAlbumForm = () => (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-6"
+    >
+      <FormStepper />
+
+      {currentStep === 1 ? renderContentDetailsStep() : renderUploadFilesStep()}
+
+      <motion.div variants={item} className="flex justify-between">
+        {currentStep > 1 && (
+          <Button onClick={handleBack} variant="outline" type="button">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
+        <div className={currentStep === 1 ? "ml-auto" : ""}>
+          <Button onClick={handleNext} disabled={isSubmitting}>
+            {isSubmitting ? (
+              <div className="flex items-center">
+                <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>
+                <span>Submitting...</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                {currentStep < totalSteps ? (
+                  <>
+                    Next
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4" />
+                    Submit for Approval
+                  </>
+                )}
+              </div>
+            )}
+          </Button>
+        </div>
       </motion.div>
     </motion.div>
   );
 
   return (
     <Protected description="Connect wallet to create content.">
-      <div className="container max-w-4xl mx-auto py-12 px-4">
+      <div className="container max-w-4xl mx-auto py-8 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
+          className="mb-6"
         >
           <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
             Create New Content
           </h1>
-          <p className="text-muted-foreground">
-            Share your exclusive content with your fans and supporters
-          </p>
         </motion.div>
 
         {renderAlbumForm()}

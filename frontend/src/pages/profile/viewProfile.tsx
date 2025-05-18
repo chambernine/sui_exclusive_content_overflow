@@ -347,7 +347,7 @@ export function ProfilePage() {
 
     const handleViewDetails = (album: Album) => {
       localStorage.setItem("viewingAlbum", JSON.stringify(album));
-      navigate(`/myPurchase/${album.albumId}`);
+      navigate(`profile/myPurchase/${album.albumId}`);
     };
 
     return (
@@ -592,7 +592,7 @@ export function ProfilePage() {
                     </label>
                   )}
                 </div>
-                <div className="flex-1 text-center md:text-left">
+                <div className="flex-1 text-center md:text-left w-full">
                   {editMode ? (
                     <Form {...form}>
                       <form

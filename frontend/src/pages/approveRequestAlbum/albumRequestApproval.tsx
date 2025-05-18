@@ -532,7 +532,7 @@ export default function AlbumRequestApproval() {
 
   return (
     <Protected description="Connect wallet to manage content requests">
-      <div className="container max-w-6xl mx-auto py-6 md:py-12 px-4">
+      <div className="container max-w-6xl mx-auto py-6 md:py-8 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

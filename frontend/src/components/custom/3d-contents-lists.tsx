@@ -74,7 +74,7 @@ export function ThreeDContentsLists({
   if (isLoading) {
     return (
       <div className="mx-auto max-w-7xl rounded-xl bg-gray-950/5 p-2 ring-1 ring-neutral-700/10">
-        <Skeleton className="h-100 w-full rounded-lg" />
+        <Skeleton className="h-60 sm:h-100 w-full rounded-lg" />
       </div>
     );
   }

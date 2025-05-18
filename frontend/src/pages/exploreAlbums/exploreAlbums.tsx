@@ -103,7 +103,7 @@ export default function ExploreAlbums() {
 
   return (
     <Protected description="Connect wallet to manage album requests">
-      <div className="py-12 px-8 w-full">
+      <div className="py-8 px-4 w-full">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -123,7 +123,7 @@ export default function ExploreAlbums() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8 text-center h-100"
+            className="mb-8 text-center h-60 sm:h-100"
           >
             <ThreeDContentsLists contents={albums} isLoading={isLoading} />
           </motion.div>

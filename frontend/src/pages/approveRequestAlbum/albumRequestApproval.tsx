@@ -402,7 +402,7 @@ export default function AlbumRequestApproval() {
                   </CardTitle>
                   <div>{renderStatusBadge(album.status)}</div>
                 </div>
-                <div className="flex justify-between items-center mt-2">
+                <div className="flex justify-between items-center">
                   <Badge
                     className={`${
                       tierColors[album.tier as keyof typeof tierColors]
@@ -452,7 +452,7 @@ export default function AlbumRequestApproval() {
 
                   <div className="relative">
                     <div className="grid grid-cols-2 gap-2">
-                      {album.contentInfos?.slice(0, 4).map((img, i) => (
+                      {album.contentInfos?.slice(0, 2).map((img, i) => (
                         <motion.div
                           key={i}
                           whileHover={{ scale: 1.03 }}
@@ -469,13 +469,13 @@ export default function AlbumRequestApproval() {
                       ))}
                     </div>
 
-                    {album.contentInfos?.length > 4 && (
+                    {album.contentInfos?.length > 2 && (
                       <div className="absolute bottom-2 right-2">
                         <Badge
                           variant="secondary"
                           className="bg-background/90 backdrop-blur-sm"
                         >
-                          +{album.contentInfos.length - 4} more
+                          +{album.contentInfos.length - 2} more
                         </Badge>
                       </div>
                     )}
@@ -537,11 +537,11 @@ export default function AlbumRequestApproval() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
+          className="mb-6"
         >
           <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 gradient-text">
             <ClipboardCheck className="h-6 w-6" />
-            Content Request Management
+            Content Management
           </h1>
           <p className="text-muted-foreground">
             Review submitted contents and manage your content publication
@@ -554,7 +554,7 @@ export default function AlbumRequestApproval() {
           onValueChange={setCurrentTab}
           className="w-full"
         >
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <TabsList className="w-full md:w-auto">
               <TabsTrigger value="pending-approval" className="flex gap-2">
                 <CheckCircle className="h-4 w-4" />
@@ -590,9 +590,6 @@ export default function AlbumRequestApproval() {
                       <CheckCircle className="h-5 w-5 text-primary" />
                       Contents Awaiting Your Approval
                     </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Review and approve contents submitted by creators
-                    </p>
                   </div>
                   <Badge variant="outline" className="bg-primary/10">
                     {filteredPendingApproval.length} content
@@ -615,10 +612,6 @@ export default function AlbumRequestApproval() {
                       <Album className="h-5 w-5 text-primary" />
                       My Contents Ready to Publish
                     </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Track the status of your submitted contents and publish
-                      approved ones
-                    </p>
                   </div>
                   <Badge variant="outline" className="bg-primary/10">
                     {filteredMyAlbums.length} content

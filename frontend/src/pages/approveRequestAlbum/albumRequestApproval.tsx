@@ -532,8 +532,8 @@ export default function AlbumRequestApproval() {
 
   return (
     <Protected description="Connect wallet to manage content requests">
-      <div className="container max-w-6xl mx-auto py-6 md:py-8 px-4">
-        <motion.div
+      <div className="container w-full mx-auto p-4">
+        {/* <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -541,13 +541,13 @@ export default function AlbumRequestApproval() {
         >
           <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 gradient-text">
             <ClipboardCheck className="h-6 w-6" />
-            Content Management
+            Contents Management
           </h1>
           <p className="text-muted-foreground">
             Review submitted contents and manage your content publication
             process
           </p>
-        </motion.div>
+        </motion.div> */}
 
         <Tabs
           value={currentTab}

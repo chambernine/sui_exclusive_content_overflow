@@ -232,8 +232,6 @@ export function ProfilePage() {
   const { mutate: updateProfileMutation } = useUpdateProfile();
 
   const handleSaveProfile = async (values: z.infer<typeof formSchema>) => {
-    console.log("Saving profile with values:", values);
-
     setIsUpdating(true);
     try {
       // Handle file upload if it's a File object
@@ -907,7 +905,7 @@ export function ProfilePage() {
 
   return (
     <Protected description="Connect wallet to view profile">
-      <div className="container py-8 px-4">
+      <div className="container p-4">
         <LoadingWrapper isLoading={isProfileLoading} variant="profile">
           <div className="w-full mx-auto">{renderProfileContent()}</div>
         </LoadingWrapper>

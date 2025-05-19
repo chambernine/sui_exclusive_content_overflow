@@ -666,19 +666,7 @@ export default function CreateAlbumPage() {
 
   return (
     <Protected description="Connect wallet to create content.">
-      <div className="container max-w-4xl mx-auto py-8 px-4">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-6"
-        >
-          <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            Create New Content
-          </h1>
-        </motion.div>
-
+      <div className="container w-full mx-auto py-4 px-4 sm:px-16">
         {renderAlbumForm()}
       </div>
     </Protected>

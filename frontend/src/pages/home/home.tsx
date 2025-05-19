@@ -298,43 +298,6 @@ export default function Home() {
   return (
     <Protected hideChildren>
       <div className="min-h-screen w-full flex flex-col p-4 md:p-6">
-        {/* Welcome Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 relative"
-        >
-          <div className="relative">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-                Silvy
-              </span>
-            </h1>
-            <motion.p
-              className="text-muted-foreground max-w-md"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              Discover and collect exclusive content on the Sui blockchain
-            </motion.p>
-            <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/10 via-primary/50 to-primary/10 hidden md:block" />
-          </div>
-          <div className="flex items-center gap-4">
-            <ConnectButton />
-            {/* Mobile Profile Avatar */}
-            <Avatar
-              className="h-8 w-8 lg:hidden cursor-pointer border border-border"
-              onClick={() => setShowMobileProfile(true)}
-            >
-              <AvatarFallback className="bg-primary/20 text-primary">
-                {address ? address.slice(0, 2) : ""}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </motion.div>
-
         {/* 3-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Profile */}

@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -23,8 +23,6 @@ import {
   Check,
   Clock,
   ExternalLink,
-  ChevronLeft,
-  AlertCircle,
   CheckCircle,
   ArrowLeft,
 } from "lucide-react";
@@ -91,7 +89,7 @@ export default function PublishDraftAlbum() {
     if (!album) return;
     setIsPublishing(true);
     try {
-      await axios.patch(
+      const res = await axios.patch(
         `${DOMAIN_DEV}/my-album/publish`,
         { id: dbId },
         {
@@ -100,8 +98,8 @@ export default function PublishDraftAlbum() {
           },
         }
       );
+
       await fetchAlbum();
-      toast.success("Album published to blockchain");
     } catch (err) {
       console.error("Failed to publish album:", err);
       toast.error("Failed to publish album to blockchain");
@@ -154,7 +152,7 @@ export default function PublishDraftAlbum() {
               onClick={() => navigate("/management-contents")}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Request Management
+              Back to Contents Management
             </Button>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -180,61 +178,90 @@ export default function PublishDraftAlbum() {
             <>
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-border hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>Album Details</span>
-                      <Badge className={tierColors[album.tier as AlbumTier]}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <CardTitle className="text-lg font-medium">
+                        Album Details
+                      </CardTitle>
+                      <Badge
+                        className={`${
+                          tierColors[album.tier as AlbumTier]
+                        } px-3 py-1`}
+                      >
                         {tierNames[album.tier as AlbumTier]}
                       </Badge>
-                    </CardTitle>
-                    <CardDescription>{album.description}</CardDescription>
+                    </div>
+                    <CardDescription className="text-sm line-clamp-2">
+                      {album.description}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="text-muted-foreground">Price:</span>
-                          <span className="font-semibold">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3 bg-muted/10 p-3 rounded-md">
+                        <h3 className="text-xs uppercase tracking-wider font-medium text-muted-foreground mb-2">
+                          Basic Information
+                        </h3>
+                        <div className="flex justify-between items-center py-1.5">
+                          <span className="text-sm text-muted-foreground">
+                            Price
+                          </span>
+                          <span className="text-sm font-medium">
                             {album.price} SUI
                           </span>
-                        </p>
-                        <p className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="text-muted-foreground">
-                            Created:
+                        </div>
+                        <div className="h-px bg-border/40"></div>
+                        <div className="flex justify-between items-center py-1.5">
+                          <span className="text-sm text-muted-foreground">
+                            Created
                           </span>
-                          <span>
+                          <span className="text-sm">
                             {new Date(
                               album.created_at.seconds * 1000
                             ).toLocaleDateString()}
                           </span>
-                        </p>
-                        <p className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="text-muted-foreground">Owner:</span>
-                          <span className="font-mono text-xs">
+                        </div>
+                        <div className="h-px bg-border/40"></div>
+                        <div className="flex justify-between items-center py-1.5">
+                          <span className="text-sm text-muted-foreground">
+                            Owner
+                          </span>
+                          <span className="font-mono bg-muted/30 px-1.5 py-0.5 rounded text-xs">
                             {album.owner.substring(0, 6)}...
                             {album.owner.substring(album.owner.length - 4)}
                           </span>
-                        </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="text-muted-foreground">
-                            Contents:
+
+                      <div className="space-y-3 bg-muted/10 p-3 rounded-md">
+                        <h3 className="text-xs uppercase tracking-wider font-medium text-muted-foreground mb-2">
+                          Content Details
+                        </h3>
+                        <div className="flex justify-between items-center py-1.5">
+                          <span className="text-sm text-muted-foreground">
+                            Contents
                           </span>
-                          <span>{album.contents.length} files</span>
-                        </p>
-                        <p className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="text-muted-foreground">
-                            Previews:
+                          <span className="text-sm font-medium">
+                            {album.contents.length} files
                           </span>
-                          <span>{album.contentInfos.length} images</span>
-                        </p>
-                        <p className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="text-muted-foreground">Tags:</span>
-                          <span className="max-w-[200px] truncate text-right">
+                        </div>
+                        <div className="h-px bg-border/40"></div>
+                        <div className="flex justify-between items-center py-1.5">
+                          <span className="text-sm text-muted-foreground">
+                            Previews
+                          </span>
+                          <span className="text-sm">
+                            {album.contentInfos.length} images
+                          </span>
+                        </div>
+                        <div className="h-px bg-border/40"></div>
+                        <div className="flex justify-between items-center py-1.5">
+                          <span className="text-sm text-muted-foreground">
+                            Tags
+                          </span>
+                          <span className="text-sm max-w-[200px] truncate text-right bg-muted/30 px-1.5 py-0.5 rounded">
                             {album.tags.join(", ")}
                           </span>
-                        </p>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -243,19 +270,29 @@ export default function PublishDraftAlbum() {
 
               <motion.div variants={itemVariants} className="mt-6">
                 <Card className="overflow-hidden border-border hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <span>Publishing Status</span>
-                      {!isAllPublished && isAnyPublished && (
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <CardTitle className="text-lg font-medium flex items-center gap-2">
+                        <span>Publishing Status</span>
+                        {!isAllPublished && isAnyPublished && (
+                          <Badge
+                            variant="outline"
+                            className="bg-amber-500/10 text-amber-500 border-amber-500/30"
+                          >
+                            <Clock className="mr-1 h-3 w-3" /> In Progress
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      {isAllPublished && (
                         <Badge
                           variant="outline"
-                          className="bg-amber-500/10 text-amber-500 border-amber-500/30"
+                          className="bg-green-500/10 text-green-500 border-green-500/30"
                         >
-                          <Clock className="mr-1 h-3 w-3" /> In Progress
+                          <Check className="mr-1 h-3 w-3" /> Complete
                         </Badge>
                       )}
-                    </CardTitle>
-                    <CardDescription>
+                    </div>
+                    <CardDescription className="text-sm">
                       {pendingCount > 0
                         ? `${pendingCount} content blob${
                             pendingCount !== 1 ? "s" : ""
@@ -267,7 +304,9 @@ export default function PublishDraftAlbum() {
                     <div>
                       <div className="flex justify-between text-xs mb-2">
                         <span>Publication Progress</span>
-                        <span>{Math.round(progress)}%</span>
+                        <span className="font-medium">
+                          {Math.round(progress)}%
+                        </span>
                       </div>
                       <Progress value={progress} className="h-2" />
                     </div>
@@ -346,6 +385,7 @@ export default function PublishDraftAlbum() {
                             {!blob.ispublished && (
                               <Button
                                 size="sm"
+                                variant="secondary"
                                 className="w-full sm:w-auto"
                                 disabled={publishingBlobId === blob.blobId}
                                 onClick={async () => {

@@ -103,8 +103,8 @@ export default function ExploreAlbums() {
 
   return (
     <Protected description="Connect wallet to manage album requests">
-      <div className="py-8 px-4 w-full">
-        <motion.div
+      <div className="p-4 w-full">
+        {/* <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -116,7 +116,7 @@ export default function ExploreAlbums() {
           <p className="text-muted-foreground">
             Discover and purchase exclusive content albums
           </p>
-        </motion.div>
+        </motion.div> */}
 
         {albums.length > 0 && (
           <motion.div

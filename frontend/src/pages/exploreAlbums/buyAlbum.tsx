@@ -165,11 +165,6 @@ export default function BuyAlbum() {
   if (isLoading) {
     return (
       <div className="container mx-auto py-4 md:py-6 max-w-7xl">
-        {/* Back button skeleton */}
-        <div className="mb-4">
-          <Skeleton className="h-10 w-28" />
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Image Gallery & Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -300,22 +295,7 @@ export default function BuyAlbum() {
 
   return (
     <Protected description="Connect wallet to view and purchase content">
-      <div className="container mx-auto py-4 md:py-6 max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Button
-            variant="ghost"
-            className="mb-4"
-            onClick={() => navigate("/explore-albums")}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Explore
-          </Button>
-        </motion.div>
-
+      <div className="container mx-auto py-4 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 lg:justify-center gap-8">
           {/* Left Column - Image Gallery */}
           <motion.div

@@ -114,7 +114,7 @@ export function LoadingWrapper({
 
     if (variant === "publish-album") {
       return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="w-full mx-auto p-4">
           {/* Back link and title section */}
           <div className="mb-6">
             <div className="flex items-center mb-2">

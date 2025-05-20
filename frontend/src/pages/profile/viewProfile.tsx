@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -321,7 +322,7 @@ export function ProfilePage() {
   const renderAlbumGrid = (albums: any, loading: boolean) => {
     if (loading) {
       return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((item) => (
             <Card
               key={item}
@@ -364,7 +365,12 @@ export function ProfilePage() {
     };
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
         {filteredAlbums.map((album: Album) => (
           <motion.div key={album.albumId} variants={item}>
             <CardWithLens
@@ -428,7 +434,147 @@ export function ProfilePage() {
             </CardWithLens>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
+    );
+  };
+
+  // Album list view component
+  const renderAlbumList = (albums: any, loading: boolean) => {
+    if (loading) {
+      return (
+        <div className="space-y-3">
+          {[1, 2, 3].map((item) => (
+            <Card
+              key={item}
+              className="overflow-hidden bg-card border-border hover:shadow-lg transition-shadow cursor-pointer p-0"
+            >
+              <div className="flex flex-col sm:flex-row h-full">
+                <div className="hidden sm:block w-full sm:w-48 h-40 bg-muted animate-pulse" />
+                <div className="flex-1 p-3 sm:p-4">
+                  <div className="h-4 w-3/4 bg-muted animate-pulse mb-2" />
+                  <div className="h-4 w-1/2 bg-muted animate-pulse mb-4" />
+                  <div className="h-4 w-1/4 bg-muted animate-pulse" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
+    if (!albums || albums.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No albums found</p>
+        </div>
+      );
+    }
+
+    const filteredAlbums = filterAlbums(albums);
+
+    if (filteredAlbums.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            No contents match your search criteria
+          </p>
+        </div>
+      );
+    }
+
+    const handleViewDetails = (album: Album) => {
+      localStorage.setItem("viewingAlbum", JSON.stringify(album));
+      navigate(`/profile/myPurchase/${album.albumId}`);
+    };
+
+    return (
+      <motion.div
+        className="space-y-3"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        {filteredAlbums.map((album: Album) => (
+          <motion.div key={album.albumId} variants={item}>
+            <Card
+              className="overflow-hidden bg-card border-border hover:shadow-lg transition-shadow cursor-pointer p-0"
+              onClick={() => handleViewDetails(album)}
+            >
+              <div className="flex flex-col sm:flex-row h-full">
+                <div className="hidden sm:block w-full sm:w-48 h-40 sm:h-auto relative">
+                  <AspectRatio ratio={16 / 9} className="h-full">
+                    {album.contentInfos?.[0] ? (
+                      <img
+                        src={album.contentInfos[0]}
+                        alt={album.name}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        No preview
+                      </div>
+                    )}
+                  </AspectRatio>
+                </div>
+                <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-2">
+                    <div>
+                      <h3 className="font-semibold text-lg line-clamp-1">
+                        {album.name}
+                      </h3>
+                    </div>
+                    <Badge
+                      className={`${
+                        tierColors[album.tier as keyof typeof tierColors]
+                      } text-white w-fit shrink-0 text-sm sm:ml-2`}
+                    >
+                      {tierNames[album.tier as keyof typeof tierNames]}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between mt-auto pt-2 border-t border-border">
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Heart className="h-4 w-4" />
+                        <span className="text-xs sm:text-sm">
+                          {album.interaction?.likes || 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Share2 className="h-4 w-4" />
+                        <span className="text-xs sm:text-sm">
+                          {album.interaction?.shares || 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Bookmark className="h-4 w-4" />
+                        <span className="text-xs sm:text-sm">
+                          {album.interaction?.saves || 0}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm sm:text-base">
+                        {album.price} SUI
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2 sm:px-3 bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary border border-primary/20"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewDetails(album);
+                        }}
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        ))}
+      </motion.div>
     );
   };
 
@@ -839,12 +985,37 @@ export function ProfilePage() {
                       </TabsTrigger>
                     </TabsList>
                   </div>
-                </Tabs>
 
-                {renderAlbumGrid(
-                  purchasedAlbumsData?.data,
-                  isPurchasedAlbumsLoading
-                )}
+                  <TabsContent value="grid" className="m-0">
+                    <LoadingWrapper
+                      isLoading={isPurchasedAlbumsLoading}
+                      variant="album"
+                      count={6}
+                      loadingText="Loading albums..."
+                      gridCols="3"
+                    >
+                      {renderAlbumGrid(
+                        purchasedAlbumsData?.data,
+                        isPurchasedAlbumsLoading
+                      )}
+                    </LoadingWrapper>
+                  </TabsContent>
+
+                  <TabsContent value="list" className="m-0">
+                    <LoadingWrapper
+                      isLoading={isPurchasedAlbumsLoading}
+                      variant="card"
+                      count={4}
+                      layout="block"
+                      loadingText="Loading albums..."
+                    >
+                      {renderAlbumList(
+                        purchasedAlbumsData?.data,
+                        isPurchasedAlbumsLoading
+                      )}
+                    </LoadingWrapper>
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
 
               <TabsContent value="created" className="m-0">
@@ -893,8 +1064,31 @@ export function ProfilePage() {
                       </TabsTrigger>
                     </TabsList>
                   </div>
+
+                  <TabsContent value="grid" className="m-0">
+                    <LoadingWrapper
+                      isLoading={isMyAlbumsLoading}
+                      variant="album"
+                      count={6}
+                      loadingText="Loading albums..."
+                      gridCols="3"
+                    >
+                      {renderAlbumGrid(myAlbumsData?.data, isMyAlbumsLoading)}
+                    </LoadingWrapper>
+                  </TabsContent>
+
+                  <TabsContent value="list" className="m-0">
+                    <LoadingWrapper
+                      isLoading={isMyAlbumsLoading}
+                      variant="card"
+                      count={4}
+                      layout="block"
+                      loadingText="Loading albums..."
+                    >
+                      {renderAlbumList(myAlbumsData?.data, isMyAlbumsLoading)}
+                    </LoadingWrapper>
+                  </TabsContent>
                 </Tabs>
-                {renderAlbumGrid(myAlbumsData?.data, isMyAlbumsLoading)}
               </TabsContent>
             </Tabs>
           </div>

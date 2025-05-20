@@ -228,7 +228,7 @@ export default function AlbumRequestApproval() {
         {filteredPendingApproval.map((album: Album) => (
           <motion.div key={album.albumId} variants={item}>
             <Card className="bg-card border-border hover:shadow-md transition-shadow overflow-hidden">
-              <CardHeader className="pb-2">
+              <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-lg font-medium">
                     {album.name}
@@ -253,6 +253,28 @@ export default function AlbumRequestApproval() {
                     </Badge>
                   )}
                 </div>
+                <motion.div
+                  initial={{ height: "30px", overflow: "hidden" }}
+                  animate={{
+                    height: expandedCard === album.albumId ? "auto" : "30px",
+                    overflow:
+                      expandedCard === album.albumId ? "visible" : "hidden",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p className="text-sm leading-relaxed">{album.description}</p>
+                </motion.div>
+
+                {album.description && album.description.length > 10 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => toggleExpandCard(album.albumId)}
+                  >
+                    {expandedCard === album.albumId ? "Show less" : "Read more"}
+                  </Button>
+                )}
               </CardHeader>
 
               <CardContent className="space-y-3">
@@ -268,7 +290,8 @@ export default function AlbumRequestApproval() {
                       Owner:
                     </span>
                     <span className="font-mono text-sm">
-                      {album.owner.slice(0, 10)}...{album.owner.slice(-6)}
+                      {album.owner.slice(0, 6)}...
+                      {album.owner.slice(-4)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -280,29 +303,6 @@ export default function AlbumRequestApproval() {
                     </span>
                   </div>
                 </div>
-
-                <motion.div
-                  initial={{ height: "60px", overflow: "hidden" }}
-                  animate={{
-                    height: expandedCard === album.albumId ? "auto" : "60px",
-                    overflow:
-                      expandedCard === album.albumId ? "visible" : "hidden",
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <p className="text-sm leading-relaxed">{album.description}</p>
-                </motion.div>
-
-                {album.description && album.description.length > 150 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs p-0 h-auto"
-                    onClick={() => toggleExpandCard(album.albumId)}
-                  >
-                    {expandedCard === album.albumId ? "Show less" : "Read more"}
-                  </Button>
-                )}
 
                 <Separator className="my-2" />
 
@@ -395,14 +395,26 @@ export default function AlbumRequestApproval() {
         {filteredMyAlbums.map((album: Album) => (
           <motion.div key={album.albumId} variants={item}>
             <Card className="bg-card border-border hover:shadow-md transition-shadow overflow-hidden">
-              <CardHeader className="pb-2">
+              <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-lg font-medium">
                     {album.name}
                   </CardTitle>
                   <div>{renderStatusBadge(album.status)}</div>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mt-2">
+                  <div className="flex flex-wrap gap-2">
+                    {album.tags?.slice(0, 3).map((tag, i) => (
+                      <Badge key={i} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {album.tags?.length > 3 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{album.tags.length - 3} more
+                      </Badge>
+                    )}
+                  </div>
                   <Badge
                     className={`${
                       tierColors[album.tier as keyof typeof tierColors]
@@ -410,15 +422,11 @@ export default function AlbumRequestApproval() {
                   >
                     {tierNames[album.tier as keyof typeof tierNames]}
                   </Badge>
-                  <span className="text-sm font-medium">{album.price} SUI</span>
                 </div>
-              </CardHeader>
-
-              <CardContent className="space-y-3">
                 <motion.div
-                  initial={{ height: "60px", overflow: "hidden" }}
+                  initial={{ height: "30px", overflow: "hidden" }}
                   animate={{
-                    height: expandedCard === album.albumId ? "auto" : "60px",
+                    height: expandedCard === album.albumId ? "auto" : "30px",
                     overflow:
                       expandedCard === album.albumId ? "visible" : "hidden",
                   }}
@@ -427,48 +435,70 @@ export default function AlbumRequestApproval() {
                   <p className="text-sm leading-relaxed">{album.description}</p>
                 </motion.div>
 
-                {album.description && album.description.length > 150 && (
+                {album.description && album.description.length > 10 && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs p-0 h-auto"
+                    className="text-xs"
                     onClick={() => toggleExpandCard(album.albumId)}
                   >
                     {expandedCard === album.albumId ? "Show less" : "Read more"}
                   </Button>
                 )}
+              </CardHeader>
+
+              <CardContent className="space-y-3">
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Price:
+                    </span>
+                    <span className="font-medium">{album.price} SUI</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Owner:
+                    </span>
+                    <span className="font-mono text-sm">
+                      {album.owner.slice(0, 6)}...
+                      {album.owner.slice(-4)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Created:
+                    </span>
+                    <span className="text-sm">
+                      {formatTimestamp(album.created_at)}
+                    </span>
+                  </div>
+                </div>
 
                 <Separator className="my-2" />
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium flex items-center gap-1">
+                    <h4 className="text-sm font-medium flex items-center gap-1">
                       <ImageIcon className="h-3.5 w-3.5" /> Content Preview
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Created: {formatTimestamp(album.created_at).split(",")[0]}
-                    </span>
+                    </h4>
                   </div>
 
-                  <div className="relative">
-                    <div className="grid grid-cols-2 gap-2">
-                      {album.contentInfos?.slice(0, 2).map((img, i) => (
-                        <motion.div
-                          key={i}
-                          whileHover={{ scale: 1.03 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <AspectRatio ratio={1}>
-                            <img
-                              src={img}
-                              alt={`preview-${i}`}
-                              className="h-full w-full object-cover rounded"
-                            />
-                          </AspectRatio>
-                        </motion.div>
-                      ))}
-                    </div>
-
+                  <div className="grid grid-cols-2 gap-2">
+                    {album.contentInfos?.slice(0, 2).map((img, i) => (
+                      <motion.div
+                        key={i}
+                        whileHover={{ scale: 1.03 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <AspectRatio ratio={16 / 9}>
+                          <img
+                            src={img}
+                            alt={`preview-${i}`}
+                            className="h-full w-full object-cover rounded"
+                          />
+                        </AspectRatio>
+                      </motion.div>
+                    ))}
                     {album.contentInfos?.length > 2 && (
                       <div className="absolute bottom-2 right-2">
                         <Badge
@@ -495,7 +525,7 @@ export default function AlbumRequestApproval() {
                     >
                       <Button
                         onClick={() => handlePublish(album)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        className="w-full bg-primary hover:bg-primary/90 text-white"
                       >
                         <CheckSquare className="h-4 w-4 mr-2" />
                         Publish Content

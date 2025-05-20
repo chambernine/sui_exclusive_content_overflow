@@ -28,11 +28,11 @@ export function AppLayout() {
             className="flex w-full flex-col md:flex-row justify-between items-center p-4 gap-4 relative"
           >
             <div className="relative">
-              <h1 className="flex justify-between text-3xl md:text-4xl font-bold mb-2">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
+              <h1 className="flex w-full justify-between md:text-4xl font-bold mb-2">
+                <span className="bg-clip-text text-[40px] text-transparent bg-gradient-to-r from-primary to-blue-500">
                   Silvy
                 </span>
-                <div className="block md:hidden">
+                <div className="flex items-center md:hidden">
                   <ConnectButton />
                 </div>
               </h1>

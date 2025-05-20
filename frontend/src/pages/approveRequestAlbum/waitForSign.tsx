@@ -143,7 +143,7 @@ export default function PublishDraftAlbum() {
           initial="hidden"
           animate="show"
           variants={containerVariants}
-          className="max-w-4xl mx-auto px-4 py-8"
+          className="w-full mx-auto p-4"
         >
           <motion.div variants={itemVariants} className="mb-6">
             <Button

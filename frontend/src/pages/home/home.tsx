@@ -292,7 +292,7 @@ export default function Home() {
   );
 
   const handleNavigateToAlbum = (albumId: string) => {
-    navigate(`/album/${albumId}`);
+    navigate(`/explore-albums/${albumId}`);
   };
 
   return (

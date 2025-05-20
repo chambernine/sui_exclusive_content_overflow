@@ -10,16 +10,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 dark:shadow-primary/20 dark:hover:shadow-primary/30",
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border border-primary/20 bg-background shadow-xs hover:bg-primary/10 hover:border-primary/40 hover:text-primary dark:bg-input/30 dark:border-primary/30 dark:hover:bg-primary/20",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
+          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 dark:hover:bg-secondary/60",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+          "hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20",
+        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80",
+        sui: "bg-gradient-to-br from-[#4DA2FF] to-[#4DA2FF]/80 text-white shadow-md hover:shadow-lg hover:shadow-[#4DA2FF]/20 transition-all",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

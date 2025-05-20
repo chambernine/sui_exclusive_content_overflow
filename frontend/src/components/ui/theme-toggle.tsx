@@ -12,9 +12,12 @@ export function ThemeToggle() {
   return (
     <motion.button
       onClick={toggleTheme}
-      className="cursor-pointer relative h-10 w-10 rounded-full bg-background/10 backdrop-blur-md flex items-center justify-center border border-border/50"
+      className="cursor-pointer relative h-10 w-10 rounded-full bg-background/10 backdrop-blur-md flex items-center justify-center border border-primary/20 hover:border-primary/40"
       whileTap={{ scale: 0.9 }}
-      whileHover={{ scale: 1.05 }}
+      whileHover={{
+        scale: 1.05,
+        boxShadow: "0 0 10px rgba(77, 162, 255, 0.2)",
+      }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -25,7 +28,7 @@ export function ThemeToggle() {
         transition={{ duration: 0.5, type: "spring" }}
       >
         {theme === "dark" ? (
-          <Moon className="h-5 w-5 text-blue-400 drop-shadow-glow" />
+          <Moon className="h-5 w-5 text-primary drop-shadow-glow" />
         ) : (
           <Sun className="h-5 w-5 text-yellow-500" />
         )}

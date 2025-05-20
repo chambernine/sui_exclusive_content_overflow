@@ -25,6 +25,8 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { tierColors, tierNames } from "@/types/album";
 import { useProfile } from "@/hooks/api/useProfile";
 import { Protected } from "@/components/auth/Protected";
+import { SuiButton } from "@/components/custom/sui-button";
+import { SuiCard } from "@/components/custom/sui-card";
 
 interface Album {
   albumId: string;

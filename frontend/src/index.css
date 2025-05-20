@@ -44,47 +44,81 @@
 :root {
   --radius: 0.625rem;
 
-  /* Light Mode */
+  /* Light Mode - Sui Brand Colors */
   --background: #FFFFFF;
-  --foreground: #1A1A1A;
+  /* Cloud */
+  --foreground: #011829;
+  /* Ocean */
   --card: #FFFFFF;
-  --card-foreground: #1A1A1A;
+  /* Cloud */
+  --card-foreground: #011829;
+  /* Ocean */
   --popover: #FFFFFF;
-  --popover-foreground: #1A1A1A;
+  /* Cloud */
+  --popover-foreground: #011829;
+  /* Ocean */
   --primary: #4DA2FF;
+  /* Sea */
   --primary-foreground: #FFFFFF;
-  --secondary: #F5F8FF;
-  --secondary-foreground: #1A1A1A;
-  --muted: #F5F8FF;
-  --muted-foreground: #6C7280;
-  --accent: #F5F8FF;
-  --accent-foreground: #1A1A1A;
+  /* Cloud */
+  --secondary: #C0E6FF;
+  /* Aqua */
+  --secondary-foreground: #011829;
+  /* Ocean */
+  --muted: #C0E6FF;
+  /* Aqua */
+  --muted-foreground: #011829;
+  /* Ocean - with opacity */
+  --accent: #C0E6FF;
+  /* Aqua */
+  --accent-foreground: #011829;
+  /* Ocean */
   --destructive: #FF4D4D;
-  --border: #E8EFFF;
-  --input: #E8EFFF;
+  --border: #C0E6FF;
+  /* Aqua */
+  --input: #4DA2FF40;
+  /* Sea with opacity */
   --ring: #4DA2FF;
+  /* Sea */
 }
 
 .dark {
-  /* Dark Mode */
-  --background: hsl(220 13% 10%);
-  --foreground: hsl(210 40% 98%);
-  --card: hsl(222 13% 14%);
-  --card-foreground: hsl(210 40% 98%);
-  --popover: hsl(222 13% 12%);
-  --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(217.2 91.2% 59.8%);
-  --primary-foreground: hsl(222.2 47.4% 11.2%);
-  --secondary: hsl(217.2 32.6% 17.5%);
-  --secondary-foreground: hsl(210 40% 98%);
-  --muted: hsl(217.2 32.6% 17.5%);
-  --muted-foreground: hsl(215 20.2% 65.1%);
-  --accent: hsl(217.2 32.6% 17.5%);
-  --accent-foreground: hsl(210 40% 98%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --border: hsl(217.2 32.6% 17.5%);
-  --input: hsl(217.2 32.6% 17.5%);
-  --ring: hsl(224.3 76.3% 48%);
+  /* Dark Mode - Sui Brand Colors */
+  --background: #030F1C;
+  /* Deep Ocean */
+  --foreground: #FFFFFF;
+  /* Cloud */
+  --card: #011829;
+  /* Ocean */
+  --card-foreground: #FFFFFF;
+  /* Cloud */
+  --popover: #011829;
+  /* Ocean */
+  --popover-foreground: #FFFFFF;
+  /* Cloud */
+  --primary: #4DA2FF;
+  /* Sea */
+  --primary-foreground: #030F1C;
+  /* Deep Ocean */
+  --secondary: #011829;
+  /* Ocean */
+  --secondary-foreground: #C0E6FF;
+  /* Aqua */
+  --muted: #011829;
+  /* Ocean */
+  --muted-foreground: #C0E6FF;
+  /* Aqua - with opacity */
+  --accent: #011829;
+  /* Ocean */
+  --accent-foreground: #C0E6FF;
+  /* Aqua */
+  --destructive: #FF4D4D;
+  --border: #011829;
+  /* Ocean */
+  --input: #4DA2FF30;
+  /* Sea with opacity */
+  --ring: #4DA2FF;
+  /* Sea */
 }
 
 @layer base {
@@ -148,6 +182,31 @@
 
   .drop-shadow-glow {
     filter: drop-shadow(0 0 10px rgba(77, 162, 255, 0.5));
+  }
+
+  /* Sui brand specific styles */
+  .sui-gradient-bg {
+    @reference bg-gradient-to-r from-[#4DA2FF] to-[#4DA2FF]/80;
+  }
+
+  .sui-gradient-text {
+    @reference bg-gradient-to-r from-[#4DA2FF] to-[#4DA2FF]/80 bg-clip-text text-transparent;
+  }
+
+  .sui-ocean-bg {
+    @reference bg-[#011829];
+  }
+
+  .sui-deep-ocean-bg {
+    @reference bg-[#030F1C];
+  }
+
+  .sui-aqua-bg {
+    @reference bg-[#C0E6FF];
+  }
+
+  .sui-border {
+    @reference border border-[#4DA2FF]/30 hover:border-[#4DA2FF]/50;
   }
 }
 

@@ -36,7 +36,7 @@ export function CardWithLens({
 }: CardWithLensProps) {
   return (
     <Card
-      className={`h-full flex flex-col bg-card border-border cursor-pointer hover:shadow-lg transition-shadow pt-0 ${className}`}
+      className={`h-full flex flex-col bg-card border-border cursor-pointer hover:shadow-lg hover:shadow-primary/10 transition-all pt-0 ${className}`}
       onClick={onClick}
     >
       <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.3 }}>
@@ -48,9 +48,13 @@ export function CardWithLens({
         >
           <AspectRatio ratio={16 / 9} className="w-full h-full">
             {imageSrc ? (
-              <img src={imageSrc} alt={imageAlt} className="w-full h-full" />
+              <img
+                src={imageSrc}
+                alt={imageAlt}
+                className="w-full h-full rounded-t-xl"
+              />
             ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded-t-lg">
+              <div className="w-full h-full bg-secondary flex items-center justify-center rounded-t-xl text-muted-foreground">
                 No preview
               </div>
             )}

@@ -601,7 +601,7 @@ export function ProfilePage() {
               <CardContent className="px-6">
                 <div className="flex flex-col items-center gap-6 mb-6">
                   <div className="relative">
-                    <Avatar className="h-24 w-24">
+                    <Avatar className="h-22 w-22">
                       <AvatarImage src={profileImage || ""} alt="Profile" />
                       <AvatarFallback className="bg-muted text-muted-foreground">
                         <User className="h-10 w-10" />
@@ -696,7 +696,7 @@ export function ProfilePage() {
 
                     <Button
                       type="submit"
-                      className="w-full mt-6"
+                      className="w-full mt-2"
                       disabled={isUpdating}
                     >
                       {isUpdating ? (
@@ -730,7 +730,7 @@ export function ProfilePage() {
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative">
-                  <Avatar className="h-24 w-24">
+                  <Avatar className="h-22 w-22">
                     <AvatarImage src={profileImage || ""} alt="Profile" />
                     <AvatarFallback className="bg-muted text-muted-foreground">
                       <User className="h-10 w-10" />

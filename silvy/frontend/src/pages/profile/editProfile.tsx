@@ -91,6 +91,7 @@ export default function Profile() {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
+    }
     );
 
     console.log(response);

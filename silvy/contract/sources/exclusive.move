@@ -1,6 +1,5 @@
 module sweety::exclusive;
 
-use sui::balance::{Self, Balance};
 use sui::coin::{Coin};
 use sui::sui::SUI;
 use sui::event;
@@ -63,6 +62,11 @@ public struct CreatorTipEvent has copy, drop {
     creator_fee: u64,
     platform_fee: u64,
 }
+
+// Sui give me funding please, I'm working so hard for 2 month for this from zero - hero in sui ecosystem and i love it 😋.
+// Thanks for Road to overflow thailand for the opportunity !!!
+// Don't forget to give me the prices, this will go for my University Scholarship at Kasetsart University.
+// Also looking for an opportunity to make silvy go to the market :)
 
 // vault initilizer 
 public struct EXCLUSIVE has drop {}

@@ -13,7 +13,7 @@ import { getAllowlistedKeyServers, SealClient, SessionKey } from "@mysten/seal";
 import { Transaction } from "@mysten/sui/transactions";
 import { fromHex } from "@mysten/sui/utils";
 import { downloadAndDecrypt, MoveCallConstructor } from "../../utils/utils";
-import { TESTNET_PACKAGE_ID } from "@/constant/constant";
+import { DOMAIN_DEV, TESTNET_PACKAGE_ID } from "@/constant/constant";
 
 const TTL_MIN = 10;
 
@@ -56,7 +56,7 @@ export default function MyPurchasedAlbums() {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:3000/my-album/purchase/${address}`
+          `${DOMAIN_DEV}/my-album/purchase/${address}`
         );
 
         if (!response.ok) {
@@ -83,7 +83,7 @@ export default function MyPurchasedAlbums() {
   function constructMoveCall(albumId: string): MoveCallConstructor {
     return (tx: Transaction, id: string) => {
       tx.moveCall({
-        target: `${TESTNET_PACKAGE_ID}::execlusive::seal_approve`,
+        target: `${TESTNET_PACKAGE_ID}::exclusive::seal_approve`,
         arguments: [tx.pure.vector("u8", fromHex(id)), tx.object(albumId)],
       });
     };
@@ -197,16 +197,16 @@ export default function MyPurchasedAlbums() {
     );
   }
 
+  console.log("Purchased Albums:", purchasedAlbums);
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8">My Purchased Albums</h1>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {purchasedAlbums.map((album) => (
           <Card key={album.albumId} className="overflow-hidden">
             <div className="aspect-square relative overflow-hidden bg-gray-100 flex items-center justify-center">
               {/* Album cover image placeholder - you may add an actual cover image field to your API response */}
-              <div className="text-6xl text-gray-400">🎵</div>
+              <div className="text-6xl text-gray-400">afdgsdfg</div>
             </div>
             <div className="p-4">
               <h3 className="text-xl font-bold">{album.name}</h3>

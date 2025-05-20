@@ -132,20 +132,6 @@ entry fun create_album_entry(
     transfer::transfer(create_album(name, price, creator, ctx), creator);
 }
 
-fun update_creator_balance(
-    creator: address,
-    vault: &mut Vault,
-    amount: u64,
-    _ctx: &mut TxContext
-) {
-    let prev = if (table::contains(&vault.balances, creator)) {
-        *table::borrow(&vault.balances, creator)
-    } else {
-        0
-    };
-    table::add(&mut vault.balances, creator, prev + amount);
-}
-
 // === Album Support ===
 entry fun support_album(
     album: &mut Album,
@@ -170,7 +156,7 @@ entry fun support_album(
     transfer::public_transfer(platform_coin, _vault.admin);
     transfer::public_transfer(creator_coin, album.owner);
 
-    update_creator_balance(album.owner, _vault, creator_fee, ctx);
+    // update_creator_balance(album.owner, _vault, creator_fee, ctx);
     album.insider.push_back(sender);
     event::emit(SupportEvent {
         supporter: sender,
@@ -201,7 +187,7 @@ entry fun tip_to_creator(
     transfer::public_transfer(platform_coin, _vault.admin);
     transfer::public_transfer(creator_coin, creator);
 
-    update_creator_balance(creator, _vault, creator_fee, ctx);
+    // update_creator_balance(creator, _vault, creator_fee, ctx);
     
     event::emit(CreatorTipEvent {
         supporter: ctx.sender(),

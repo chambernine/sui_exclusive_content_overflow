@@ -29,7 +29,7 @@ export default function useInteractContract() {
     console.log(albumId, capId, blobId);
     const tx = new Transaction();
     tx.moveCall({
-      target: `${TESTNET_PACKAGE_ID}::execlusive::publish`,
+      target: `${TESTNET_PACKAGE_ID}::exclusive::publish`,
       arguments: [tx.object(albumId), tx.object(capId), tx.pure.string(blobId)],
     });
 
@@ -68,7 +68,7 @@ export default function useInteractContract() {
 
     // 2. Call the entry function
     tx.moveCall({
-      target: `${TESTNET_PACKAGE_ID}::execlusive::support_album`,
+      target: `${TESTNET_PACKAGE_ID}::exclusive::support_album`,
       arguments: [
         tx.object(albumId), // &mut Album (shared)
         coin, // Coin<SUI>

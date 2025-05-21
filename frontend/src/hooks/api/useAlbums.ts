@@ -8,6 +8,7 @@ import {
   approveAlbum,
   publishAlbum,
   submitDraftAlbumForApproval,
+  fetchMyPublishAlbums,
 } from "@/services/api";
 import { toast } from "sonner";
 
@@ -58,6 +59,15 @@ export const useMyAlbums = (address: string | undefined) => {
   return useQuery({
     queryKey: albumKeys.myAlbums(address || ""),
     queryFn: () => fetchMyAlbums(address || ""),
+    enabled: !!address,
+  });
+};
+
+// Fetch my publish as a creator
+export const useMyPublishAlbums = (address: string | undefined) => {
+  return useQuery({
+    queryKey: albumKeys.myAlbums(address || ""),
+    queryFn: () => fetchMyPublishAlbums(address || ""),
     enabled: !!address,
   });
 };

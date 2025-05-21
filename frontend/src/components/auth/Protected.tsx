@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { Login } from "./Login";
+import { useProfile } from "@/hooks/api/useProfile";
 
 interface ProtectedProps {
   children: ReactNode;

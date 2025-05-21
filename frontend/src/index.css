@@ -289,6 +289,17 @@
   object-fit: cover;
 }
 
+.Button_buttonVariants__x1s81q0.Button_buttonVariants_variant_primary__x1s81q1.Button_buttonVariants_size_lg__x1s81q4.AccountDropdownMenu_connectedAccount__div2ql0::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/Sui_Symbol_Sea.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
 .Button_buttonVariants__x1s81q0.Button_buttonVariants_variant_primary__x1s81q1.Button_buttonVariants_size_lg__x1s81q4.AccountDropdownMenu_connectedAccount__div2ql0 {
   padding: 14px !important;
   height: 12px !important;

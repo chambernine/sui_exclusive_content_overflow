@@ -34,6 +34,11 @@ export const fetchMyAlbums = async (address: string) => {
   return response.data;
 };
 
+export const fetchMyPublishAlbums = async (address: string) => {
+  const response = await api.get(`/my-album/published/${address}`);
+  return response.data;
+};
+
 export const fetchPurchasedAlbums = async (address: string) => {
   const response = await api.get(`/my-album/purchase/${address}`);
   return response.data;

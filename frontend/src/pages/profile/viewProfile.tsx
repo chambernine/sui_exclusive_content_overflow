@@ -59,7 +59,10 @@ import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { tierColors, tierNames } from "@/types/album";
 import { Protected } from "@/components/auth/Protected";
 import { useProfile, useUpdateProfile } from "@/hooks/api/useProfile";
-import { useMyAlbums, useMyPurchasedAlbums } from "@/hooks/api/useAlbums";
+import {
+  useMyPublishAlbums,
+  useMyPurchasedAlbums,
+} from "@/hooks/api/useAlbums";
 import { CardWithLens } from "@/components/custom/card-with-lens";
 import { fileToBase64 } from "@/utils/fileFormat";
 import { useNavigate } from "react-router-dom";
@@ -160,7 +163,7 @@ export function ProfilePage() {
 
   // Fetch user's created albums
   const { data: myAlbumsData, isLoading: isMyAlbumsLoading } =
-    useMyAlbums(address);
+    useMyPublishAlbums(address);
 
   // Fetch user's purchased albums
   const { data: purchasedAlbumsData, isLoading: isPurchasedAlbumsLoading } =

@@ -21,7 +21,14 @@ export const downloadAndDecrypt = async (
   setIsDialogOpen: (open: boolean) => void,
   setReloadKey: (updater: (prev: number) => number) => void
 ) => {
-  const aggregators = ["aggregator1"];
+  const aggregators = [
+    "aggregator1",
+    "aggregator2",
+    "aggregator3",
+    "aggregator4",
+    "aggregator5",
+    "aggregator6",
+  ];
   // First, download all files in parallel (ignore errors)
   const downloadResults = await Promise.all(
     blobIds.map(async (blobId) => {
@@ -30,7 +37,7 @@ export const downloadAndDecrypt = async (
         const timeout = setTimeout(() => controller.abort(), 10000);
         const randomAggregator =
           aggregators[Math.floor(Math.random() * aggregators.length)];
-        const aggregatorUrl = `/${randomAggregator}/v1/blobs/${blobId}`;
+        const aggregatorUrl = `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${blobId}`;
         const response = await fetch(aggregatorUrl, {
           signal: controller.signal,
         });

@@ -17,7 +17,6 @@ import {
   Upload,
   X,
   Tag as TagIcon,
-  Sparkles,
   FileText,
   Check,
   PlusCircle,
@@ -113,7 +112,7 @@ export default function CreateAlbumPage() {
     if (!files) return;
 
     const fileList = Array.from(files);
-    const maxAllowed = 10;
+    const maxAllowed = 3;
     const current = draft.contentInfos?.length || 0;
 
     if (current + fileList.length > maxAllowed) {
@@ -137,7 +136,7 @@ export default function CreateAlbumPage() {
     if (!files) return;
 
     const fileList = Array.from(files);
-    const maxAllowed = 10;
+    const maxAllowed = 5;
     const current = draft.contents?.length || 0;
 
     if (current + fileList.length > maxAllowed) {
@@ -483,9 +482,14 @@ export default function CreateAlbumPage() {
             ) : (
               <div>
                 <div className="mb-2">
-                  <h3 className="text-sm font-medium">
-                    {previewContentInfos.length} Preview Image
-                    {previewContentInfos.length !== 1 && "s"}
+                  <h3 className="text-sm font-medium flex items-center justify-between">
+                    <span>
+                      {previewContentInfos.length} Preview Image
+                      {previewContentInfos.length !== 1 && "s"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {previewContentInfos.length} of 3
+                    </span>
                   </h3>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -508,25 +512,27 @@ export default function CreateAlbumPage() {
                       </button>
                     </div>
                   ))}
-                  <label
-                    htmlFor="preview-images-additional"
-                    className="cursor-pointer flex items-center justify-center aspect-square border-2 border-dashed border-border rounded-md hover:border-primary/50 transition-colors"
-                  >
-                    <div className="flex flex-col items-center justify-center">
-                      <PlusCircle className="h-6 w-6 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground mt-1">
-                        Add more
-                      </span>
-                    </div>
-                    <input
-                      id="preview-images-additional"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handlePreviewFiles}
-                      className="hidden"
-                    />
-                  </label>
+                  {previewContentInfos.length < 3 && (
+                    <label
+                      htmlFor="preview-images-additional"
+                      className="cursor-pointer flex items-center justify-center aspect-square border-2 border-dashed border-border rounded-md hover:border-primary/50 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center">
+                        <PlusCircle className="h-6 w-6 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground mt-1">
+                          Add more
+                        </span>
+                      </div>
+                      <input
+                        id="preview-images-additional"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handlePreviewFiles}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
               </div>
             )}
@@ -565,9 +571,14 @@ export default function CreateAlbumPage() {
             ) : (
               <div>
                 <div className="mb-2">
-                  <h3 className="text-sm font-medium">
-                    {previewContents.length} Content File
-                    {previewContents.length !== 1 && "s"}
+                  <h3 className="text-sm font-medium flex items-center justify-between">
+                    <span>
+                      {previewContents.length} Content File
+                      {previewContents.length !== 1 && "s"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {previewContents.length} of 5
+                    </span>
                   </h3>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -590,25 +601,27 @@ export default function CreateAlbumPage() {
                       </button>
                     </div>
                   ))}
-                  <label
-                    htmlFor="content-files-additional"
-                    className="cursor-pointer flex items-center justify-center aspect-square border-2 border-dashed border-border rounded-md hover:border-primary/50 transition-colors"
-                  >
-                    <div className="flex flex-col items-center justify-center">
-                      <PlusCircle className="h-6 w-6 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground mt-1">
-                        Add more
-                      </span>
-                    </div>
-                    <input
-                      id="content-files-additional"
-                      type="file"
-                      accept="image/*,video/*"
-                      multiple
-                      onChange={handleContentFiles}
-                      className="hidden"
-                    />
-                  </label>
+                  {previewContents.length < 5 && (
+                    <label
+                      htmlFor="content-files-additional"
+                      className="cursor-pointer flex items-center justify-center aspect-square border-2 border-dashed border-border rounded-md hover:border-primary/50 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center">
+                        <PlusCircle className="h-6 w-6 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground mt-1">
+                          Add more
+                        </span>
+                      </div>
+                      <input
+                        id="content-files-additional"
+                        type="file"
+                        accept="image/*,video/*"
+                        multiple
+                        onChange={handleContentFiles}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
               </div>
             )}

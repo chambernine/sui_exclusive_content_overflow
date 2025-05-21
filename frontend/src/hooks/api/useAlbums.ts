@@ -31,7 +31,7 @@ export const useExploreAlbums = (address?: string) => {
   return useQuery({
     queryKey: albumKeys.lists(),
     queryFn: fetchExploreAlbums,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0, // Always considered stale, so it will refetch
     enabled: !!address, // Only run query if address exists
   });
 };

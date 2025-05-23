@@ -9,7 +9,7 @@ export interface IUserData {
   socialLinks: {
     x: string;
     twitch: string;
-    ig: string;
+    instagram: string;
     youtube: string;
   };
   purchase: string[];

@@ -53,7 +53,7 @@ app.post("/edit-profile", async (c) => {
   const socialLinks = {
     x: body.get("social_links[x]")?.toString() || "",
     twitch: body.get("social_links[twitch]")?.toString() || "",
-    ig: body.get("social_links[instagram]")?.toString() || "",
+    instagram: body.get("social_links[instagram]")?.toString() || "",
     youtube: body.get("social_links[youtube]")?.toString() || "",
   };
 
@@ -233,7 +233,8 @@ app.patch("/my-album/publish", async (c) => {
     const { albumId: albumAccessId, capId } = await createAlbum(
       draftAlbum.name,
       draftAlbum.price,
-      draftAlbum.owner
+      draftAlbum.owner,
+      draftAlbum.limited,
     );
     const encryptedBlobs = await sealEncryptions(albumAccessId, draftAlbum.contents);
     const walrusObjectIds: WalrusObjectResponse[] = await publishWalrus(

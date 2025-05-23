@@ -7,7 +7,8 @@ import type { WalrusObjectResponse } from "./type.js";
 async function createAlbum(
   name: string,
   price: number,
-  owner: string
+  owner: string,
+  limited: number,
 ): Promise<{ albumId: string; capId: string }> {
   const tx = new Transaction();
   tx.moveCall({
@@ -16,6 +17,7 @@ async function createAlbum(
       tx.pure.string(name),
       tx.pure.u64(price * 1_000_000_000),
       tx.pure.address(owner),
+      tx.pure.u64(limited)
     ],
   });
   tx.setGasBudget(10000000);
@@ -118,7 +120,7 @@ function base64ToUint8Array(base64String: string): Uint8Array {
 }
 
 const storeBlob = async (encryptedData: Uint8Array) => {
-  return fetch(`https://publisher.walrus-testnet.walrus.space/v1/blobs?epochs=7`, {
+  return fetch(`https://publisher.walrus-testnet.walrus.space/v1/blobs?epochs=10`, {
     method: 'PUT',
     body: encryptedData,
   }).then((response) => {

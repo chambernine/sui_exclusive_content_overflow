@@ -1,8 +1,6 @@
 // Copyright (c), Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
-import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
-import { PACKAGE_ID } from "./constant.js"
 
 import dotenv from "dotenv";
 import { Secp256k1Keypair } from '@mysten/sui/keypairs/secp256k1';

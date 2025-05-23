@@ -326,469 +326,474 @@ export default function PublishDraftAlbum() {
 
   return (
     <Protected>
-      <div className="container mx-auto py-4 max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Button
-            variant="ghost"
-            className="mb-4"
-            onClick={() => navigate("/management-contents")}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Contents Management
-          </Button>
-        </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 lg:justify-center gap-8">
-          {/* Left Column - Image Gallery */}
+      <WalrusLoading size={160} showMessage={true} isLoading={isPublishing}>
+        <div className="container mx-auto py-4 max-w-7xl">
           <motion.div
-            className="lg:col-span-2 space-y-4 sm:space-y-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <motion.div
-              className="w-full overflow-hidden rounded-lg shadow-lg"
-              variants={itemVariants}
+            <Button
+              variant="ghost"
+              className="mb-4"
+              onClick={() => navigate("/management-contents")}
             >
-              {album.contentInfos?.length > 0 ? (
-                <Carousel
-                  opts={{
-                    loop: true,
-                    align: "center",
-                  }}
-                  setApi={setCarouselApi}
-                  className="relative"
-                >
-                  <CarouselContent>
-                    {album.contentInfos.map((img: string, i: number) => (
-                      <CarouselItem key={i}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Contents Management
+            </Button>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 lg:justify-center gap-8">
+            {/* Left Column - Image Gallery */}
+            <motion.div
+              className="lg:col-span-2 space-y-4 sm:space-y-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <motion.div
+                className="w-full overflow-hidden rounded-lg shadow-lg"
+                variants={itemVariants}
+              >
+                {album.contentInfos?.length > 0 ? (
+                  <Carousel
+                    opts={{
+                      loop: true,
+                      align: "center",
+                    }}
+                    setApi={setCarouselApi}
+                    className="relative"
+                  >
+                    <CarouselContent>
+                      {album.contentInfos.map((img: string, i: number) => (
+                        <CarouselItem key={i}>
+                          <AspectRatio
+                            ratio={16 / 9}
+                            className="bg-card/50 backdrop-blur-sm"
+                          >
+                            <CardWithLens
+                              imageSrc={img}
+                              imageAlt={`${album.name} - Preview ${i + 1}`}
+                              className="h-full w-full overflow-hidden border-none shadow-none"
+                            >
+                              <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs">
+                                Preview {i + 1} of {album.contentInfos.length}
+                              </div>
+                            </CardWithLens>
+                          </AspectRatio>
+                        </CarouselItem>
+                      ))}
+                      {/* Locked content item */}
+                      <CarouselItem key="locked">
                         <AspectRatio
                           ratio={16 / 9}
                           className="bg-card/50 backdrop-blur-sm"
                         >
-                          <CardWithLens
-                            imageSrc={img}
-                            imageAlt={`${album.name} - Preview ${i + 1}`}
-                            className="h-full w-full overflow-hidden border-none shadow-none"
-                          >
-                            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs">
-                              Preview {i + 1} of {album.contentInfos.length}
+                          <div className="h-full w-full overflow-hidden border-none shadow-none relative bg-black/20">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <Lock className="h-16 w-16 text-muted-foreground mb-3 opacity-70" />
+                              <p className="text-lg text-white font-medium">
+                                Exclusive Content
+                              </p>
+                              <p className="text-sm text-white/80 mt-2">
+                                Publish to make content available
+                              </p>
                             </div>
-                          </CardWithLens>
+                            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs">
+                              Locked Content
+                            </div>
+                          </div>
                         </AspectRatio>
                       </CarouselItem>
-                    ))}
-                    {/* Locked content item */}
-                    <CarouselItem key="locked">
-                      <AspectRatio
-                        ratio={16 / 9}
-                        className="bg-card/50 backdrop-blur-sm"
-                      >
-                        <div className="h-full w-full overflow-hidden border-none shadow-none relative bg-black/20">
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <Lock className="h-16 w-16 text-muted-foreground mb-3 opacity-70" />
-                            <p className="text-lg text-white font-medium">
-                              Exclusive Content
-                            </p>
-                            <p className="text-sm text-white/80 mt-2">
-                              Publish to make content available
-                            </p>
-                          </div>
-                          <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs">
-                            Locked Content
-                          </div>
-                        </div>
-                      </AspectRatio>
-                    </CarouselItem>
-                  </CarouselContent>
-                  <CarouselPrevious className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70" />
-                  <CarouselNext className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70" />
-                </Carousel>
-              ) : (
-                <AspectRatio ratio={16 / 9}>
-                  <div className="flex items-center justify-center h-full w-full bg-muted rounded-lg text-muted-foreground">
-                    No preview available
-                  </div>
-                </AspectRatio>
-              )}
-            </motion.div>
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70" />
+                    <CarouselNext className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70" />
+                  </Carousel>
+                ) : (
+                  <AspectRatio ratio={16 / 9}>
+                    <div className="flex items-center justify-center h-full w-full bg-muted rounded-lg text-muted-foreground">
+                      No preview available
+                    </div>
+                  </AspectRatio>
+                )}
+              </motion.div>
 
-            {/* Thumbnail Gallery */}
-            {album.contentInfos?.length > 0 && (
-              <motion.div
-                className="flex flex-wrap gap-3 justify-center"
-                variants={itemVariants}
-              >
-                {album.contentInfos.map((img: string, i: number) => (
+              {/* Thumbnail Gallery */}
+              {album.contentInfos?.length > 0 && (
+                <motion.div
+                  className="flex flex-wrap gap-3 justify-center"
+                  variants={itemVariants}
+                >
+                  {album.contentInfos.map((img: string, i: number) => (
+                    <motion.div
+                      key={i}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`cursor-pointer overflow-hidden rounded-md border-4 transition-all ${
+                        selectedImage === i
+                          ? "border-primary shadow-lg"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => setSelectedImage(i)}
+                    >
+                      <AspectRatio ratio={1} className="w-20 sm:w-24">
+                        <img
+                          src={img}
+                          alt={`Thumbnail ${i + 1}`}
+                          className="object-cover h-full w-full"
+                        />
+                      </AspectRatio>
+                    </motion.div>
+                  ))}
+                  {/* Locked content thumbnail */}
                   <motion.div
-                    key={i}
+                    key="locked-thumbnail"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className={`cursor-pointer overflow-hidden rounded-md border-4 transition-all ${
-                      selectedImage === i
+                      selectedImage === album.contentInfos.length
                         ? "border-primary shadow-lg"
                         : "border-border hover:border-primary/50"
                     }`}
-                    onClick={() => setSelectedImage(i)}
+                    onClick={() => setSelectedImage(album.contentInfos.length)}
                   >
-                    <AspectRatio ratio={1} className="w-20 sm:w-24">
-                      <img
-                        src={img}
-                        alt={`Thumbnail ${i + 1}`}
-                        className="object-cover h-full w-full"
-                      />
+                    <AspectRatio ratio={1} className="w-20 sm:w-24 bg-black/20">
+                      <div className="flex items-center justify-center h-full w-full">
+                        <Lock className="h-6 w-6 text-white/70" />
+                      </div>
                     </AspectRatio>
                   </motion.div>
-                ))}
-                {/* Locked content thumbnail */}
-                <motion.div
-                  key="locked-thumbnail"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`cursor-pointer overflow-hidden rounded-md border-4 transition-all ${
-                    selectedImage === album.contentInfos.length
-                      ? "border-primary shadow-lg"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                  onClick={() => setSelectedImage(album.contentInfos.length)}
-                >
-                  <AspectRatio ratio={1} className="w-20 sm:w-24 bg-black/20">
-                    <div className="flex items-center justify-center h-full w-full">
-                      <Lock className="h-6 w-6 text-white/70" />
-                    </div>
-                  </AspectRatio>
                 </motion.div>
-              </motion.div>
-            )}
+              )}
 
-            {/* Content Details Section */}
-            <motion.div variants={itemVariants}>
-              <Card className="overflow-hidden h-full flex flex-col bg-card border-border cursor-default hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="prose prose-sm dark:prose-invert">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <h1 className="text-3xl font-bold">{album.name}</h1>
-                      <Badge
-                        className={`${
-                          tierColors[album.tier as AlbumTier]
-                        } text-white text-sm`}
-                      >
-                        {tierNames[album.tier as AlbumTier]}
-                      </Badge>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {album.tags?.map((tag: string, i: number) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {tag}
+              {/* Content Details Section */}
+              <motion.div variants={itemVariants}>
+                <Card className="overflow-hidden h-full flex flex-col bg-card border-border cursor-default hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="prose prose-sm dark:prose-invert">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h1 className="text-3xl font-bold">{album.name}</h1>
+                        <Badge
+                          className={`${
+                            tierColors[album.tier as AlbumTier]
+                          } text-white text-sm`}
+                        >
+                          {tierNames[album.tier as AlbumTier]}
                         </Badge>
-                      ))}
-                    </div>
-                    <p className="leading-relaxed whitespace-pre-line mt-4">
-                      {album.description}
-                    </p>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6 pt-0">
-                  <Separator className="my-2" />
-                  {/* Content Details */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-base font-semibold mb-2">
-                      <TagIcon className="h-5 w-5 text-primary" />
-                      Content Details
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-y-3 bg-muted/50 p-4 rounded-lg text-sm">
-                      <span className="text-muted-foreground col-span-1">
-                        Content Count
-                      </span>
-                      <span className="col-span-2 flex justify-end">
-                        <span className="bg-background px-2 py-1 rounded text-xs truncate max-w-full">
-                          {album.contents?.length || 0} files
-                        </span>
-                      </span>
-                      <span className="text-muted-foreground col-span-1">
-                        Created
-                      </span>
-                      <span className="col-span-2 flex justify-end">
-                        <span className="bg-background px-2 py-1 rounded text-xs truncate max-w-full">
-                          {formatDate(album.created_at)}
-                        </span>
-                      </span>
-
-                      <span className="text-muted-foreground col-span-1">
-                        Creator
-                      </span>
-                      <span className="col-span-2 flex justify-end">
-                        <span className="font-mono bg-background px-2 py-1 rounded text-xs truncate max-w-full">
-                          {album.owner}
-                        </span>
-                      </span>
-
-                      {album.albumId && (
-                        <>
-                          <span className="text-muted-foreground col-span-1">
-                            Album ID
-                          </span>
-                          <span className="col-span-2 flex justify-end">
-                            <span className="font-mono bg-background px-2 py-1 rounded text-xs truncate max-w-full">
-                              {album.albumId}
-                            </span>
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Status section */}
-                  <div className="space-y-4 mt-6">
-                    <div className="flex items-center gap-2 text-base font-semibold mb-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      Publication Status
-                    </div>
-                    <div className="flex w-full items-center justify-between p-4 bg-muted/50 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        <span className="text-xs sm:text-base">
-                          {album.contents?.length || 0} Files
-                        </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {isAllPublished ? (
+
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {album.tags?.map((tag: string, i: number) => (
                           <Badge
-                            variant="outline"
-                            className="bg-green-500/10 text-green-500 border-green-500/30"
+                            key={i}
+                            variant="secondary"
+                            className="text-xs"
                           >
-                            <Check className="mr-1 h-3 w-3" /> Complete
+                            {tag}
                           </Badge>
-                        ) : (
-                          <Badge
-                            variant="outline"
-                            className="bg-amber-500/10 text-amber-500 border-amber-500/30"
-                          >
-                            <Clock className="mr-1 h-3 w-3" /> {pendingCount}{" "}
-                            Pending
-                          </Badge>
+                        ))}
+                      </div>
+                      <p className="leading-relaxed whitespace-pre-line mt-4">
+                        {album.description}
+                      </p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-6 pt-0">
+                    <Separator className="my-2" />
+                    {/* Content Details */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-base font-semibold mb-2">
+                        <TagIcon className="h-5 w-5 text-primary" />
+                        Content Details
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-y-3 bg-muted/50 p-4 rounded-lg text-sm">
+                        <span className="text-muted-foreground col-span-1">
+                          Content Count
+                        </span>
+                        <span className="col-span-2 flex justify-end">
+                          <span className="bg-background px-2 py-1 rounded text-xs truncate max-w-full">
+                            {album.contents?.length || 0} files
+                          </span>
+                        </span>
+                        <span className="text-muted-foreground col-span-1">
+                          Created
+                        </span>
+                        <span className="col-span-2 flex justify-end">
+                          <span className="bg-background px-2 py-1 rounded text-xs truncate max-w-full">
+                            {formatDate(album.created_at)}
+                          </span>
+                        </span>
+
+                        <span className="text-muted-foreground col-span-1">
+                          Creator
+                        </span>
+                        <span className="col-span-2 flex justify-end">
+                          <span className="font-mono bg-background px-2 py-1 rounded text-xs truncate max-w-full">
+                            {album.owner}
+                          </span>
+                        </span>
+
+                        {album.albumId && (
+                          <>
+                            <span className="text-muted-foreground col-span-1">
+                              Album ID
+                            </span>
+                            <span className="col-span-2 flex justify-end">
+                              <span className="font-mono bg-background px-2 py-1 rounded text-xs truncate max-w-full">
+                                {album.albumId}
+                              </span>
+                            </span>
+                          </>
                         )}
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+
+                    {/* Status section */}
+                    <div className="space-y-4 mt-6">
+                      <div className="flex items-center gap-2 text-base font-semibold mb-2">
+                        <FileText className="h-5 w-5 text-primary" />
+                        Publication Status
+                      </div>
+                      <div className="flex w-full items-center justify-between p-4 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          <span className="text-xs sm:text-base">
+                            {album.contents?.length || 0} Files
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isAllPublished ? (
+                            <Badge
+                              variant="outline"
+                              className="bg-green-500/10 text-green-500 border-green-500/30"
+                            >
+                              <Check className="mr-1 h-3 w-3" /> Complete
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant="outline"
+                              className="bg-amber-500/10 text-amber-500 border-amber-500/30"
+                            >
+                              <Clock className="mr-1 h-3 w-3" /> {pendingCount}{" "}
+                              Pending
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </motion.div>
-          </motion.div>
 
-          {/* Right Column - Publish Card */}
-          <motion.div
-            className="space-y-6"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Card className="sticky top-6 bg-card/80 backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle>Publish This Content</CardTitle>
-                <CardDescription>
-                  Make your content available on the blockchain
-                </CardDescription>
-              </CardHeader>
+            {/* Right Column - Publish Card */}
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="sticky top-6 bg-card/80 backdrop-blur-sm border-border hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle>Publish This Content</CardTitle>
+                  <CardDescription>
+                    Make your content available on the blockchain
+                  </CardDescription>
+                </CardHeader>
 
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Status:</span>
-                  <div className="font-medium">
-                    {isAllPublished ? (
-                      <Badge
-                        variant="outline"
-                        className="bg-green-500/10 text-green-500 border-green-500/30"
-                      >
-                        <Check className="mr-1 h-3 w-3" /> Complete
-                      </Badge>
-                    ) : album.publishedBlobs &&
-                      album.publishedBlobs.length > 0 ? (
-                      <Badge
-                        variant="outline"
-                        className="bg-amber-500/10 text-amber-500 border-amber-500/30"
-                      >
-                        <Clock className="mr-1 h-3 w-3" /> In Progress
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="bg-blue-500/10 text-blue-500 border-blue-500/30"
-                      >
-                        <Info className="mr-1 h-3 w-3" /> Not Started
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                {/* Publication progress indicator */}
-                <div className="flex flex-col space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      Publication progress:
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      Status:
                     </span>
-                    <div className="font-medium flex items-center">
-                      {album.publishedBlobs ? (
-                        <>{Math.round(progress)}%</>
+                    <div className="font-medium">
+                      {isAllPublished ? (
+                        <Badge
+                          variant="outline"
+                          className="bg-green-500/10 text-green-500 border-green-500/30"
+                        >
+                          <Check className="mr-1 h-3 w-3" /> Complete
+                        </Badge>
+                      ) : album.publishedBlobs &&
+                        album.publishedBlobs.length > 0 ? (
+                        <Badge
+                          variant="outline"
+                          className="bg-amber-500/10 text-amber-500 border-amber-500/30"
+                        >
+                          <Clock className="mr-1 h-3 w-3" /> In Progress
+                        </Badge>
                       ) : (
-                        <>0%</>
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-500/10 text-blue-500 border-blue-500/30"
+                        >
+                          <Info className="mr-1 h-3 w-3" /> Not Started
+                        </Badge>
                       )}
                     </div>
                   </div>
 
-                  <Progress
-                    value={progress}
-                    className={
-                      isAllPublished
-                        ? "bg-green-200"
-                        : isAnyPublished
-                        ? "bg-amber-200"
-                        : "bg-primary/20"
-                    }
-                    style={
-                      {
-                        "--progress-indicator-color": isAllPublished
-                          ? "rgb(34, 197, 94)"
-                          : isAnyPublished
-                          ? "rgb(217, 119, 6)"
-                          : "var(--primary)",
-                      } as React.CSSProperties
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="rounded-md bg-primary/10 p-3 border border-primary/20">
-                  <h4 className="font-medium text-sm flex items-center mb-2">
-                    <Info className="h-4 w-4 mr-2 text-primary" />
-                    Publication Steps:
-                  </h4>
-                  <ol className="text-sm space-y-2 list-decimal pl-5">
-                    <li className="text-muted-foreground">
-                      Initialize the album on blockchain
-                    </li>
-                    <li className="text-muted-foreground">
-                      Sign each content blob individually
-                    </li>
-                  </ol>
-                </div>
-
-                {/* Blob list for signing */}
-                {album.albumId &&
-                  album.publishedBlobs &&
-                  album.publishedBlobs.length > 0 && (
-                    <div className="space-y-3 bg-card/50 p-3 rounded-lg border border-border">
-                      <h4 className="font-medium text-sm">
-                        Content Blobs ({album.publishedBlobs.length})
-                      </h4>
-                      <div className="max-h-56 overflow-y-auto space-y-2">
-                        {album.publishedBlobs?.map((blob) => (
-                          <div
-                            key={blob.blobId}
-                            id={`blob-${blob.blobId}`}
-                            className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border transition-shadow ${
-                              blob.ispublished
-                                ? "bg-green-500/5 border-green-500/20"
-                                : "bg-card/50 border-border hover:shadow-sm"
-                            }`}
-                          >
-                            <div className="mb-2 sm:mb-0">
-                              <p
-                                className="text-xs font-mono truncate max-w-[150px] sm:max-w-[120px]"
-                                title={blob.blobId}
-                              >
-                                {blob.blobId.substring(0, 8)}...
-                                {blob.blobId.substring(blob.blobId.length - 8)}
-                              </p>
-                              {blob.ispublished ? (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-green-500/10 text-green-500 border-green-500/30 text-xs mt-1"
-                                >
-                                  <Check className="mr-1 h-3 w-3" /> Published
-                                </Badge>
-                              ) : (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-amber-500/10 text-amber-500 border-amber-500/30 text-xs mt-1"
-                                >
-                                  <Clock className="mr-1 h-3 w-3" /> Pending
-                                </Badge>
-                              )}
-                            </div>
-
-                            {!blob.ispublished && (
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                className="w-full sm:w-auto"
-                                disabled={publishingBlobId === blob.blobId}
-                                onClick={async () => {
-                                  try {
-                                    if (!album.albumId) return;
-                                    setPublishingBlobId(blob.blobId);
-
-                                    const txResult: PublishStatus =
-                                      await publishBlobsToAlbum(
-                                        album.albumId,
-                                        album.capId!,
-                                        blob.blobId
-                                      );
-
-                                    if (txResult.status === "approved") {
-                                      await markBlobAsPublished(blob.blobId);
-                                    } else if (txResult.status === "failed") {
-                                      setPublishingBlobId(null);
-                                      toast.error(
-                                        "Transaction failed. Check console for details."
-                                      );
-                                    } else if (txResult.status === "rejected") {
-                                      setPublishingBlobId(null);
-                                      toast.error("Transaction was rejected.");
-                                    }
-                                  } catch (err) {
-                                    console.error(
-                                      "Error during sign & publish:",
-                                      err
-                                    );
-                                    toast.error(
-                                      "Failed to sign and publish content"
-                                    );
-                                    setPublishingBlobId(null);
-                                  }
-                                }}
-                              >
-                                {publishingBlobId === blob.blobId ? (
-                                  <>
-                                    <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin mr-2"></div>
-                                    Processing...
-                                  </>
-                                ) : (
-                                  <>Sign & Publish</>
-                                )}
-                              </Button>
-                            )}
-                          </div>
-                        ))}
+                  {/* Publication progress indicator */}
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Publication progress:
+                      </span>
+                      <div className="font-medium flex items-center">
+                        {album.publishedBlobs ? (
+                          <>{Math.round(progress)}%</>
+                        ) : (
+                          <>0%</>
+                        )}
                       </div>
                     </div>
-                  )}
-              </CardContent>
 
-              <CardFooter className="flex flex-col space-y-3">
-                {!album.albumId ? (
-                  <WalrusLoading
-                    size={160}
-                    showMessage={true}
-                    isLoading={isPublishing}
-                  >
+                    <Progress
+                      value={progress}
+                      className={
+                        isAllPublished
+                          ? "bg-green-200"
+                          : isAnyPublished
+                          ? "bg-amber-200"
+                          : "bg-primary/20"
+                      }
+                      style={
+                        {
+                          "--progress-indicator-color": isAllPublished
+                            ? "rgb(34, 197, 94)"
+                            : isAnyPublished
+                            ? "rgb(217, 119, 6)"
+                            : "var(--primary)",
+                        } as React.CSSProperties
+                      }
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="rounded-md bg-primary/10 p-3 border border-primary/20">
+                    <h4 className="font-medium text-sm flex items-center mb-2">
+                      <Info className="h-4 w-4 mr-2 text-primary" />
+                      Publication Steps:
+                    </h4>
+                    <ol className="text-sm space-y-2 list-decimal pl-5">
+                      <li className="text-muted-foreground">
+                        Initialize the album on blockchain
+                      </li>
+                      <li className="text-muted-foreground">
+                        Sign each content blob individually
+                      </li>
+                    </ol>
+                  </div>
+
+                  {/* Blob list for signing */}
+                  {album.albumId &&
+                    album.publishedBlobs &&
+                    album.publishedBlobs.length > 0 && (
+                      <div className="space-y-3 bg-card/50 p-3 rounded-lg border border-border">
+                        <div className="max-h-56 overflow-y-auto space-y-2">
+                          {album.publishedBlobs?.map((blob) => (
+                            <div
+                              key={blob.blobId}
+                              id={`blob-${blob.blobId}`}
+                              className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border transition-shadow ${
+                                blob.ispublished
+                                  ? "bg-green-500/5 border-green-500/20"
+                                  : "bg-card/50 border-border hover:shadow-sm"
+                              }`}
+                            >
+                              <div className="mb-2 sm:mb-0">
+                                <p
+                                  className="text-xs font-mono truncate max-w-[150px] sm:max-w-[120px]"
+                                  title={blob.blobId}
+                                >
+                                  {blob.blobId.substring(0, 8)}...
+                                  {blob.blobId.substring(
+                                    blob.blobId.length - 8
+                                  )}
+                                </p>
+                                {blob.ispublished ? (
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-green-500/10 text-green-500 border-green-500/30 text-xs mt-1"
+                                  >
+                                    <Check className="mr-1 h-3 w-3" /> Published
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-amber-500/10 text-amber-500 border-amber-500/30 text-xs mt-1"
+                                  >
+                                    <Clock className="mr-1 h-3 w-3" /> Pending
+                                  </Badge>
+                                )}
+                              </div>
+
+                              {!blob.ispublished && (
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  className="w-full sm:w-auto"
+                                  disabled={publishingBlobId === blob.blobId}
+                                  onClick={async () => {
+                                    try {
+                                      if (!album.albumId) return;
+                                      setPublishingBlobId(blob.blobId);
+
+                                      const txResult: PublishStatus =
+                                        await publishBlobsToAlbum(
+                                          album.albumId,
+                                          album.capId!,
+                                          blob.blobId
+                                        );
+
+                                      if (txResult.status === "approved") {
+                                        await markBlobAsPublished(blob.blobId);
+                                      } else if (txResult.status === "failed") {
+                                        setPublishingBlobId(null);
+                                        toast.error(
+                                          "Transaction failed. Check console for details."
+                                        );
+                                      } else if (
+                                        txResult.status === "rejected"
+                                      ) {
+                                        setPublishingBlobId(null);
+                                        toast.error(
+                                          "Transaction was rejected."
+                                        );
+                                      }
+                                    } catch (err) {
+                                      console.error(
+                                        "Error during sign & publish:",
+                                        err
+                                      );
+                                      toast.error(
+                                        "Failed to sign and publish content"
+                                      );
+                                      setPublishingBlobId(null);
+                                    }
+                                  }}
+                                >
+                                  {publishingBlobId === blob.blobId ? (
+                                    <>
+                                      <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin mr-2"></div>
+                                      Processing...
+                                    </>
+                                  ) : (
+                                    <>Sign & Publish</>
+                                  )}
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </CardContent>
+
+                <CardFooter className="flex flex-col space-y-3">
+                  {!album.albumId ? (
                     <Button
                       className="w-full bg-primary hover:bg-primary/90 text-white"
                       onClick={onPublishAlbumOnChain}
@@ -806,36 +811,36 @@ export default function PublishDraftAlbum() {
                         </>
                       )}
                     </Button>
-                  </WalrusLoading>
-                ) : isAllPublished ? (
-                  <div className="p-4 rounded-md bg-green-50 border border-green-200 text-green-800 text-sm">
-                    <CircleCheck className="inline-block mr-2 h-5 w-5" />
-                    All content has been successfully published to the
-                    blockchain. Your album is now live on the platform!
-                  </div>
-                ) : null}
+                  ) : isAllPublished ? (
+                    <div className="p-4 rounded-md bg-green-50 border border-green-200 text-green-800 text-sm">
+                      <CircleCheck className="inline-block mr-2 h-5 w-5" />
+                      All content has been successfully published to the
+                      blockchain. Your album is now live on the platform!
+                    </div>
+                  ) : null}
 
-                {album.albumId && (
-                  <div className="text-xs text-muted-foreground bg-muted/30 px-4 py-2 rounded-md">
-                    {isAllPublished ? (
-                      <p className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        All content has been successfully published to the
-                        blockchain
-                      </p>
-                    ) : (
-                      <p className="flex items-center">
-                        <Clock className="h-4 w-4 text-amber-500 mr-2" />
-                        Sign each blob individually to publish your content
-                      </p>
-                    )}
-                  </div>
-                )}
-              </CardFooter>
-            </Card>
-          </motion.div>
+                  {album.albumId && (
+                    <div className="text-xs text-muted-foreground bg-muted/30 px-4 py-2 rounded-md">
+                      {isAllPublished ? (
+                        <p className="flex items-center">
+                          <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                          All content has been successfully published to the
+                          blockchain
+                        </p>
+                      ) : (
+                        <p className="flex items-center">
+                          <Clock className="h-4 w-4 text-amber-500 mr-2" />
+                          Sign each blob individually to publish your content
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </CardFooter>
+              </Card>
+            </motion.div>
+          </div>
         </div>
-      </div>
+      </WalrusLoading>
     </Protected>
   );
 }

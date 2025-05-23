@@ -521,7 +521,7 @@ export default function ViewPurchasedAlbum() {
                     <div className="flex items-center">
                       <h1 className="text-3xl font-bold">{album.name}</h1>
                       <a
-                        href={`https://testnet.suivision.xyz/account/${album.albumId}`}
+                        href={`https://testnet.suivision.xyz/object/${album.albumId}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="ml-2 inline-flex items-center hover:opacity-80 transition-opacity"

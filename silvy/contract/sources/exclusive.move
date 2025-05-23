@@ -28,6 +28,7 @@ public struct Album has key {
     price: u64,
     owner: address,
     insider: vector<address>,
+    max_insider: u64,
 }
 
 public struct AlbumCap has key {
@@ -105,6 +106,7 @@ public fun create_album(
     name: String,
     price: u64,
     creator: address,
+    max_insider: u64,
     ctx: &mut TxContext
 ): AlbumCap {
     let mut album = Album {
@@ -113,6 +115,7 @@ public fun create_album(
         price,
         owner: creator,
         insider: vector::empty(),
+        max_insider: max_insider+1  // +1 for creator,
     };
     let album_cap = AlbumCap {
         id: object::new(ctx),
@@ -127,9 +130,10 @@ entry fun create_album_entry(
     name: String,
     price: u64,
     creator: address,
+    max_insider: u64,
     ctx: &mut TxContext
 ) {
-    transfer::transfer(create_album(name, price, creator, ctx), creator);
+    transfer::transfer(create_album(name, price, creator, max_insider, ctx), creator);
 }
 
 // === Album Support ===
@@ -144,7 +148,7 @@ entry fun support_album(
     assert!(!album.insider.contains(&sender), E_DUPLICATE);
     assert!(payment.value() == album.price, E_NOT_EQUAL);
     assert!(fee >= 1 && fee <= 20, E_INVALID_FEE_RANGE);
-
+    assert!(album.insider.length() <= album.max_insider - 1, E_NO_ACCESS);
     let total_payment = album.price;
     let platform_fee = (total_payment * fee).divide_and_round_up(100);
     let creator_fee = total_payment - platform_fee;

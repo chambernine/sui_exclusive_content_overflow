@@ -115,6 +115,7 @@ app.post("/draft-album/request-approval", async (c) => {
     contentInfos: body.contentInfos,
     contents: body.contents,
     created_at: body.created_at,
+    limited: body.limited,
   });
 
   return c.json({
@@ -315,6 +316,7 @@ app.patch("/my-album/publish/:albumId/:blobId", async (c) => {
       owner: draftAlbum.owner,
       name: draftAlbum.name,
       tier: draftAlbum.tier,
+      limited: draftAlbum.limited,
       price: draftAlbum.price,
       description: draftAlbum.description,
       tags: draftAlbum.tags,
@@ -379,6 +381,7 @@ app.get("/my-album/purchase/:owner", async (c) => {
           owner: data.owner,
           name: data.name,
           tier: data.tier,
+          limited: data.limited,
           price: data.price,
           description: data.description,
           tags: data.tags,
@@ -418,8 +421,26 @@ app.get("/my-album/published/:owner", async (c) => {
       firestoreDb.collection("albums").doc(id)
     );
     const albumDocs = await firestoreDb.getAll(...albumRefs);
-
-    return c.json({ status: 200, data: albumDocs });
+    const albums: PublishedAlbum[] = albumDocs
+    .filter((doc) => doc.exists)
+    .map((doc) => {
+      const data = doc.data()!;
+      return {
+        albumId: doc.id,
+        owner: data.owner,
+        name: data.name,
+        tier: data.tier,
+        limited: data.limited,
+        price: data.price,
+        description: data.description,
+        tags: data.tags,
+        contentInfos: data.contentInfos,
+        contentsObjectId: data.contentsObjectId,
+        created_at: data.created_at,
+        interaction: data.interaction || { likes: 0, shares: 0, saves: 0 },
+      };
+    });
+    return c.json({ status: 200, data: albums });
   } catch (err) {
     console.error("🔥 Error fetching published albums:", err);
     return c.json({ status: 500, error: "Internal Server Error" });
@@ -436,6 +457,7 @@ app.get("/explore-albums", async (c) => {
         owner: data.owner,
         name: data.name,
         tier: data.tier,
+        limited: data.limited,
         price: data.price,
         description: data.description,
         tags: data.tags,
@@ -498,6 +520,7 @@ app.get("/explore-album/:albumId", async (c) => {
       owner: data.owner,
       name: data.name,
       tier: data.tier,
+      limited: data.limited,
       price: data.price,
       description: data.description,
       tags: data.tags,

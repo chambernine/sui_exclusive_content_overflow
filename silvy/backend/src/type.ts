@@ -35,6 +35,7 @@ export interface DraftAlbum {
   owner: string;
   name: string;
   tier: AlbumTier;
+  limited: number;
   price: number;
   description: string;
   tags: string[];
@@ -76,6 +77,7 @@ export interface PublishedAlbum {
   owner: string;
   name: string;
   tier: number;
+  limited: number;
   price: number;
   description: string;
   tags: string[];

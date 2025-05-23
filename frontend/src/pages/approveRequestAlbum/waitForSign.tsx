@@ -28,12 +28,11 @@ import {
   CheckCircle,
   ArrowLeft,
   Tag as TagIcon,
-  Upload,
   Info,
   CircleCheck,
-  Type,
   Lock,
   FileText,
+  Codesandbox,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Protected } from "@/components/auth/Protected";
@@ -203,7 +202,6 @@ export default function PublishDraftAlbum() {
   useEffect(() => {
     if (isAllPublished) {
       toast.success("All content has been successfully published!");
-      navigate("/explore-albums");
     }
   }, [isAllPublished, navigate]);
 
@@ -679,7 +677,7 @@ export default function PublishDraftAlbum() {
                     </h4>
                     <ol className="text-sm space-y-2 list-decimal pl-5">
                       <li className="text-muted-foreground">
-                        Initialize the album on blockchain
+                        Preserve content on the blockchain
                       </li>
                       <li className="text-muted-foreground">
                         Sign each content blob individually
@@ -806,8 +804,8 @@ export default function PublishDraftAlbum() {
                         </>
                       ) : (
                         <>
-                          <Upload className="mr-2 h-4 w-4" />
-                          Initialize Album on Blockchain
+                          <Codesandbox className="mr-1 h-4 w-4" />
+                          Preserve
                         </>
                       )}
                     </Button>

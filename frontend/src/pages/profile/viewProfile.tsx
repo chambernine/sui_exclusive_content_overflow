@@ -322,7 +322,11 @@ export function ProfilePage() {
   };
 
   // Album display components
-  const renderAlbumGrid = (albums: any, loading: boolean) => {
+  const renderAlbumGrid = (
+    albums: any,
+    loading: boolean,
+    routeType: "purchase" | "publish" = "purchase"
+  ) => {
     if (loading) {
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -364,7 +368,11 @@ export function ProfilePage() {
 
     const handleViewDetails = (album: Album) => {
       localStorage.setItem("viewingAlbum", JSON.stringify(album));
-      navigate(`/profile/myPurchase/${album.albumId}`);
+      const route =
+        routeType === "publish"
+          ? `/profile/myPublish/${album.albumId}`
+          : `/profile/myPurchase/${album.albumId}`;
+      navigate(route);
     };
 
     return (
@@ -442,7 +450,11 @@ export function ProfilePage() {
   };
 
   // Album list view component
-  const renderAlbumList = (albums: any, loading: boolean) => {
+  const renderAlbumList = (
+    albums: any,
+    loading: boolean,
+    routeType: "purchase" | "publish" = "purchase"
+  ) => {
     if (loading) {
       return (
         <div className="space-y-3">
@@ -487,7 +499,11 @@ export function ProfilePage() {
 
     const handleViewDetails = (album: Album) => {
       localStorage.setItem("viewingAlbum", JSON.stringify(album));
-      navigate(`/profile/myPurchase/${album.albumId}`);
+      const route =
+        routeType === "publish"
+          ? `/profile/myPublish/${album.albumId}`
+          : `/profile/myPurchase/${album.albumId}`;
+      navigate(route);
     };
 
     return (
@@ -1076,7 +1092,11 @@ export function ProfilePage() {
                       loadingText="Loading albums..."
                       gridCols="3"
                     >
-                      {renderAlbumGrid(myAlbumsData?.data, isMyAlbumsLoading)}
+                      {renderAlbumGrid(
+                        myAlbumsData?.data,
+                        isMyAlbumsLoading,
+                        "publish"
+                      )}
                     </LoadingWrapper>
                   </TabsContent>
 
@@ -1088,7 +1108,11 @@ export function ProfilePage() {
                       layout="block"
                       loadingText="Loading albums..."
                     >
-                      {renderAlbumList(myAlbumsData?.data, isMyAlbumsLoading)}
+                      {renderAlbumList(
+                        myAlbumsData?.data,
+                        isMyAlbumsLoading,
+                        "publish"
+                      )}
                     </LoadingWrapper>
                   </TabsContent>
                 </Tabs>

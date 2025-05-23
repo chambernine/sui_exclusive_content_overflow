@@ -22,9 +22,6 @@ export default function useInteractContract() {
     capId: string,
     blobId: string
   ): Promise<PublishStatus> {
-    console.log(TESTNET_PACKAGE_ID);
-    console.log(albumId, capId, blobId);
-
     const tx = new Transaction();
     tx.moveCall({
       target: `${TESTNET_PACKAGE_ID}::exclusive::publish`,
@@ -120,15 +117,9 @@ export default function useInteractContract() {
         type?.includes(`${TESTNET_PACKAGE_ID}::exclusive::AlbumCap`) &&
         content?.dataType === "moveObject"
       ) {
-        console.log("found album cap");
-        console.log("items data: ", item.data);
         const fields = content.fields;
         console.log(albumId);
-        console.log("fields: ", fields);
-        console.log(type);
-        // if (fields. === albumId) {
-        //   return item.data?.objectId;
-        // }
+        console.log(fields);
       }
     }
 

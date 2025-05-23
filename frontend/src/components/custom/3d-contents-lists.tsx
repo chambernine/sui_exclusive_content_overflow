@@ -28,20 +28,20 @@ export function ThreeDContentsLists({
     "https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg?q=80&w=1000",
     "https://images.pexels.com/photos/2693212/pexels-photo-2693212.png?q=80&w=1000",
     "https://images.pexels.com/photos/3109807/pexels-photo-3109807.jpeg?q=80&w=1000",
-    "https://images.pexels.com/photos/3304855/pexels-photo-3304855.jpeg?q=80&w=1000",
-    "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=1000",
+    // "https://images.pexels.com/photos/3304855/pexels-photo-3304855.jpeg?q=80&w=1000",
+    // "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=1000",
 
-    "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1000",
+    // "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1000",
     "https://images.unsplash.com/photo-1514870262631-55de0332faf6?q=80&w=1000",
-    "https://images.unsplash.com/photo-1557264305-048d7e0a01ed?q=80&w=1000",
+    // "https://images.unsplash.com/photo-1557264305-048d7e0a01ed?q=80&w=1000",
     "https://images.unsplash.com/photo-1555169062-013468b47731?q=80&w=1000",
 
     "https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?q=80&w=1000",
     "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000",
-    "https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?q=80&w=1000",
+    // "https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?q=80&w=1000",
     "https://images.unsplash.com/photo-1519638399535-1b036603ac77?q=80&w=1000",
-    "https://images.unsplash.com/photo-1543269664-56d93c1b41a6?q=80&w=1000",
-    "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1000",
+    // "https://images.unsplash.com/photo-1543269664-56d93c1b41a6?q=80&w=1000",
+    // "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1000",
 
     // Anime style images
     "https://images.unsplash.com/photo-1578632292335-df3abbb0d586?q=80&w=1000",

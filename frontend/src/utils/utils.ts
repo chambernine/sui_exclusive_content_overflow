@@ -57,9 +57,6 @@ export const downloadAndDecrypt = async (
   const validDownloads = downloadResults.filter(
     (result): result is ArrayBuffer => result !== null
   );
-  console.log(validDownloads);
-
-  console.log("validDownloads count", validDownloads.length);
 
   if (validDownloads.length === 0) {
     const errorMsg =
@@ -81,10 +78,6 @@ export const downloadAndDecrypt = async (
       client: suiClient,
       onlyTransactionKind: true,
     });
-
-    console.log(ids, "ids");
-    console.log(txBytes, "txBytes");
-    console.log(sessionKey, "sessionKey");
 
     try {
       await sealClient.fetchKeys({ ids, txBytes, sessionKey, threshold: 2 });

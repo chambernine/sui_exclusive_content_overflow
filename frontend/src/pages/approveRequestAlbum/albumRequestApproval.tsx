@@ -247,11 +247,11 @@ export default function AlbumRequestApproval() {
                       {tag}
                     </Badge>
                   ))}
-                  {album.tags?.length > 3 && (
+                  {/* {album.tags?.length > 3 && (
                     <Badge variant="secondary" className="text-xs">
                       +{album.tags.length - 3} more
                     </Badge>
-                  )}
+                  )} */}
                 </div>
                 <motion.div
                   initial={{ height: "30px", overflow: "hidden" }}
@@ -329,7 +329,7 @@ export default function AlbumRequestApproval() {
                         </AspectRatio>
                       </motion.div>
                     ))}
-                    {album.contentInfos?.length > 2 && (
+                    {/* {album.contentInfos?.length > 2 && (
                       <div className="absolute bottom-2 right-2">
                         <Badge
                           variant="secondary"
@@ -338,7 +338,7 @@ export default function AlbumRequestApproval() {
                           +{album.contentInfos.length - 2} more
                         </Badge>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </CardContent>
@@ -409,11 +409,11 @@ export default function AlbumRequestApproval() {
                         {tag}
                       </Badge>
                     ))}
-                    {album.tags?.length > 3 && (
+                    {/* {album.tags?.length > 3 && (
                       <Badge variant="secondary" className="text-xs">
                         +{album.tags.length - 3} more
                       </Badge>
-                    )}
+                    )} */}
                   </div>
                   <Badge
                     className={`${
@@ -499,7 +499,7 @@ export default function AlbumRequestApproval() {
                         </AspectRatio>
                       </motion.div>
                     ))}
-                    {album.contentInfos?.length > 2 && (
+                    {/* {album.contentInfos?.length > 2 && (
                       <div className="absolute bottom-2 right-2">
                         <Badge
                           variant="secondary"
@@ -508,7 +508,7 @@ export default function AlbumRequestApproval() {
                           +{album.contentInfos.length - 2} more
                         </Badge>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </CardContent>

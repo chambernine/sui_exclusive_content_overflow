@@ -110,7 +110,12 @@ export default function PublishDraftAlbum() {
     try {
       setLoading(true);
       const res = await axios.get(`${DOMAIN_DEV}/draft-album/${dbId}`);
+
       setAlbum(res.data.data);
+
+      if (res.data.error === "Draft album not found") {
+        navigate("/explore-albums");
+      }
     } catch (err) {
       console.error("Error loading album:", err);
       toast.error("Failed to load album details");
@@ -124,8 +129,8 @@ export default function PublishDraftAlbum() {
     try {
       await axios.patch(`${DOMAIN_DEV}/my-album/publish/${dbId}/${blobId}`);
       await fetchAlbum(); // Refresh data
+
       toast.success("Content successfully published!");
-      navigate("/explore-albums");
     } catch (err) {
       console.error("❌ Failed to update backend publish state:", err);
       toast.error("Failed to update publish state");
@@ -202,6 +207,7 @@ export default function PublishDraftAlbum() {
   useEffect(() => {
     if (isAllPublished) {
       toast.success("All content has been successfully published!");
+      navigate("/explore-albums");
     }
   }, [isAllPublished, navigate]);
 

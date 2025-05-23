@@ -170,6 +170,7 @@ export default function LandingPage() {
                   <span className="text-primary font-semibold px-2">
                     Exclusive Content
                   </span>
+                  <br/>
                   on the Sui blockchain
                 </span>
               </motion.p>

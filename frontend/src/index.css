@@ -3,6 +3,19 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* 3D Animation Styles */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.transform-3d {
+  transform-style: preserve-3d;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -113,7 +126,7 @@
   --accent-foreground: #C0E6FF;
   /* Aqua */
   --destructive: #FF4D4D;
-  --border: #011829;
+  --border: #030F1C;
   /* Ocean */
   --input: #4DA2FF30;
   /* Sea with opacity */
@@ -208,61 +221,107 @@
   .sui-border {
     @reference border border-[#4DA2FF]/30 hover:border-[#4DA2FF]/50;
   }
-}
 
-/* Animations */
-.fade-in {
-  animation: fadeIn 0.5s ease-in forwards;
-}
-
-.fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-
-.stagger-in>* {
-  opacity: 0;
-  animation: fadeIn 0.5s ease-in forwards;
-}
-
-.stagger-in>*:nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.stagger-in>*:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.stagger-in>*:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.stagger-in>*:nth-child(4) {
-  animation-delay: 0.4s;
-}
-
-.stagger-in>*:nth-child(5) {
-  animation-delay: 0.5s;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+  /* Walrus loading specific styles */
+  .walrus-loading-container {
+    @reference bg-gradient-to-br from-background via-background/95 to-primary/5;
   }
 
-  to {
+  .walrus-glow {
+    @reference shadow-[0_0_20px_rgba(77, 162, 255, 0.3)] dark:shadow-[0_0_20px_rgba(77, 162, 255, 0.5)];
+  }
+
+  .walrus-pulse {
+    animation: walrusPulse 2s ease-in-out infinite;
+  }
+
+  .walrus-float {
+    animation: walrusFloat 3s ease-in-out infinite;
+  }
+
+  /* Enhanced drop shadow for walrus */
+  .drop-shadow-walrus {
+    filter: drop-shadow(0 0 15px rgba(77, 162, 255, 0.4)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  }
+}
+
+/* Walrus-specific animations */
+@keyframes walrusPulse {
+
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  50% {
     opacity: 1;
+    transform: scale(1.05);
   }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+@keyframes walrusFloat {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
   }
 
-  to {
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+
+  66% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+}
+
+/* Enhanced loading particle animations */
+.walrus-particle {
+  animation: particleFloat 4s ease-in-out infinite;
+}
+
+.walrus-particle:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.walrus-particle:nth-child(2) {
+  animation-delay: 0.8s;
+}
+
+.walrus-particle:nth-child(3) {
+  animation-delay: 1.6s;
+}
+
+.walrus-particle:nth-child(4) {
+  animation-delay: 2.4s;
+}
+
+.walrus-particle:nth-child(5) {
+  animation-delay: 3.2s;
+}
+
+@keyframes particleFloat {
+
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(0px) scale(1);
+  }
+
+  25% {
+    opacity: 0.8;
+    transform: translateY(-15px) scale(1.2);
+  }
+
+  50% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(-8px) scale(0.9);
+  }
+
+  75% {
+    opacity: 0.6;
+    transform: translateY(-20px) scale(1.1);
   }
 }
 
@@ -305,6 +364,7 @@
   height: 12px !important;
   background: color-mix(in srgb, var(--primary) 20%, transparent) !important;
   box-shadow: none !important;
+  cursor: pointer !important;
 }
 
 

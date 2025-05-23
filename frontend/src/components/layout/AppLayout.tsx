@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 import { Toaster } from "@/components/ui/sonner";
 import { motion } from "framer-motion";
@@ -8,19 +8,21 @@ import { ConnectButton } from "@mysten/dapp-kit";
 
 export function AppLayout() {
   const { address } = useSuiAccount();
+  const location = useLocation();
+  const isLandingPage = location.pathname === "/";
 
   return (
     <div className="min-h-screen bg-background">
       <motion.main
         className={`container mx-auto ${
-          address && "px-4 pb-16"
+          address && !isLandingPage && "px-4 pb-16"
         } w-full flex flex-col items-center justify-center`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {address && (
+        {address && !isLandingPage && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -53,7 +55,7 @@ export function AppLayout() {
         )}
         <Outlet />
       </motion.main>
-      {address && <NavigationDock />}
+      {address && !isLandingPage && <NavigationDock />}
       <Toaster position={"top-right"} />
     </div>
   );

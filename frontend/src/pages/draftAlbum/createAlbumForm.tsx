@@ -3,10 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 import { Timestamp } from "firebase/firestore";
 import {
   AlbumTier,
+  AlbumCategory,
   DraftAlbum,
   DraftAlbumStatus,
   tierColors,
   tierNames,
+  categoryNames,
 } from "@/types/album";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { fileToBase64 } from "@/utils/fileFormat";
@@ -22,6 +24,11 @@ import {
   PlusCircle,
   ArrowLeft,
   ArrowRight,
+  Grid,
+  Users,
+  Type,
+  Award,
+  Coins,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -44,6 +51,7 @@ export interface IFormDraftAlbum {
   owner: string;
   name: string;
   tier: AlbumTier;
+  category: AlbumCategory;
   price: number;
   description: string;
   tags: string[];
@@ -51,6 +59,7 @@ export interface IFormDraftAlbum {
   contentInfos: File[] | null;
   contents: File[] | null;
   created_at: Timestamp;
+  limited: number | null;
 }
 
 export default function CreateAlbumPage() {
@@ -65,6 +74,7 @@ export default function CreateAlbumPage() {
     owner: "",
     name: "",
     tier: AlbumTier.standard,
+    category: AlbumCategory.photo,
     price: 0,
     description: "",
     tags: [],
@@ -72,6 +82,7 @@ export default function CreateAlbumPage() {
     contentInfos: [],
     contents: [],
     created_at: Timestamp.now(),
+    limited: 10,
   });
 
   const [previewContentInfos, setPreviewContentInfos] = useState<string[]>([]);
@@ -90,11 +101,24 @@ export default function CreateAlbumPage() {
         tier: parseInt(value) as AlbumTier,
       }));
     }
+    if (name === "category") {
+      return setDraft((prev) => ({
+        ...prev,
+        category: parseInt(value) as AlbumCategory,
+      }));
+    }
     if (name === "price") {
       const floatValue = parseFloat(value);
       return setDraft((prev) => ({
         ...prev,
         price: isNaN(floatValue) ? 0 : parseFloat(floatValue.toFixed(5)),
+      }));
+    }
+    if (name === "limited") {
+      const intValue = parseInt(value);
+      return setDraft((prev) => ({
+        ...prev,
+        limited: isNaN(intValue) ? null : Math.min(intValue, 100000),
       }));
     }
     if (name === "tags") {
@@ -190,6 +214,13 @@ export default function CreateAlbumPage() {
     }));
   };
 
+  const handleSelectCategory = (value: string) => {
+    setDraft((prev) => ({
+      ...prev,
+      category: parseInt(value) as AlbumCategory,
+    }));
+  };
+
   const validateStep1 = () => {
     if (!draft.name) {
       toast.error("Please enter an album name.");
@@ -203,6 +234,14 @@ export default function CreateAlbumPage() {
 
     if (draft.price <= 0) {
       toast.error("Please enter a valid price.");
+      return false;
+    }
+
+    if (
+      draft.limited !== null &&
+      (draft.limited < 10 || draft.limited > 100000)
+    ) {
+      toast.error("Membership limit must be between 10 and 100,000.");
       return false;
     }
 
@@ -262,6 +301,8 @@ export default function CreateAlbumPage() {
         owner: address,
         contents: base64Contents,
         contentInfos: base64Previews,
+        category: draft.category,
+        limited: draft.limited,
       };
 
       submitDraftAlbum(draftAlbum, {
@@ -272,6 +313,7 @@ export default function CreateAlbumPage() {
             owner: "",
             name: "",
             tier: AlbumTier.standard,
+            category: AlbumCategory.photo,
             price: 0,
             description: "",
             tags: [],
@@ -279,6 +321,7 @@ export default function CreateAlbumPage() {
             contentInfos: [],
             contents: [],
             created_at: Timestamp.now(),
+            limited: null,
           });
           setPreviewContentInfos([]);
           setPreviewContents([]);
@@ -359,7 +402,12 @@ export default function CreateAlbumPage() {
       <CardContent className="space-y-6">
         <motion.div variants={item} className="space-y-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="name">Content Name</Label>
+            <Label htmlFor="name">
+              <div className="flex items-center gap-1">
+                <Type className="h-4 w-4" />
+                Content Name
+              </div>
+            </Label>
             <Input
               id="name"
               name="name"
@@ -371,7 +419,12 @@ export default function CreateAlbumPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <Label htmlFor="tier">Tier</Label>
+              <Label htmlFor="tier">
+                <div className="flex items-center gap-1">
+                  <Award className="h-4 w-4" />
+                  Tier
+                </div>
+              </Label>
               <Select
                 value={draft.tier.toString()}
                 onValueChange={handleSelectTier}
@@ -397,8 +450,38 @@ export default function CreateAlbumPage() {
             </div>
 
             <div className="flex flex-col gap-1">
+              <Label htmlFor="category">
+                <div className="flex items-center gap-1">
+                  <Grid className="h-4 w-4" />
+                  Category
+                </div>
+              </Label>
+              <Select
+                value={draft.category.toString()}
+                onValueChange={handleSelectCategory}
+                disabled
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(categoryNames).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      <div className="flex items-center gap-2">{value}</div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="price">
-                <div className="flex items-center gap-1">Price (SUI)</div>
+                <div className="flex items-center gap-1">
+                  <Coins className="h-4 w-4" />
+                  Price (SUI)
+                </div>
               </Label>
               <Input
                 id="price"
@@ -408,6 +491,35 @@ export default function CreateAlbumPage() {
                 onChange={handleChange}
                 placeholder="0.00"
                 className="mt-1"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="limited">
+                <div className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  Membership Limit
+                </div>
+              </Label>
+              <Input
+                id="limited"
+                type="number"
+                name="limited"
+                value={draft.limited || ""}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  if (
+                    e.target.value === "" ||
+                    (value >= 10 && value <= 100000)
+                  ) {
+                    handleChange(e);
+                  }
+                }}
+                defaultValue={10}
+                placeholder="10"
+                className="mt-1"
+                min="10"
+                max="100000"
               />
             </div>
           </div>

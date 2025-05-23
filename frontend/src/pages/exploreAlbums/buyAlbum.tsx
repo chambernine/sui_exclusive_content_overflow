@@ -27,11 +27,14 @@ import {
   CreditCard,
   ArrowLeft,
   MessageSquare,
+  AlertTriangle as ExclamationTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { tierColors, tierNames } from "@/types/album";
+import { PublishStatus } from "@/types/interact";
 import {
   Carousel,
   CarouselContent,
@@ -41,6 +44,9 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { DOMAIN_DEV } from "@/constant/constant";
+import { useSuiClient } from "@mysten/dapp-kit";
+
+import { AvatarCircles } from "@/components/magicui/avatar-circles";
 
 interface Album {
   albumId: string;
@@ -61,6 +67,7 @@ interface Album {
 
 export default function BuyAlbum() {
   const { albumId } = useParams();
+  const suiClient = useSuiClient();
   const navigate = useNavigate();
   const { address } = useSuiAccount();
   const { data, isLoading } = useExploreAlbumById(albumId || "", address);
@@ -70,6 +77,12 @@ export default function BuyAlbum() {
   const [selectedImage, setSelectedImage] = useState<number>(0);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [purchaseInProgress, setPurchaseInProgress] = useState<boolean>(false);
+  const [purchaseCount, setPurchaseCount] = useState<number>(0);
+  const [limited, setLimited] = useState<number>(0); // Set your max purchases per user here
+  const [loadingPurchaseCount, setLoadingPurchaseCount] =
+    useState<boolean>(true);
+
+  const [members, setMembers] = useState([]);
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -126,20 +139,38 @@ export default function BuyAlbum() {
       return;
     }
 
-    if (!album) return;
+    if (!album || !album.albumId) return;
+
+    if (purchaseCount >= limited) {
+      toast.error(
+        `You've reached the maximum purchase limit of ${limited} albums`
+      );
+      return;
+    }
 
     setPurchaseInProgress(true);
     try {
-      await CreateSupportAlbumTx(
+      const txResult: PublishStatus = await CreateSupportAlbumTx(
         album.albumId,
         album.price * 1_000_000_000,
         20
       );
-      await onPurchaseAlbum(album.albumId, address);
-      toast.success("Purchase initiated! Check your wallet for confirmation.");
-    } catch (error) {
-      console.error("Purchase failed:", error);
-      toast.error("Purchase failed. Please try again.");
+
+      if (txResult.status === "approved") {
+        await onPurchaseAlbum(album.albumId, address);
+        toast.success("Transaction approved!");
+        navigate("/profile");
+
+        // If you need to redirect or update state after successful purchase, do it here
+      } else if (txResult.status === "failed") {
+        console.error("Transaction failed:", txResult.error);
+        toast.error("Transaction failed. Check console for details.");
+      } else if (txResult.status === "rejected") {
+        toast.error("Transaction was rejected.");
+      }
+    } catch (err) {
+      console.error("Error during purchase transaction:", err);
+      toast.error("Failed to complete purchase. Please try again.");
     } finally {
       setPurchaseInProgress(false);
     }
@@ -161,6 +192,31 @@ export default function BuyAlbum() {
       minute: "2-digit",
     });
   };
+
+  useEffect(() => {
+    setLoadingPurchaseCount(true);
+    const fetchAllowlist = async () => {
+      if (!albumId) return;
+      try {
+        const allowlist = await suiClient.getObject({
+          id: albumId!,
+          options: { showContent: true },
+        });
+
+        const fields =
+          (allowlist.data?.content as { fields: any })?.fields || {};
+
+        setLimited(fields.max_insider - 1);
+        setPurchaseCount(fields.insider.length - 1);
+        setMembers(fields.insider.slice(1));
+
+        setLoadingPurchaseCount(false);
+      } catch (error) {
+        console.error("Error fetching allowlist:", error);
+      }
+    };
+    fetchAllowlist();
+  }, [albumId, suiClient]);
 
   if (isLoading) {
     return (
@@ -548,6 +604,80 @@ export default function BuyAlbum() {
                   <div className="text-2xl font-bold">{album.price} SUI</div>
                 </div>
 
+                {/* Purchase count indicator */}
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Purchase limit:
+                    </span>
+                    <div className="font-medium flex items-center">
+                      {loadingPurchaseCount ? (
+                        <div className="h-3 w-3 mr-1 animate-spin rounded-full border-2 border-t-transparent border-primary"></div>
+                      ) : (
+                        <span
+                          className={
+                            purchaseCount >= limited
+                              ? "text-red-600 font-bold"
+                              : ""
+                          }
+                        >
+                          {purchaseCount}/{limited}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {!loadingPurchaseCount && (
+                    <Progress
+                      value={(purchaseCount / limited) * 100}
+                      className={
+                        purchaseCount >= limited
+                          ? "bg-red-200"
+                          : purchaseCount > limited * 0.75
+                          ? "bg-amber-200"
+                          : purchaseCount > limited * 0.5
+                          ? "bg-emerald-200"
+                          : "bg-primary/20"
+                      }
+                      style={
+                        {
+                          "--progress-indicator-color":
+                            purchaseCount >= limited
+                              ? "rgb(220, 38, 38)"
+                              : purchaseCount > limited * 0.75
+                              ? "rgb(217, 119, 6)"
+                              : purchaseCount > limited * 0.5
+                              ? "rgb(5, 150, 105)"
+                              : "var(--primary)",
+                        } as React.CSSProperties
+                      }
+                    />
+                  )}
+                </div>
+
+                <div className="mt-2">
+                  {!loadingPurchaseCount ? (
+                    purchaseCount > 0 && (
+                      <AvatarCircles
+                        title={`Purchase Members (${purchaseCount} of ${limited})`}
+                        avatarUrls={
+                          members.map((address: string) => ({
+                            imageUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${address}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`,
+                            profileUrl: `https://suiscan.xyz/testnet/account/${address}`,
+                          })) || []
+                        }
+                        numPeople={purchaseCount > 5 ? purchaseCount - 5 : 0}
+                      />
+                    )
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                    </div>
+                  )}
+                </div>
+
                 <Separator />
 
                 <div className="rounded-md bg-primary/10 p-3 border border-primary/20">
@@ -558,10 +688,7 @@ export default function BuyAlbum() {
                   <ul className="text-sm space-y-2">
                     <li className="flex items-start">
                       <span className="mr-2">•</span>
-                      <span>
-                        Full access to all {album.contentInfos?.length || 0}+
-                        exclusive images
-                      </span>
+                      <span>Full access to all exclusive images</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-2">•</span>
@@ -573,12 +700,22 @@ export default function BuyAlbum() {
                     </li>
                   </ul>
                 </div>
+
+                {/* Purchase Limit Warning */}
+                {purchaseCount >= limited && (
+                  <div className="p-4 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm">
+                    <ExclamationTriangle className="inline-block mr-2 h-5 w-5" />
+                    You have reached the maximum purchase limit of {limited}{" "}
+                    albums. Please remove an existing album from your collection
+                    to purchase this one.
+                  </div>
+                )}
               </CardContent>
 
               <CardFooter className="flex flex-col space-y-3">
                 <Button
                   className="w-full bg-primary hover:bg-primary/90 text-white"
-                  disabled={purchaseInProgress}
+                  disabled={purchaseInProgress || purchaseCount >= limited}
                   onClick={handlePurchase}
                 >
                   {purchaseInProgress ? (

@@ -4,6 +4,7 @@ import { ThemeProvider } from "./providers/ThemeProvider";
 
 import Home from "./pages/home/home";
 import AlbumRequestApproval from "./pages/approveRequestAlbum/albumRequestApproval";
+import LandingPage from "./pages/landing/landing";
 
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProfilePage } from "./pages/profile/viewProfile";
@@ -22,6 +23,10 @@ function App() {
       children: [
         {
           index: true,
+          element: <LandingPage />,
+        },
+        {
+          path: "home",
           element: <Home />,
         },
         {

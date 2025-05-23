@@ -29,6 +29,7 @@ import {
 import { toast } from "sonner";
 import { Protected } from "@/components/auth/Protected";
 import { DOMAIN_DEV } from "@/constant/constant";
+import { WalrusLoading } from "@/components/ui/walrus-loading";
 
 export default function PublishDraftAlbum() {
   const navigate = useNavigate();
@@ -135,6 +136,13 @@ export default function PublishDraftAlbum() {
     album?.publishedBlobs?.some((blob) => blob.ispublished) || false;
   const pendingCount =
     album?.publishedBlobs?.filter((blob) => !blob.ispublished).length || 0;
+
+  useEffect(() => {
+    if (isAllPublished) {
+      toast.success("All content has been successfully published!");
+      navigate("/explore-albums");
+    }
+  }, [isAllPublished]);
 
   return (
     <Protected>
@@ -316,21 +324,27 @@ export default function PublishDraftAlbum() {
                         <h3 className="text-sm font-medium">
                           Content Publication
                         </h3>
-                        <Button
-                          size="sm"
-                          onClick={onPublishAlbumOnChain}
-                          // disabled={isPublishing || !album.albumId}
-                          className={isPublishing ? "animate-pulse" : ""}
+                        <WalrusLoading
+                          size={160}
+                          showMessage={true}
+                          isLoading={isPublishing}
                         >
-                          {isPublishing ? (
-                            <>
-                              <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin mr-2"></div>
-                              Publishing...
-                            </>
-                          ) : (
-                            <>Publish Album</>
-                          )}
-                        </Button>
+                          <Button
+                            size="sm"
+                            onClick={onPublishAlbumOnChain}
+                            // disabled={isPublishing || !album.publishedBlobs}
+                            className={isPublishing ? "animate-pulse" : ""}
+                          >
+                            {isPublishing ? (
+                              <>
+                                <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin mr-2"></div>
+                                Publishing...
+                              </>
+                            ) : (
+                              <>Publish Album</>
+                            )}
+                          </Button>
+                        </WalrusLoading>
                       </div>
 
                       {(!album.publishedBlobs ||

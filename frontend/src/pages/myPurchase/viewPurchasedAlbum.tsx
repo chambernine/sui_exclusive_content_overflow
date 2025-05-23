@@ -37,6 +37,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import LetterGlitch from "@/components/ui/LetterGlitch";
+import { CardWithLens } from "@/components/custom/card-with-lens";
 
 const TTL_MIN = 10;
 
@@ -434,16 +435,17 @@ export default function ViewPurchasedAlbum() {
                         ratio={16 / 9}
                         className="bg-card/50 backdrop-blur-sm"
                       >
-                        <div className="h-full w-full overflow-hidden border-none shadow-none">
-                          <img
-                            src={img}
-                            alt={`${album?.name || "Album"} - Content ${i + 1}`}
-                            className="object-cover h-full w-full"
-                          />
+                        <CardWithLens
+                          imageSrc={img}
+                          imageAlt={`${album?.name || "Album"} - Content ${
+                            i + 1
+                          }`}
+                          className="h-full w-full overflow-hidden border-none shadow-none"
+                        >
                           <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs">
                             Content {i + 1} of {decryptedFileUrls.length}
                           </div>
-                        </div>
+                        </CardWithLens>
                       </AspectRatio>
                     </CarouselItem>
                   ))}

@@ -117,9 +117,29 @@ export function Login({
         </motion.div>
 
         <motion.div variants={item} className="mt-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            Powered by Sui Blockchain • Secure Transactions • Exclusive Content
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            viewport={{ once: true }}
+            className="flex justify-center mt-6 sm:mt-8"
+          >
+            <div className="flex items-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-card/50 backdrop-blur-sm border border-border">
+              <span className="text-xs sm:text-sm text-muted-foreground">
+                Powered by
+              </span>
+              <div className="flex items-center space-x-1">
+                <img
+                  src="/Sui_Symbol_Sea.svg"
+                  alt="Sui"
+                  className="w-3 h-3 sm:w-4 sm:h-4"
+                />
+                <span className="text-xs sm:text-sm font-medium text-primary">
+                  Sui
+                </span>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </div>

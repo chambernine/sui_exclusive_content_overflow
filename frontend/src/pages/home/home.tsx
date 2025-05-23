@@ -297,7 +297,7 @@ export default function Home() {
 
   return (
     <Protected hideChildren>
-      <div className="min-h-screen w-full flex flex-col p-4 md:p-6">
+      <div className="min-h-screen w-full flex flex-col p-4 md:p-6 ">
         {/* 3-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Profile */}

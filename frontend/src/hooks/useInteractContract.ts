@@ -61,7 +61,7 @@ export default function useInteractContract() {
     albumId: string,
     paymentAmount: number,
     fee: number
-  ) {
+  ): Promise<PublishStatus> {
     const tx = new Transaction();
 
     // 1. Add coin for payment
@@ -80,20 +80,28 @@ export default function useInteractContract() {
 
     // 3. Optional: set budget
     tx.setGasBudget(10_000_000);
-    console.log("execute tx ");
-    signAndExecute(
-      {
-        transaction: tx,
-      },
-      {
-        onSuccess: async (result) => {
-          console.log("Transaction successful:", await result);
-        },
-        onError: (error) => {
-          console.error("Transaction failed:", error);
-        },
-      }
-    );
+    return new Promise((resolve) => {
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: (result) => {
+            // Check status
+            if (result.effects?.status?.status === "success") {
+              resolve({ status: "approved", result });
+            } else {
+              resolve({
+                status: "failed",
+                error: result.effects?.status?.error,
+                result,
+              });
+            }
+          },
+          onError: () => {
+            resolve({ status: "rejected" });
+          },
+        }
+      );
+    });
   }
 
   async function findCapIdForAlbum(walletAddress: string, albumId: string) {

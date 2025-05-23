@@ -42,7 +42,7 @@ export function NavigationDock() {
   }
 
   const routes = [
-    { path: "/", icon: <Home className="h-5 w-5" />, label: "Home" },
+    { path: "/home", icon: <Home className="h-5 w-5" />, label: "Home" },
     {
       path: "/explore-albums",
       icon: <Search className="h-5 w-5" />,
@@ -81,8 +81,8 @@ export function NavigationDock() {
             icon={route.icon}
             label={route.label}
             isActive={
-              route.path === "/"
-                ? location.pathname === "/"
+              route.path === "/home"
+                ? location.pathname === "/home"
                 : location.pathname.startsWith(route.path)
             }
           />

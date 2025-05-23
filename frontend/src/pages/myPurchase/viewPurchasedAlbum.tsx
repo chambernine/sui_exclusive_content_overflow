@@ -518,7 +518,22 @@ export default function ViewPurchasedAlbum() {
               <CardHeader>
                 <div className="prose prose-sm dark:prose-invert">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <h1 className="text-3xl font-bold">{album?.name}</h1>
+                    <div className="flex items-center">
+                      <h1 className="text-3xl font-bold">{album.name}</h1>
+                      <a
+                        href={`https://testnet.suivision.xyz/account/${album.albumId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 inline-flex items-center hover:opacity-80 transition-opacity"
+                        title="View on Sui Explorer"
+                      >
+                        <img
+                          src="/suiscan.png"
+                          alt="Sui Explorer"
+                          className="h-6 w-6"
+                        />
+                      </a>
+                    </div>
                     <Badge
                       className={`${
                         tierColors[album?.tier as keyof typeof tierColors]

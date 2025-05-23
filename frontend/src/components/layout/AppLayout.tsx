@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { NavigationDock } from "../navigation/navigation-dock";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { ConnectButton } from "@mysten/dapp-kit";
+import { Lock } from "lucide-react";
 
 export function AppLayout() {
   const { address } = useSuiAccount();
@@ -31,9 +32,14 @@ export function AppLayout() {
           >
             <div className="relative">
               <h1 className="flex w-full justify-between md:text-4xl font-bold mb-2">
-                <span className="bg-clip-text text-[40px] text-transparent bg-gradient-to-r from-primary to-blue-500">
-                  Silvy
-                </span>
+                <div className="flex items-center gap-2">
+                  <div className="flex p-2 bg-primary/10 rounded-full">
+                    <Lock className="h-6 w-6 text-primary" />
+                  </div>
+                  <span className="bg-clip-text text-[40px] text-transparent bg-gradient-to-r from-primary to-blue-500">
+                    Silvy
+                  </span>
+                </div>
                 <div className="flex items-center md:hidden">
                   <ConnectButton />
                 </div>

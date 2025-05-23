@@ -525,9 +525,9 @@ export default function Home() {
                 <QuickActions />
               </motion.div>
 
-              <motion.div variants={item}>
+              {/* <motion.div variants={item}>
                 <FeaturedTier />
-              </motion.div>
+              </motion.div> */}
             </div>
           </motion.div>
         </div>

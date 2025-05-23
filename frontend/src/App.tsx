@@ -12,7 +12,6 @@ import CreateAlbumPage from "./pages/draftAlbum/createAlbumForm";
 import ExploreAlbums from "./pages/exploreAlbums/exploreAlbums";
 import BuyAlbum from "./pages/exploreAlbums/buyAlbum";
 import PublishDraftAlbum from "./pages/approveRequestAlbum/waitForSign";
-import MyPurchasedAlbums from "./pages/myPurchase/my-purchashed";
 import ViewPurchasedAlbum from "./pages/myPurchase/viewPurchasedAlbum";
 
 function App() {
@@ -52,10 +51,6 @@ function App() {
         {
           path: "explore-albums/:albumId",
           element: <BuyAlbum />,
-        },
-        {
-          path: "myPurchase",
-          element: <MyPurchasedAlbums />,
         },
         {
           path: "profile/myPurchase/:albumId",

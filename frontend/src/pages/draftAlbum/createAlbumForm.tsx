@@ -536,7 +536,7 @@ export default function CreateAlbumPage() {
               value={draft.description}
               onChange={handleChange}
               placeholder="Describe your content"
-              className="mt-1 min-h-24"
+              className="mt-1 min-h-16"
             />
           </div>
           <div className="flex flex-col gap-1">

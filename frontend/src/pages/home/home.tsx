@@ -1,9 +1,7 @@
 // src/pages/Home.tsx
-import { ConnectButton } from "@mysten/dapp-kit";
 import { useSuiAccount } from "@/hooks/useSuiAccount";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Login } from "@/components/auth/Login";
 import { useExploreAlbums } from "@/hooks/api/useAlbums";
 import {
   Card,
@@ -17,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, Share2, Bookmark } from "lucide-react";
+import { Heart, Share2, Bookmark, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LoadingWrapper } from "@/components/ui/loading-wrapper";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,6 +23,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { tierColors, tierNames } from "@/types/album";
 import { useProfile } from "@/hooks/api/useProfile";
 import { Protected } from "@/components/auth/Protected";
+import { AvatarImage } from "@radix-ui/react-avatar";
 
 interface Album {
   albumId: string;
@@ -101,9 +100,12 @@ export default function Home() {
       <CardContent className="space-y-4">
         <div className="flex flex-col items-center">
           <div className="h-20 w-20 rounded-full bg-primary/20 flex items-center justify-center mb-3">
-            <span className="font-bold text-lg text-primary">
-              {address ? address.slice(0, 2) : ""}
-            </span>
+            <Avatar className="h-22 w-22">
+              <AvatarImage src={""} alt="Profile" />
+              <AvatarFallback className="bg-muted text-muted-foreground">
+                <User className="h-10 w-10" />
+              </AvatarFallback>
+            </Avatar>
           </div>
           <div className="hidden lg:flex items-center px-2 py-1 rounded-full bg-primary/10 text-primary dark:text-primary">
             <span className="font-mono text-sm">

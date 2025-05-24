@@ -791,7 +791,7 @@ export default function LandingPage() {
                   <div className="aspect-[16/9] bg-black/20 relative overflow-hidden">
                     {/* Placeholder for app screenshot - in production replace with actual app screenshot */}
                     <img
-                      src="https://source.unsplash.com/random/1200x800?digital+art"
+                      src="/Demo1.png"
                       alt="App Preview"
                       className="w-full h-full object-cover opacity-90"
                     />
@@ -846,7 +846,7 @@ export default function LandingPage() {
                   <div className="aspect-[9/16] bg-black/20 relative overflow-hidden">
                     {/* Placeholder for mobile app screenshot */}
                     <img
-                      src="https://source.unsplash.com/random/800x1600?digital+art"
+                      src="/Demo2.png"
                       alt="Mobile App Preview"
                       className="w-full h-full object-cover opacity-90"
                     />

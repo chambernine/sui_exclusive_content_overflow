@@ -419,7 +419,7 @@ export default function CreateAlbumPage() {
       <CardHeader>
         <CardTitle>Content Details</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         <motion.div variants={item} className="space-y-4">
           <div className="flex flex-col gap-1">
             <Label htmlFor="name">
@@ -774,7 +774,7 @@ export default function CreateAlbumPage() {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-6"
+      className="space-y-4"
     >
       <FormStepper />
 

@@ -137,10 +137,20 @@ export default function CreateAlbumPage() {
 
     const fileList = Array.from(files);
     const maxAllowed = 3;
+    const maxFileSize = 1048576; // 1 MB in bytes
     const current = draft.contentInfos?.length || 0;
 
     if (current + fileList.length > maxAllowed) {
       toast.error(`Maximum of ${maxAllowed} preview files allowed.`);
+      return;
+    }
+
+    // Check file sizes
+    const oversizedFiles = fileList.filter((file) => file.size > maxFileSize);
+    if (oversizedFiles.length > 0) {
+      toast.error(
+        `Each file must be smaller than 1 MB. ${oversizedFiles.length} file(s) exceed this limit.`
+      );
       return;
     }
 
@@ -161,10 +171,20 @@ export default function CreateAlbumPage() {
 
     const fileList = Array.from(files);
     const maxAllowed = 5;
+    const maxFileSize = 1048576; // 1 MB in bytes
     const current = draft.contents?.length || 0;
 
     if (current + fileList.length > maxAllowed) {
       toast.error(`Maximum of ${maxAllowed} content files allowed.`);
+      return;
+    }
+
+    // Check file sizes
+    const oversizedFiles = fileList.filter((file) => file.size > maxFileSize);
+    if (oversizedFiles.length > 0) {
+      toast.error(
+        `Each file must be smaller than 1 MB. ${oversizedFiles.length} file(s) exceed this limit.`
+      );
       return;
     }
 
@@ -580,6 +600,9 @@ export default function CreateAlbumPage() {
                     <span className="text-xs text-muted-foreground">
                       These images will be shown as previews
                     </span>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      Max size: 1 MB per file
+                    </span>
                   </div>
                 </label>
                 <input
@@ -668,6 +691,9 @@ export default function CreateAlbumPage() {
                     </span>
                     <span className="text-xs text-muted-foreground">
                       These files will be accessible to users after purchase
+                    </span>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      Max size: 1 MB per file
                     </span>
                   </div>
                 </label>

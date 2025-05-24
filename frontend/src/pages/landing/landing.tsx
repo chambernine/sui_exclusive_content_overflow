@@ -2,46 +2,15 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
-import { ThreeDMarquee } from "@/components/ui/3d-marquee";
 import { Svg3DAnimation } from "@/components/ui/svg-3d-animation";
 import { Lock } from "lucide-react";
+import { ThreeDContentsLists } from "@/components/custom/3d-contents-lists";
 
 const stats = [
   { label: "Content Created", value: "15,890+" },
   { label: "Users", value: "32,159+" },
   { label: "Revenue Generated", value: "1,259 SUI" },
   { label: "Unique Content Creators", value: "4,127+" },
-];
-
-// Themed images for the 3D marquee showcase
-const mockImages = [
-  // Digital art & NFT themed images
-  "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&q=80", // NFT art
-  "https://images.unsplash.com/photo-1645936041965-ef7ec254954e?w=600&h=400&q=80", // Digital artwork
-  "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=600&h=400&q=80", // Crypto art
-  "https://images.unsplash.com/photo-1646548851235-0321e69f812f?w=600&h=400&q=80", // Blockchain art
-  "https://images.unsplash.com/photo-1629734553618-8627fd538351?w=600&h=400&q=80", // Digital painting
-
-  // Blockchain & technology themed
-  "https://images.unsplash.com/photo-1639152201720-5e536d254d81?w=600&h=400&q=80", // Blockchain concept
-  "https://images.unsplash.com/photo-1620808335012-0db2093bd970?w=600&h=400&q=80", // Technology data
-  "https://images.unsplash.com/photo-1642005508584-4383b0a8226c?w=600&h=400&q=80", // Digital finance
-  "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=600&h=400&q=80", // Futuristic tech
-  "https://images.unsplash.com/photo-1638913662180-afc4334cf422?w=600&h=400&q=80", // Crypto mining
-
-  // Premium/exclusive content themed
-  "https://images.unsplash.com/photo-1618172193763-c511deb635ca?w=600&h=400&q=80", // Luxury digital
-  "https://images.unsplash.com/photo-1618005198919-177e9dd3b230?w=600&h=400&q=80", // Premium experience
-  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=400&q=80", // Exclusive visualization
-  "https://images.unsplash.com/photo-1556742205-e10c9486e506?w=600&h=400&q=80", // Creative digital
-  "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=600&h=400&q=80", // Virtual gallery
-
-  // Creator economy & community
-  "https://images.unsplash.com/photo-1595561458968-fb29ee2a46a0?w=600&h=400&q=80", // Digital community
-  "https://images.unsplash.com/photo-1521898284481-a5ec348cb555?w=600&h=400&q=80", // Creator space
-  "https://images.unsplash.com/photo-1559650656-5d1d361ad10e?w=600&h=400&q=80", // Digital collaboration
-  "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=600&h=400&q=80", // Community concept
-  "https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?w=600&h=400&q=80", // Digital economy
 ];
 
 export default function LandingPage() {
@@ -170,7 +139,7 @@ export default function LandingPage() {
                   <span className="text-primary font-semibold px-2">
                     Exclusive Content
                   </span>
-                  <br/>
+                  <br />
                   on the Sui blockchain
                 </span>
               </motion.p>
@@ -318,8 +287,9 @@ export default function LandingPage() {
             viewport={{ once: true, margin: "-100px" }}
             className="mb-16 sm:mb-20 rounded-xl overflow-hidden"
           >
-            <ThreeDMarquee
-              images={mockImages}
+            <ThreeDContentsLists
+              contents={[]}
+              isLoading={false}
               className="h-[250px] sm:h-[300px] md:h-[400px]"
             />
           </motion.div>

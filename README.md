@@ -1,12 +1,12 @@
 # Silvy 🌊
 
-Pitching https://youtu.be/mQNua9sZa-U
-
 **A Social Media Platform for Exclusive Content**
 
 > "Creation is owned by community not platform"
 
 Silvy is a revolutionary social media platform for exclusive content, built on the Sui blockchain ecosystem. It empowers creators to securely share content with their audience while maintaining full ownership and control.
+
+Pitching https://youtu.be/mQNua9sZa-U
 
 ## 🌟 Overview
 
